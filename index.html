@@ -3,59 +3,35 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Distribusi Minyak 2026</title>
+  <title>Dashboard Distribusi Minyak 2026 - Real Time</title>
   
-  <!-- Meta tags untuk SEO & PWA -->
-  <meta name="description" content="Dashboard real-time distribusi minyak dengan integrasi Google Sheets" />
+  <!-- Meta tags -->
+  <meta name="description" content="Dashboard real-time distribusi minyak" />
   <meta name="theme-color" content="#071424" />
-  <link rel="manifest" href="data:application/manifest+json,{
-    &quot;name&quot;: &quot;Dashboard Minyak&quot;,
-    &quot;short_name&quot;: &quot;MinyakDash&quot;,
-    &quot;theme_color&quot;: &quot;#071424&quot;,
-    &quot;background_color&quot;: &quot;#071424&quot;,
-    &quot;display&quot;: &quot;standalone&quot;
-  }" />
 
-  <!-- Google Font dengan optimasi -->
+  <!-- Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Chart.js dengan versi stabil -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <!-- PapaParse untuk parsing CSV -->
+  <!-- PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
-    /* CSS Variables dengan sistem yang lebih terstruktur */
     :root {
-      /* Warna utama */
       --bg-primary: #071424;
       --bg-secondary: #0c1f35;
       --bg-tertiary: #0f2a47;
       --text-primary: #e9f1fb;
       --text-secondary: #a7b6c8;
-      --text-muted: #8a9bb5;
-      
-      /* Warna aksen */
       --accent-primary: #ffb000;
       --accent-secondary: #449cff;
       --success: #2ecc71;
       --warning: #f1c40f;
       --danger: #e74c3c;
       --info: #3498db;
-      
-      /* Status colors */
-      --status-delivered: rgba(46, 204, 113, 0.16);
-      --status-delivered-border: rgba(46, 204, 113, 0.25);
-      --status-cancel: rgba(231, 76, 60, 0.16);
-      --status-cancel-border: rgba(231, 76, 60, 0.25);
-      --status-progress: rgba(241, 196, 15, 0.16);
-      --status-progress-border: rgba(241, 196, 15, 0.25);
-      --status-ondelivery: rgba(52, 152, 219, 0.16);
-      --status-ondelivery-border: rgba(52, 152, 219, 0.25);
-      
-      /* UI Elements */
       --line: rgba(255, 255, 255, 0.08);
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
       --radius-sm: 10px;
@@ -71,20 +47,18 @@
     }
 
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', sans-serif;
       color: var(--text-primary);
       background: radial-gradient(1200px 600px at 10% 10%, rgba(68, 156, 255, 0.18), transparent 60%),
                   radial-gradient(900px 500px at 90% 15%, rgba(255, 176, 0, 0.12), transparent 60%),
                   var(--bg-primary);
       min-height: 100vh;
-      line-height: 1.5;
     }
 
-    /* Layout */
     .wrap {
-      max-width: 1320px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 24px 16px;
+      padding: 20px 16px;
     }
 
     /* Loading Overlay */
@@ -100,13 +74,10 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
-      opacity: 0;
-      transition: var(--transition);
     }
 
     .loading-overlay.show {
       display: flex;
-      opacity: 1;
     }
 
     .loading-spinner {
@@ -128,13 +99,12 @@
       gap: 16px;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 18px;
+      padding: 16px 20px;
       border: 1px solid var(--line);
       background: rgba(12, 31, 53, 0.55);
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .title {
@@ -159,14 +129,13 @@
 
     h1 {
       margin: 0;
-      font-size: clamp(18px, 4vw, 22px);
-      letter-spacing: 0.2px;
+      font-size: clamp(18px, 4vw, 24px);
     }
 
     .sub {
-      margin: 3px 0 0;
       color: var(--text-secondary);
       font-size: 12px;
+      margin-top: 4px;
     }
 
     /* Controls */
@@ -175,7 +144,6 @@
       gap: 10px;
       flex-wrap: wrap;
       align-items: center;
-      justify-content: flex-end;
     }
 
     .ctrl {
@@ -194,7 +162,6 @@
       font-weight: 600;
     }
 
-    /* Form Elements */
     input, select, button {
       font-family: inherit;
       color: var(--text-primary);
@@ -222,7 +189,6 @@
       border: none;
       font-weight: 800;
       cursor: pointer;
-      padding: 8px 16px;
     }
 
     button:hover {
@@ -230,20 +196,9 @@
       box-shadow: 0 4px 12px rgba(255, 176, 0, 0.3);
     }
 
-    button:active {
-      transform: translateY(0);
-    }
-
     button.secondary {
       background: rgba(15, 42, 71, 0.65);
       color: var(--text-primary);
-      border: 1px solid var(--line);
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
     }
 
     /* Grid Layouts */
@@ -265,18 +220,14 @@
       grid-template-columns: 1.2fr 1.8fr 1.6fr;
     }
 
-    /* Responsive */
     @media (max-width: 1200px) {
       .kpis { grid-template-columns: repeat(3, 1fr); }
       .main, .bottom { grid-template-columns: 1fr; }
       header { flex-direction: column; align-items: flex-start; }
-      .controls { width: 100%; justify-content: flex-start; }
     }
 
     @media (max-width: 640px) {
       .kpis { grid-template-columns: repeat(2, 1fr); }
-      .ctrl { flex-wrap: wrap; width: 100%; }
-      .ctrl input { width: 100%; }
     }
 
     /* Cards */
@@ -284,13 +235,12 @@
       border: 1px solid var(--line);
       background: rgba(12, 31, 53, 0.55);
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
       overflow: hidden;
     }
 
     .card .hd {
-      padding: 12px 14px;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -300,26 +250,23 @@
 
     .card .hd .t {
       font-weight: 800;
-      letter-spacing: 0.3px;
       font-size: 14px;
     }
 
     .card .bd {
-      padding: 14px;
+      padding: 16px;
     }
 
     /* KPI Cards */
     .kpi {
-      padding: 14px;
+      padding: 16px;
       border-radius: var(--radius-lg);
       background: rgba(15, 42, 71, 0.55);
       border: 1px solid var(--line);
-      box-shadow: var(--shadow);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      min-height: 86px;
       transition: var(--transition);
     }
 
@@ -332,73 +279,37 @@
       font-size: 12px;
       color: var(--text-secondary);
       font-weight: 700;
-      letter-spacing: 0.3px;
       text-transform: uppercase;
     }
 
     .kpi .left .val {
-      font-size: clamp(20px, 4vw, 30px);
+      font-size: clamp(24px, 4vw, 32px);
       font-weight: 900;
       margin-top: 4px;
       line-height: 1;
     }
 
+    .kpi .left .sub-val {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
     .kpi .right {
-      width: 42px;
-      height: 42px;
+      width: 48px;
+      height: 48px;
       border-radius: var(--radius-md);
       display: grid;
       place-items: center;
-      border: 1px solid var(--line);
       background: rgba(0, 0, 0, 0.22);
-      font-size: 18px;
+      font-size: 20px;
     }
 
-    /* Pills & Badges */
-    .pill {
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      border: 1px solid var(--line);
-      background: rgba(0, 0, 0, 0.25);
-      color: var(--text-secondary);
-      font-weight: 600;
-    }
-
-    /* Status Labels */
-    .status {
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 11px;
-      display: inline-block;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .s-delivered {
-      background: var(--status-delivered);
-      border: 1px solid var(--status-delivered-border);
-      color: var(--success);
-    }
-
-    .s-cancel {
-      background: var(--status-cancel);
-      border: 1px solid var(--status-cancel-border);
-      color: var(--danger);
-    }
-
-    .s-progress {
-      background: var(--status-progress);
-      border: 1px solid var(--status-progress-border);
-      color: var(--warning);
-    }
-
-    .s-ondelivery {
-      background: var(--status-ondelivery);
-      border: 1px solid var(--status-ondelivery-border);
-      color: var(--info);
-    }
+    /* Status Colors */
+    .status-delivered { color: var(--success); }
+    .status-ondelivery { color: var(--info); }
+    .status-progress { color: var(--warning); }
+    .status-cancel { color: var(--danger); }
 
     /* Tables */
     table {
@@ -411,10 +322,9 @@
       padding: 12px 10px;
       border-bottom: 1px solid var(--line);
       color: var(--text-secondary);
-      font-weight: 800;
+      font-weight: 700;
       font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     td {
@@ -425,16 +335,6 @@
 
     tr:last-child td {
       border-bottom: none;
-    }
-
-    tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    /* Charts */
-    canvas {
-      max-height: 280px;
-      width: 100% !important;
     }
 
     /* Messages */
@@ -456,7 +356,6 @@
       padding: 8px 12px;
       border-radius: var(--radius-sm);
       background: rgba(46, 204, 113, 0.1);
-      border: 1px solid rgba(46, 204, 113, 0.2);
     }
 
     .info-message {
@@ -464,193 +363,182 @@
       padding: 8px 12px;
       border-radius: var(--radius-sm);
       background: rgba(52, 152, 219, 0.1);
-      border: 1px solid rgba(52, 152, 219, 0.2);
     }
 
-    /* Accessibility */
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text-secondary);
     }
 
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .fade-in {
-      animation: fadeIn 0.3s ease forwards;
+    canvas {
+      max-height: 280px;
+      width: 100% !important;
     }
   </style>
 </head>
 
 <body>
-  <!-- Loading Overlay -->
-  <div id="loadingOverlay" class="loading-overlay" role="alert" aria-busy="false">
-    <div class="loading-spinner" aria-label="Loading..."></div>
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
   </div>
 
   <div class="wrap">
-    <header role="banner">
+    <header>
       <div class="title">
-        <div class="badge" aria-hidden="true">
-          <span>🛢️</span>
-        </div>
+        <div class="badge"><span>🛢️</span></div>
         <div>
           <h1>Dashboard Distribusi Minyak 2026</h1>
-          <p class="sub">Sumber data: Google Sheets (Real-time CSV)</p>
+          <p class="sub">Data real-time dari Google Sheets (Sheet: 166266133)</p>
         </div>
       </div>
 
-      <div class="controls" role="group" aria-label="Kontrol dashboard">
+      <div class="controls">
         <div class="ctrl">
-          <label for="fromDate">Periode</label>
-          <input type="date" id="fromDate" aria-label="Dari tanggal" />
+          <label>Periode</label>
+          <input type="date" id="fromDate" />
           <span class="note">s/d</span>
-          <input type="date" id="toDate" aria-label="Sampai tanggal" />
+          <input type="date" id="toDate" />
         </div>
-
         <div class="ctrl">
-          <label for="refreshSec">Auto Refresh</label>
-          <select id="refreshSec" aria-label="Interval refresh otomatis">
+          <label>Auto Refresh</label>
+          <select id="refreshSec">
             <option value="0">Off</option>
-            <option value="30">30 detik</option>
-            <option value="60" selected>60 detik</option>
-            <option value="120">120 detik</option>
-            <option value="300">5 menit</option>
+            <option value="30">30 dtk</option>
+            <option value="60" selected>60 dtk</option>
+            <option value="120">120 dtk</option>
           </select>
         </div>
-
-        <button id="btnRefresh" aria-label="Refresh data">
-          <span aria-hidden="true">↻</span> Refresh
-        </button>
-        <button id="btnReset" class="secondary" aria-label="Reset filter">
-          <span aria-hidden="true">✕</span> Reset
-        </button>
+        <button id="btnRefresh">↻ Refresh</button>
+        <button id="btnReset" class="secondary">✕ Reset</button>
       </div>
     </header>
 
-    <!-- KPI Section -->
-    <div class="grid kpis" id="kpiRow" role="region" aria-label="Key Performance Indicators">
-      <div class="kpi" id="kpiTotalOrderCard">
+    <!-- KPI Section dengan Total Order dan QTY -->
+    <div class="grid kpis">
+      <div class="kpi">
         <div class="left">
           <div class="lbl">Total Order</div>
-          <div class="val" id="kpiTotalOrder" aria-live="polite">-</div>
+          <div class="val" id="kpiTotalOrder">-</div>
+          <div class="sub-val" id="kpiTotalOrderDetail">-</div>
         </div>
-        <div class="right" aria-hidden="true">🧾</div>
+        <div class="right">📊</div>
       </div>
 
-      <div class="kpi" id="kpiTotalQtyCard">
+      <div class="kpi">
         <div class="left">
           <div class="lbl">Total QTY</div>
-          <div class="val" id="kpiTotalQty" aria-live="polite">-</div>
+          <div class="val" id="kpiTotalQty">-</div>
+          <div class="sub-val" id="kpiTotalQtyDetail">-</div>
         </div>
-        <div class="right" aria-hidden="true">📦</div>
+        <div class="right">🛢️</div>
       </div>
 
-      <div class="kpi" id="kpiDeliveredCard">
+      <div class="kpi">
         <div class="left">
           <div class="lbl">Delivered</div>
-          <div class="val" id="kpiDelivered" aria-live="polite">-</div>
+          <div class="val" id="kpiDelivered">-</div>
+          <div class="sub-val" id="kpiDeliveredQty">-</div>
         </div>
-        <div class="right" aria-hidden="true">✅</div>
+        <div class="right">✅</div>
       </div>
 
-      <div class="kpi" id="kpiOnDeliveryCard">
+      <div class="kpi">
         <div class="left">
           <div class="lbl">On Delivery</div>
-          <div class="val" id="kpiOnDelivery" aria-live="polite">-</div>
+          <div class="val" id="kpiOnDelivery">-</div>
+          <div class="sub-val" id="kpiOnDeliveryQty">-</div>
         </div>
-        <div class="right" aria-hidden="true">🚚</div>
+        <div class="right">🚚</div>
       </div>
 
-      <div class="kpi" id="kpiCancelCard">
+      <div class="kpi">
+        <div class="left">
+          <div class="lbl">Progress</div>
+          <div class="val" id="kpiProgress">-</div>
+          <div class="sub-val" id="kpiProgressQty">-</div>
+        </div>
+        <div class="right">⏳</div>
+      </div>
+
+      <div class="kpi">
         <div class="left">
           <div class="lbl">Cancel</div>
-          <div class="val" id="kpiCancel" aria-live="polite">-</div>
+          <div class="val" id="kpiCancel">-</div>
+          <div class="sub-val" id="kpiCancelQty">-</div>
         </div>
-        <div class="right" aria-hidden="true">⛔</div>
-      </div>
-
-      <div class="kpi" id="kpiOnTimeCard">
-        <div class="left">
-          <div class="lbl">On Time</div>
-          <div class="val" id="kpiOnTime" aria-live="polite">-</div>
-        </div>
-        <div class="right" aria-hidden="true">⏱️</div>
+        <div class="right">⛔</div>
       </div>
     </div>
 
     <!-- Main Charts -->
     <div class="grid main">
-      <div class="card" role="region" aria-label="Grafik status distribusi">
+      <div class="card">
         <div class="hd">
           <div class="t">Status Distribusi</div>
-          <div class="pill" id="lastUpdate">Last update: -</div>
+          <div class="pill" id="lastUpdate">Loading...</div>
         </div>
         <div class="bd">
-          <canvas id="chartStatus" role="img" aria-label="Donut chart status distribusi"></canvas>
-          <div class="note" id="statusNote" style="margin-top:10px"></div>
+          <canvas id="chartStatus"></canvas>
+          <div class="note" id="statusNote" style="margin-top:12px"></div>
         </div>
       </div>
 
-      <div class="card" role="region" aria-label="Grafik QTY per kota">
+      <div class="card">
         <div class="hd">
-          <div class="t">QTY per Kota Tujuan</div>
-          <div class="pill">Top 8</div>
+          <div class="t">Top 8 Kota Tujuan</div>
+          <div class="pill">Berdasarkan QTY</div>
         </div>
         <div class="bd">
-          <canvas id="chartCity" role="img" aria-label="Bar chart QTY per kota"></canvas>
+          <canvas id="chartCity"></canvas>
         </div>
       </div>
 
-      <div class="card" role="region" aria-label="Grafik QTY per pabrik">
+      <div class="card">
         <div class="hd">
-          <div class="t">QTY per Pabrik</div>
-          <div class="pill">Top 6</div>
+          <div class="t">Top 6 Pabrik</div>
+          <div class="pill">Berdasarkan QTY</div>
         </div>
         <div class="bd">
-          <canvas id="chartFactory" role="img" aria-label="Bar chart QTY per pabrik"></canvas>
+          <canvas id="chartFactory"></canvas>
         </div>
       </div>
     </div>
 
     <!-- Bottom Section -->
     <div class="grid bottom">
-      <div class="card" role="region" aria-label="Grafik SLA ketepatan waktu">
+      <div class="card">
         <div class="hd">
           <div class="t">SLA Ketepatan Waktu</div>
           <div class="pill" id="slaPill">-</div>
         </div>
         <div class="bd">
-          <canvas id="chartSLA" role="img" aria-label="Donut chart SLA"></canvas>
-          <p class="note" style="margin:10px 0 0">
-            SLA: Actual Muat ≤ Tgl Muat → On Time
+          <canvas id="chartSLA"></canvas>
+          <p class="note" style="margin-top:12px">
+            On Time: Actual Muat ≤ Tgl Muat<br>
+            Berdasarkan status Delivered
           </p>
         </div>
       </div>
 
-      <div class="card" role="region" aria-label="Tabel real-time delivery">
+      <div class="card">
         <div class="hd">
           <div class="t">Real Time Delivery</div>
-          <div class="pill">10 terbaru</div>
+          <div class="pill">10 Data Terbaru</div>
         </div>
         <div class="bd" style="padding:0">
-          <div style="overflow-x: auto;">
+          <div style="overflow-x:auto">
             <table>
               <thead>
                 <tr>
-                  <th scope="col">No Polisi</th>
-                  <th scope="col">Tujuan</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Actual Muat</th>
+                  <th>No Polisi</th>
+                  <th>Tujuan</th>
+                  <th>Status</th>
+                  <th>QTY</th>
+                  <th>Actual Muat</th>
                 </tr>
               </thead>
               <tbody id="rtBody"></tbody>
@@ -659,132 +547,100 @@
         </div>
       </div>
 
-      <div class="card" role="region" aria-label="Informasi sistem">
+      <div class="card">
         <div class="hd">
-          <div class="t">System Info</div>
-          <div class="pill">Status</div>
+          <div class="t">Ringkasan Data</div>
+          <div class="pill">Info</div>
         </div>
         <div class="bd">
-          <div id="systemInfo" class="note">
-            <div>• Mode: <span id="systemMode">Production</span></div>
-            <div>• Cache: <span id="cacheStatus">Active</span></div>
-            <div>• Auto-refresh: <span id="refreshStatus">60s</span></div>
+          <div class="note" style="margin-bottom:12px">
+            <div>• Total Baris: <span id="totalRows">-</span></div>
+            <div>• Periode Data: <span id="dataPeriod">-</span></div>
+            <div>• Auto Refresh: <span id="refreshStatus">60s</span></div>
           </div>
-          <div id="messageContainer" class="note" style="margin-top:12px;"></div>
-          <div id="errorContainer" class="error-message" style="display:none; margin-top:12px;"></div>
-          <div id="successContainer" class="success-message" style="display:none; margin-top:12px;"></div>
+          <div id="messageContainer"></div>
+          <div id="errorContainer" style="display:none"></div>
         </div>
       </div>
     </div>
-
-    <footer style="margin-top:24px; text-align:center;">
-      <p class="note">© Dashboard Distribusi Minyak 2026 • v2.0.0 • Real-time updates</p>
-    </footer>
   </div>
 
   <script>
     (function() {
       'use strict';
 
-      // =========================
-      // 1) KONFIGURASI
-      // =========================
+      // ================= KONFIGURASI =================
       const CONFIG = {
-        CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRAqs3OR5iSyutu1ozCM5Q4JFXNKOV4AhOB7u2d2SCUfbV2SasQ17VBH924VxdTxoN4aYq3W3qZu8X/pub?output=csv",
-        CACHE_DURATION: 5 * 60 * 1000, // 5 menit
+        CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRAqs3OR5iSyutu1ozCM5Q4JFXNKOV4AhOB7u2d2SCUfbV2SasQ17VBH924VxdTxoN4aYq3W3qZu8X/pub?gid=166266133&single=true&output=csv",
         MAX_RETRIES: 3,
         RETRY_DELAY: 2000,
         CHART_COLORS: {
           delivered: '#2ecc71',
           onDelivery: '#3498db',
           progress: '#f1c40f',
-          cancel: '#e74c3c',
-          onTime: '#2ecc71',
-          delay: '#e74c3c'
+          cancel: '#e74c3c'
         }
       };
 
-      // Mapping kolom dengan sinonim
-      const KEYS = {
-        orderCode: ["generate order", "order", "kode order", "nomor order", "generate_order"],
-        pabrik: ["pabrik minyak", "pabrik", "supplier", "asal"],
-        kota: ["kota tujuan", "tujuan", "kota", "destination"],
-        qty: ["qty", "quantity", "jumlah", "volume"],
-        status: ["status", "sts"],
-        tglMuat: ["tgl. muat", "tgl muat", "tanggal muat", "planned muat", "rencana muat"],
-        actualMuat: ["actual muat", "realisasi muat", "actual", "tgl actual muat", "tanggal actual"],
-        noPolisi: ["no. polisi/no. bl", "no polisi", "nopol", "plat", "polisi"],
-        tglInput: ["tanggal input", "tgl input", "input date", "created at"]
+      // Mapping kolom berdasarkan posisi (A=0, B=1, C=2, D=3, E=4, F=5, O=14)
+      const COLUMN_MAP = {
+        orderCode: 2,    // Kolom C (index 2) - Generate Order
+        pabrik: 3,       // Kolom D (index 3) - Pabrik Minyak
+        kota: 5,         // Kolom F (index 5) - Kota Tujuan
+        qty: 12,         // Kolom M (index 12) - QTY (asumsi, perlu dicek)
+        status: 14,      // Kolom O (index 14) - Status
+        tglMuat: 9,      // Kolom J (index 9) - Tgl Muat (asumsi)
+        actualMuat: 10,  // Kolom K (index 10) - Actual Muat (asumsi)
+        noPolisi: 11,    // Kolom L (index 11) - No Polisi (asumsi)
+        tglInput: 1      // Kolom B (index 1) - Tanggal Input (asumsi)
       };
 
-      // Status yang dianggap "On Delivery"
-      const ON_DELIVERY_STATUS = ["on delivery", "delivery", "dalam perjalanan", "pickup", "pick up", "proses order", "menunggu jadwal pelayaran"];
+      // Mapping status
+      const STATUS_MAP = {
+        DELIVERED: ['delivered', 'selesai', 'done', 'terkirim'],
+        ON_DELIVERY: ['on delivery', 'delivery', 'dalam perjalanan', 'pickup'],
+        PROGRESS: ['progress', 'proses', 'diproses', 'menunggu'],
+        CANCEL: ['cancel', 'batal', 'cancelled', 'dibatalkan']
+      };
 
-      // =========================
-      // 2) STATE MANAGEMENT
-      // =========================
+      // ================= STATE =================
       const State = {
         data: null,
         filteredData: null,
-        lastUpdate: null,
         charts: {},
-        cache: {
-          data: null,
-          timestamp: null
-        },
+        cache: { data: null, timestamp: null },
         refreshTimer: null,
-        retryCount: 0,
         isLoading: false
       };
 
-      // =========================
-      // 3) UTILITY FUNCTIONS
-      // =========================
-      const $ = (id) => document.getElementById(id);
-      const $$ = (selector) => document.querySelectorAll(selector);
+      // ================= UTILITY =================
+      const $ = id => document.getElementById(id);
 
       function showLoading(show) {
         const overlay = $('loadingOverlay');
-        if (!overlay) return;
-        
         State.isLoading = show;
-        overlay.setAttribute('aria-busy', show);
-        
-        if (show) {
-          overlay.classList.add('show');
-        } else {
-          overlay.classList.remove('show');
-        }
+        if (show) overlay.classList.add('show');
+        else overlay.classList.remove('show');
       }
 
-      function showMessage(type, message, duration = 5000) {
-        const containers = {
-          error: 'errorContainer',
-          success: 'successContainer',
-          info: 'messageContainer'
-        };
-
-        const containerId = containers[type] || 'messageContainer';
-        const container = $(containerId);
-        if (!container) return;
-
-        container.textContent = message;
-        container.style.display = 'block';
+      function showMessage(type, message, duration = 3000) {
+        const container = $('messageContainer');
+        const errorContainer = $('errorContainer');
         
-        // Tambahkan class sesuai type
-        container.className = type === 'error' ? 'error-message' : 
-                             type === 'success' ? 'success-message' : 
-                             'info-message';
-
-        if (duration > 0) {
-          setTimeout(() => {
-            container.style.display = 'none';
-          }, duration);
+        if (type === 'error') {
+          errorContainer.style.display = 'block';
+          errorContainer.className = 'error-message';
+          errorContainer.textContent = message;
+          if (duration > 0) setTimeout(() => errorContainer.style.display = 'none', duration);
+        } else {
+          container.className = type === 'success' ? 'success-message' : 'info-message';
+          container.textContent = message;
+          if (duration > 0) setTimeout(() => container.textContent = '', duration);
         }
       }
 
       function formatNumber(num) {
-        if (num === null || num === undefined || isNaN(num)) return '-';
+        if (num === null || num === undefined || isNaN(num)) return '0';
         return new Intl.NumberFormat('id-ID').format(Math.round(num));
       }
 
@@ -792,50 +648,20 @@
         if (!date) return '-';
         try {
           return new Intl.DateTimeFormat('id-ID', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
+            day: '2-digit', month: '2-digit', year: 'numeric'
           }).format(date);
         } catch {
           return '-';
         }
       }
 
-      function normalizeString(str) {
-        return (str ?? '').toString().trim().toLowerCase();
-      }
-
-      function findKeyIndex(headers, candidates) {
-        const normalizedHeaders = headers.map(h => normalizeString(h));
-        
-        // Exact match
-        for (const candidate of candidates) {
-          const index = normalizedHeaders.indexOf(normalizeString(candidate));
-          if (index >= 0) return index;
-        }
-        
-        // Partial match
-        for (let i = 0; i < normalizedHeaders.length; i++) {
-          for (const candidate of candidates) {
-            if (normalizedHeaders[i].includes(normalizeString(candidate))) {
-              return i;
-            }
-          }
-        }
-        
-        return -1;
-      }
-
       function parseNumber(value) {
-        if (value === null || value === undefined) return 0;
-        
+        if (!value) return 0;
         try {
-          // Hapus titik ribuan, ganti koma desimal dengan titik
           const cleaned = value.toString()
             .replace(/\./g, '')
             .replace(',', '.')
             .replace(/[^\d.-]/g, '');
-          
           const num = Number(cleaned);
           return Number.isFinite(num) ? num : 0;
         } catch {
@@ -845,122 +671,134 @@
 
       function parseDate(value) {
         if (!value) return null;
-        
         try {
           const str = value.toString().trim();
           
-          // Format YYYY-MM-DD
-          if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
-            const date = new Date(str);
-            return isNaN(date.getTime()) ? null : date;
-          }
-          
-          // Format DD/MM/YYYY atau DD-MM-YYYY
+          // Format DD/MM/YYYY
           const match = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
           if (match) {
             const [_, day, month, year] = match;
-            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-            return isNaN(date.getTime()) ? null : date;
+            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
           }
           
-          // Fallback ke Date.parse
-          const date = new Date(str);
-          return isNaN(date.getTime()) ? null : date;
+          // Format YYYY-MM-DD
+          if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+            return new Date(str);
+          }
+          
+          return null;
         } catch {
           return null;
         }
       }
 
-      function isInDateRange(date, from, to) {
-        if (!date) return false;
-        if (from && date < from) return false;
-        if (to) {
-          const toEnd = new Date(to);
-          toEnd.setHours(23, 59, 59, 999);
-          if (date > toEnd) return false;
+      function getStatusCategory(status) {
+        const normalized = (status || '').toLowerCase().trim();
+        
+        for (const [category, keywords] of Object.entries(STATUS_MAP)) {
+          if (keywords.some(k => normalized.includes(k))) {
+            return category;
+          }
         }
-        return true;
+        return 'PROGRESS'; // Default
       }
 
-      function getStatusClass(status) {
-        const normalized = normalizeString(status);
+      // ================= DATA PROCESSING =================
+      function processRow(row) {
+        // Akses langsung berdasarkan index kolom
+        const values = Object.values(row);
         
-        if (normalized === 'delivered') return 's-delivered';
-        if (['cancel', 'canceled', 'cancelled'].includes(normalized)) return 's-cancel';
-        if (ON_DELIVERY_STATUS.includes(normalized)) return 's-ondelivery';
-        return 's-progress';
-      }
-
-      function isOnDelivery(status) {
-        return ON_DELIVERY_STATUS.includes(normalizeString(status));
-      }
-
-      function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-          const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-          };
-          clearTimeout(timeout);
-          timeout = setTimeout(later, wait);
-        };
-      }
-
-      // =========================
-      // 4) DATA PROCESSING
-      // =========================
-      function processRow(row, headers, indices) {
-        const getValue = (index) => {
-          if (index < 0 || index >= headers.length) return '';
-          const key = headers[index];
-          return row[key] || '';
-        };
-
         return {
-          orderCode: getValue(indices.orderCode),
-          pabrik: getValue(indices.pabrik),
-          kota: getValue(indices.kota),
-          qty: parseNumber(getValue(indices.qty)),
-          status: getValue(indices.status).toString().trim(),
-          tglMuat: parseDate(getValue(indices.tglMuat)),
-          actualMuat: parseDate(getValue(indices.actualMuat)),
-          noPolisi: getValue(indices.noPolisi),
-          tglInput: parseDate(getValue(indices.tglInput)),
+          orderCode: values[COLUMN_MAP.orderCode] || '',
+          pabrik: values[COLUMN_MAP.pabrik] || '',
+          kota: values[COLUMN_MAP.kota] || '',
+          qty: parseNumber(values[COLUMN_MAP.qty]),
+          status: values[COLUMN_MAP.status] || '',
+          statusCategory: getStatusCategory(values[COLUMN_MAP.status]),
+          tglMuat: parseDate(values[COLUMN_MAP.tglMuat]),
+          actualMuat: parseDate(values[COLUMN_MAP.actualMuat]),
+          noPolisi: values[COLUMN_MAP.noPolisi] || '',
+          tglInput: parseDate(values[COLUMN_MAP.tglInput])
         };
       }
 
-      function filterDataByDate(data, from, to) {
-        if (!from && !to) return data;
+      function getUniqueOrders(data) {
+        // Menggunakan Set untuk mendapatkan order unik berdasarkan orderCode
+        const uniqueOrders = new Map();
         
-        return data.filter(item => {
-          const date = item.tglInput || item.tglMuat || item.actualMuat;
-          return isInDateRange(date, from, to);
+        data.forEach(item => {
+          if (item.orderCode && !uniqueOrders.has(item.orderCode)) {
+            uniqueOrders.set(item.orderCode, item);
+          }
         });
+        
+        return Array.from(uniqueOrders.values());
       }
 
       function calculateStats(data) {
-        const totalOrder = data.length;
+        // Data unik untuk order (hindari duplikat)
+        const uniqueData = getUniqueOrders(data);
+        const totalUniqueOrders = uniqueData.length;
+        
+        // Total QTY dari semua data (termasuk duplikat)
         const totalQty = data.reduce((sum, item) => sum + (item.qty || 0), 0);
         
-        const delivered = data.filter(item => normalizeString(item.status) === 'delivered').length;
-        const cancel = data.filter(item => ['cancel', 'canceled', 'cancelled'].includes(normalizeString(item.status))).length;
-        const onDelivery = data.filter(item => isOnDelivery(item.status)).length;
-        const progress = Math.max(0, totalOrder - delivered - cancel - onDelivery);
+        // Hitung per status (menggunakan data unik untuk order count, semua data untuk QTY)
+        let delivered = { count: 0, qty: 0 };
+        let onDelivery = { count: 0, qty: 0 };
+        let progress = { count: 0, qty: 0 };
+        let cancel = { count: 0, qty: 0 };
         
-        // Hitung SLA
-        const slaData = data.filter(item => item.tglMuat && item.actualMuat);
-        const onTimeCount = slaData.filter(item => item.actualMuat.getTime() <= item.tglMuat.getTime()).length;
+        // Untuk count order, gunakan unique orders
+        uniqueData.forEach(item => {
+          switch(item.statusCategory) {
+            case 'DELIVERED':
+              delivered.count++;
+              break;
+            case 'ON_DELIVERY':
+              onDelivery.count++;
+              break;
+            case 'CANCEL':
+              cancel.count++;
+              break;
+            default:
+              progress.count++;
+          }
+        });
+        
+        // Untuk QTY, gunakan semua data
+        data.forEach(item => {
+          switch(item.statusCategory) {
+            case 'DELIVERED':
+              delivered.qty += item.qty || 0;
+              break;
+            case 'ON_DELIVERY':
+              onDelivery.qty += item.qty || 0;
+              break;
+            case 'CANCEL':
+              cancel.qty += item.qty || 0;
+              break;
+            default:
+              progress.qty += item.qty || 0;
+          }
+        });
+        
+        // SLA untuk delivered orders
+        const slaData = uniqueData.filter(item => 
+          item.statusCategory === 'DELIVERED' && item.tglMuat && item.actualMuat
+        );
+        const onTimeCount = slaData.filter(item => 
+          item.actualMuat.getTime() <= item.tglMuat.getTime()
+        ).length;
         const onTimePercentage = slaData.length ? (onTimeCount / slaData.length) * 100 : 0;
 
         return {
-          totalOrder,
+          totalOrders: totalUniqueOrders,
           totalQty,
           delivered,
-          cancel,
           onDelivery,
           progress,
-          onTimeCount,
+          cancel,
           onTimePercentage,
           slaSampleSize: slaData.length
         };
@@ -972,9 +810,7 @@
         for (const item of data) {
           const key = (keyFn(item) || '').toString().trim();
           if (!key) continue;
-          
-          const currentSum = map.get(key) || 0;
-          map.set(key, currentSum + (item.qty || 0));
+          map.set(key, (map.get(key) || 0) + (item.qty || 0));
         }
         
         return Array.from(map.entries())
@@ -982,150 +818,85 @@
           .slice(0, limit);
       }
 
-      // =========================
-      // 5) DATA FETCHING
-      // =========================
-      async function fetchDataWithRetry(url, retries = CONFIG.MAX_RETRIES) {
-        for (let i = 0; i < retries; i++) {
-          try {
-            return await new Promise((resolve, reject) => {
-              Papa.parse(url, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: resolve,
-                error: reject
-              });
-            });
-          } catch (error) {
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY));
-          }
-        }
-      }
-
-      async function loadData(useCache = true) {
-        // Cek cache
-        if (useCache && State.cache.data && State.cache.timestamp) {
-          const age = Date.now() - State.cache.timestamp;
-          if (age < CONFIG.CACHE_DURATION) {
-            return State.cache.data;
-          }
-        }
-
+      // ================= DATA FETCHING =================
+      async function fetchData() {
         showLoading(true);
-        $('errorContainer').style.display = 'none';
-
+        
         try {
-          const from = $('fromDate')?.value ? new Date($('fromDate').value) : null;
-          const to = $('toDate')?.value ? new Date($('toDate').value) : null;
+          const result = await new Promise((resolve, reject) => {
+            Papa.parse(CONFIG.CSV_URL, {
+              download: true,
+              header: false,
+              skipEmptyLines: true,
+              complete: resolve,
+              error: reject
+            });
+          });
 
-          const result = await fetchDataWithRetry(CONFIG.CSV_URL);
-          
-          if (!result.data || !result.data.length) {
-            throw new Error('CSV kosong atau tidak terbaca');
+          if (!result.data || result.data.length < 2) {
+            throw new Error('Data tidak ditemukan');
           }
 
-          const headers = result.meta.fields || Object.keys(result.data[0] || {});
+          // Skip header row (baris pertama)
+          const dataRows = result.data.slice(1);
           
-          // Mapping indices
-          const indices = {
-            orderCode: findKeyIndex(headers, KEYS.orderCode),
-            pabrik: findKeyIndex(headers, KEYS.pabrik),
-            kota: findKeyIndex(headers, KEYS.kota),
-            qty: findKeyIndex(headers, KEYS.qty),
-            status: findKeyIndex(headers, KEYS.status),
-            tglMuat: findKeyIndex(headers, KEYS.tglMuat),
-            actualMuat: findKeyIndex(headers, KEYS.actualMuat),
-            noPolisi: findKeyIndex(headers, KEYS.noPolisi),
-            tglInput: findKeyIndex(headers, KEYS.tglInput)
-          };
-
-          // Validasi kolom minimal
-          if (indices.qty < 0 || indices.status < 0) {
-            throw new Error('Kolom QTY dan STATUS wajib ada di spreadsheet');
-          }
-
-          // Proses data
-          let processedData = result.data.map(row => processRow(row, headers, indices));
+          // Proses setiap baris
+          let processedData = dataRows.map(row => processRow(row));
           
-          // Filter berdasarkan tanggal
-          const filteredData = filterDataByDate(processedData, from, to);
+          // Filter baris yang valid (punya orderCode)
+          processedData = processedData.filter(item => item.orderCode && item.orderCode.trim() !== '');
           
-          // Update cache
-          State.cache = {
-            data: processedData,
-            filteredData,
-            timestamp: Date.now()
-          };
-
-          showMessage('success', 'Data berhasil dimuat', 3000);
-          return { data: processedData, filteredData, headers, indices };
+          console.log(`Loaded ${processedData.length} rows`);
+          
+          return processedData;
           
         } catch (error) {
-          console.error('Load error:', error);
-          showMessage('error', `Gagal memuat data: ${error.message}`);
+          console.error('Fetch error:', error);
+          showMessage('error', `Gagal load data: ${error.message}`);
           throw error;
         } finally {
           showLoading(false);
         }
       }
 
-      // =========================
-      // 6) RENDERING FUNCTIONS
-      // =========================
+      // ================= RENDERING =================
       function renderKPI(stats) {
-        $('kpiTotalOrder').textContent = formatNumber(stats.totalOrder);
+        // Total Order
+        $('kpiTotalOrder').textContent = formatNumber(stats.totalOrders);
+        $('kpiTotalOrderDetail').textContent = 'Order unik';
+        
+        // Total QTY
         $('kpiTotalQty').textContent = formatNumber(stats.totalQty);
-        $('kpiDelivered').textContent = formatNumber(stats.delivered);
-        $('kpiOnDelivery').textContent = formatNumber(stats.onDelivery);
-        $('kpiCancel').textContent = formatNumber(stats.cancel);
-        $('kpiOnTime').textContent = stats.slaSampleSize ? `${Math.round(stats.onTimePercentage)}%` : '-';
-        $('slaPill').textContent = stats.slaSampleSize ? `Sampel: ${stats.slaSampleSize}` : 'Data tidak lengkap';
-      }
-
-      function renderRealTimeTable(data) {
-        const sorted = [...data]
-          .sort((a, b) => {
-            const dateA = a.actualMuat || a.tglMuat || a.tglInput || new Date(0);
-            const dateB = b.actualMuat || b.tglMuat || b.tglInput || new Date(0);
-            return dateB.getTime() - dateA.getTime();
-          })
-          .slice(0, 10);
-
-        const tbody = $('rtBody');
-        tbody.innerHTML = '';
-
-        for (const item of sorted) {
-          const row = document.createElement('tr');
-          
-          const colNoPol = document.createElement('td');
-          colNoPol.textContent = item.noPolisi || '-';
-          
-          const colKota = document.createElement('td');
-          colKota.textContent = item.kota || '-';
-          
-          const colStatus = document.createElement('td');
-          const statusSpan = document.createElement('span');
-          statusSpan.className = `status ${getStatusClass(item.status)}`;
-          statusSpan.textContent = item.status || '-';
-          colStatus.appendChild(statusSpan);
-          
-          const colActual = document.createElement('td');
-          colActual.textContent = item.actualMuat ? formatDate(item.actualMuat) : '-';
-          
-          row.append(colNoPol, colKota, colStatus, colActual);
-          tbody.appendChild(row);
-        }
+        $('kpiTotalQtyDetail').textContent = 'Total volume';
+        
+        // Delivered
+        $('kpiDelivered').textContent = formatNumber(stats.delivered.count);
+        $('kpiDeliveredQty').textContent = `QTY: ${formatNumber(stats.delivered.qty)}`;
+        
+        // On Delivery
+        $('kpiOnDelivery').textContent = formatNumber(stats.onDelivery.count);
+        $('kpiOnDeliveryQty').textContent = `QTY: ${formatNumber(stats.onDelivery.qty)}`;
+        
+        // Progress
+        $('kpiProgress').textContent = formatNumber(stats.progress.count);
+        $('kpiProgressQty').textContent = `QTY: ${formatNumber(stats.progress.qty)}`;
+        
+        // Cancel
+        $('kpiCancel').textContent = formatNumber(stats.cancel.count);
+        $('kpiCancelQty').textContent = `QTY: ${formatNumber(stats.cancel.qty)}`;
+        
+        // SLA
+        $('slaPill').textContent = stats.slaSampleSize ? 
+          `Sampel: ${stats.slaSampleSize} order` : 'Data SLA tidak lengkap';
       }
 
       function renderCharts(data, stats) {
         // Hancurkan chart lama
-        Object.values(State.charts).forEach(chart => {
-          if (chart) chart.destroy();
-        });
+        Object.values(State.charts).forEach(chart => chart?.destroy());
 
-        // Chart Status (Donut)
+        const uniqueData = getUniqueOrders(data);
+
+        // Chart Status
         const ctxStatus = $('chartStatus')?.getContext('2d');
         if (ctxStatus) {
           State.charts.status = new Chart(ctxStatus, {
@@ -1133,32 +904,27 @@
             data: {
               labels: ['Delivered', 'On Delivery', 'Progress', 'Cancel'],
               datasets: [{
-                data: [stats.delivered, stats.onDelivery, stats.progress, stats.cancel],
-                backgroundColor: [
-                  CONFIG.CHART_COLORS.delivered,
-                  CONFIG.CHART_COLORS.onDelivery,
-                  CONFIG.CHART_COLORS.progress,
-                  CONFIG.CHART_COLORS.cancel
+                data: [
+                  stats.delivered.count,
+                  stats.onDelivery.count,
+                  stats.progress.count,
+                  stats.cancel.count
                 ],
-                borderWidth: 0,
-                hoverOffset: 6
+                backgroundColor: Object.values(CONFIG.CHART_COLORS),
+                borderWidth: 0
               }]
             },
             options: {
               responsive: true,
-              maintainAspectRatio: true,
               plugins: {
-                legend: { 
-                  position: 'right',
-                  labels: { color: '#e9f1fb', font: { size: 11 } }
-                },
+                legend: { position: 'right', labels: { color: '#e9f1fb' } },
                 tooltip: {
                   callbacks: {
-                    label: (context) => {
-                      const value = context.raw || 0;
-                      const total = stats.totalOrder || 1;
+                    label: (ctx) => {
+                      const value = ctx.raw;
+                      const total = stats.totalOrders;
                       const percentage = ((value / total) * 100).toFixed(1);
-                      return `${context.label}: ${formatNumber(value)} (${percentage}%)`;
+                      return `${ctx.label}: ${value} order (${percentage}%)`;
                     }
                   }
                 }
@@ -1168,69 +934,56 @@
           });
         }
 
-        $('statusNote').textContent = `Total ${stats.totalOrder} order • Delivered ${stats.delivered} • On Delivery ${stats.onDelivery} • Progress ${stats.progress} • Cancel ${stats.cancel}`;
+        $('statusNote').textContent = 
+          `Total ${stats.totalOrders} order unik • Delivered ${stats.delivered.count} • On Delivery ${stats.onDelivery.count} • Progress ${stats.progress.count} • Cancel ${stats.cancel.count}`;
 
-        // Chart Kota
+        // Chart Kota (Top 8)
         const cityData = groupAndSum(data, item => item.kota, 8);
         const ctxCity = $('chartCity')?.getContext('2d');
         if (ctxCity) {
           State.charts.city = new Chart(ctxCity, {
             type: 'bar',
             data: {
-              labels: cityData.map(item => item[0]),
+              labels: cityData.map(d => d[0]),
               datasets: [{
                 label: 'Total QTY',
-                data: cityData.map(item => Math.round(item[1])),
+                data: cityData.map(d => Math.round(d[1])),
                 backgroundColor: 'rgba(52, 152, 219, 0.7)',
                 borderRadius: 6
               }]
             },
             options: {
               responsive: true,
-              maintainAspectRatio: true,
               plugins: { legend: { display: false } },
               scales: {
-                x: { 
-                  ticks: { color: '#e9f1fb', maxRotation: 45 },
-                  grid: { color: 'rgba(255,255,255,0.06)' }
-                },
-                y: { 
-                  ticks: { color: '#e9f1fb' },
-                  grid: { color: 'rgba(255,255,255,0.06)' }
-                }
+                x: { ticks: { color: '#e9f1fb', maxRotation: 45 } },
+                y: { ticks: { color: '#e9f1fb' } }
               }
             }
           });
         }
 
-        // Chart Pabrik
+        // Chart Pabrik (Top 6)
         const factoryData = groupAndSum(data, item => item.pabrik, 6);
         const ctxFactory = $('chartFactory')?.getContext('2d');
         if (ctxFactory) {
           State.charts.factory = new Chart(ctxFactory, {
             type: 'bar',
             data: {
-              labels: factoryData.map(item => item[0]),
+              labels: factoryData.map(d => d[0]),
               datasets: [{
                 label: 'Total QTY',
-                data: factoryData.map(item => Math.round(item[1])),
+                data: factoryData.map(d => Math.round(d[1])),
                 backgroundColor: 'rgba(255, 176, 0, 0.7)',
                 borderRadius: 6
               }]
             },
             options: {
               responsive: true,
-              maintainAspectRatio: true,
               plugins: { legend: { display: false } },
               scales: {
-                x: { 
-                  ticks: { color: '#e9f1fb', maxRotation: 45 },
-                  grid: { color: 'rgba(255,255,255,0.06)' }
-                },
-                y: { 
-                  ticks: { color: '#e9f1fb' },
-                  grid: { color: 'rgba(255,255,255,0.06)' }
-                }
+                x: { ticks: { color: '#e9f1fb', maxRotation: 45 } },
+                y: { ticks: { color: '#e9f1fb' } }
               }
             }
           });
@@ -1239,38 +992,29 @@
         // Chart SLA
         const ctxSLA = $('chartSLA')?.getContext('2d');
         if (ctxSLA) {
-          const onTime = stats.onTimeCount;
-          const delay = stats.slaSampleSize - onTime;
-          
+          const deliveredOrders = uniqueData.filter(d => d.statusCategory === 'DELIVERED');
+          const onTime = deliveredOrders.filter(d => 
+            d.tglMuat && d.actualMuat && d.actualMuat <= d.tglMuat
+          ).length;
+          const delay = deliveredOrders.filter(d => 
+            d.tglMuat && d.actualMuat && d.actualMuat > d.tglMuat
+          ).length;
+          const noData = deliveredOrders.length - onTime - delay;
+
           State.charts.sla = new Chart(ctxSLA, {
             type: 'doughnut',
             data: {
-              labels: ['On Time', 'Delay'],
+              labels: ['On Time', 'Delay', 'No Data'],
               datasets: [{
-                data: [onTime, delay],
-                backgroundColor: [CONFIG.CHART_COLORS.onTime, CONFIG.CHART_COLORS.delay],
-                borderWidth: 0,
-                hoverOffset: 6
+                data: [onTime, delay, noData],
+                backgroundColor: ['#2ecc71', '#e74c3c', '#95a5a6'],
+                borderWidth: 0
               }]
             },
             options: {
               responsive: true,
-              maintainAspectRatio: true,
               plugins: {
-                legend: { 
-                  position: 'bottom',
-                  labels: { color: '#e9f1fb', font: { size: 11 } }
-                },
-                tooltip: {
-                  callbacks: {
-                    label: (context) => {
-                      const value = context.raw || 0;
-                      const total = stats.slaSampleSize || 1;
-                      const percentage = ((value / total) * 100).toFixed(1);
-                      return `${context.label}: ${value} (${percentage}%)`;
-                    }
-                  }
-                }
+                legend: { position: 'bottom', labels: { color: '#e9f1fb' } }
               },
               cutout: '70%'
             }
@@ -1278,123 +1022,121 @@
         }
       }
 
+      function renderRealTimeTable(data) {
+        const sorted = [...data]
+          .sort((a, b) => {
+            const dateA = a.actualMuat || a.tglMuat || a.tglInput || new Date(0);
+            const dateB = b.actualMuat || b.tglMuat || b.tglInput || new Date(0);
+            return dateB - dateA;
+          })
+          .slice(0, 10);
+
+        const tbody = $('rtBody');
+        tbody.innerHTML = '';
+
+        sorted.forEach(item => {
+          const row = tbody.insertRow();
+          row.insertCell().textContent = item.noPolisi || '-';
+          row.insertCell().textContent = item.kota || '-';
+          row.insertCell().textContent = item.status || '-';
+          row.insertCell().textContent = formatNumber(item.qty);
+          row.insertCell().textContent = item.actualMuat ? formatDate(item.actualMuat) : '-';
+        });
+      }
+
       async function refresh() {
         if (State.isLoading) return;
 
         try {
-          const { filteredData } = await loadData(true);
+          const data = await fetchData();
+          
+          // Filter berdasarkan tanggal jika ada
+          const from = $('fromDate')?.value ? new Date($('fromDate').value) : null;
+          const to = $('toDate')?.value ? new Date($('toDate').value) : null;
+          
+          let filteredData = data;
+          if (from || to) {
+            filteredData = data.filter(item => {
+              const date = item.tglInput || item.tglMuat || item.actualMuat;
+              if (!date) return false;
+              if (from && date < from) return false;
+              if (to) {
+                const toEnd = new Date(to);
+                toEnd.setHours(23, 59, 59);
+                if (date > toEnd) return false;
+              }
+              return true;
+            });
+          }
+
           const stats = calculateStats(filteredData);
           
           renderKPI(stats);
           renderCharts(filteredData, stats);
           renderRealTimeTable(filteredData);
           
-          const now = new Date();
-          $('lastUpdate').textContent = `Update: ${formatDate(now)} ${now.toLocaleTimeString('id-ID')}`;
+          // Update info
+          $('lastUpdate').textContent = `Update: ${new Date().toLocaleString('id-ID')}`;
+          $('totalRows').textContent = `${filteredData.length} baris (${stats.totalOrders} order unik)`;
           
-          State.lastUpdate = now;
+          // Periode data
+          const dates = filteredData
+            .map(d => d.tglInput || d.tglMuat || d.actualMuat)
+            .filter(d => d)
+            .sort((a, b) => a - b);
+          
+          if (dates.length > 0) {
+            $('dataPeriod').textContent = 
+              `${formatDate(dates[0])} - ${formatDate(dates[dates.length-1])}`;
+          }
+          
+          showMessage('success', `Data diperbarui: ${filteredData.length} baris`);
           
         } catch (error) {
-          console.error('Refresh error:', error);
+          showMessage('error', error.message);
         }
       }
 
-      // =========================
-      // 7) AUTO REFRESH
-      // =========================
+      // ================= AUTO REFRESH =================
       function setupAutoRefresh() {
-        if (State.refreshTimer) {
-          clearInterval(State.refreshTimer);
-          State.refreshTimer = null;
-        }
-
-        const seconds = Number($('refreshSec')?.value || 0);
+        if (State.refreshTimer) clearInterval(State.refreshTimer);
         
+        const seconds = Number($('refreshSec')?.value || 0);
         if (seconds > 0) {
-          State.refreshTimer = setInterval(() => {
-            refresh();
-          }, seconds * 1000);
-          
+          State.refreshTimer = setInterval(refresh, seconds * 1000);
           $('refreshStatus').textContent = `${seconds}s`;
         } else {
           $('refreshStatus').textContent = 'Off';
         }
       }
 
-      // =========================
-      // 8) EVENT HANDLERS
-      // =========================
-      const debouncedRefresh = debounce(refresh, 500);
-
-      function resetFilters() {
-        $('fromDate').value = '';
-        $('toDate').value = '';
-        debouncedRefresh();
-        showMessage('info', 'Filter direset', 2000);
-      }
-
-      // =========================
-      // 9) INITIALIZATION
-      // =========================
+      // ================= INIT =================
       function init() {
-        // Setup event listeners
+        // Event listeners
         $('btnRefresh')?.addEventListener('click', refresh);
-        $('btnReset')?.addEventListener('click', resetFilters);
+        $('btnReset')?.addEventListener('click', () => {
+          $('fromDate').value = '';
+          $('toDate').value = '';
+          refresh();
+        });
         $('refreshSec')?.addEventListener('change', setupAutoRefresh);
-        $('fromDate')?.addEventListener('change', debouncedRefresh);
-        $('toDate')?.addEventListener('change', debouncedRefresh);
+        $('fromDate')?.addEventListener('change', refresh);
+        $('toDate')?.addEventListener('change', refresh);
 
         // Initial load
         refresh();
         setupAutoRefresh();
 
-        // Update system info
-        $('systemMode').textContent = 'Production';
-        $('cacheStatus').textContent = 'Active (5 menit)';
-
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-          // Ctrl/Cmd + R untuk refresh
           if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
             e.preventDefault();
             refresh();
           }
-          // Ctrl/Cmd + Shift + R untuk reset filter
-          if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
-            e.preventDefault();
-            resetFilters();
-          }
         });
-
-        // Online/offline handling
-        window.addEventListener('online', () => {
-          showMessage('success', 'Koneksi tersambung kembali', 3000);
-          refresh();
-        });
-
-        window.addEventListener('offline', () => {
-          showMessage('error', 'Koneksi terputus. Menunggu koneksi kembali...', 0);
-        });
-
-        // Visibility API - pause refresh saat tab tidak aktif
-        document.addEventListener('visibilitychange', () => {
-          if (document.hidden) {
-            // Pause refresh
-            if (State.refreshTimer) {
-              clearInterval(State.refreshTimer);
-              State.refreshTimer = null;
-            }
-          } else {
-            // Resume refresh
-            setupAutoRefresh();
-            refresh(); // Refresh immediately when tab becomes visible
-          }
-        });
-
-        console.log('Dashboard initialized');
       }
 
-      // Start when DOM is ready
+      // Start
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
       } else {
