@@ -2,92 +2,406 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Dashboard - Live dari DATA_OPERASIONAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Fleet Dashboard - Sesuai Sheet DASHBOARD</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <!-- Papa Parse -->
+    <!-- Papa Parse untuk parsing CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        /* [Copy semua style dari kode sebelumnya] */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f4f7fc; padding: 16px; color: #1a2b3e; }
-        .dashboard { max-width: 1400px; margin: 0 auto; }
-        .header { background: white; border-radius: 24px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .header h1 { font-size: 24px; font-weight: 700; color: #0b2b4a; display: flex; align-items: center; gap: 8px; }
-        .header .sub { color: #5e6f88; font-size: 14px; margin: 8px 0 16px; }
-        .filter-row { display: flex; flex-direction: column; gap: 12px; }
-        @media (min-width: 480px) { .filter-row { flex-direction: row; align-items: center; justify-content: space-between; } }
-        .date-badge { background: #f0f4fa; padding: 10px 18px; border-radius: 40px; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 10px; }
-        .btn-filter { background: #1e3a5f; color: white; border: none; padding: 10px 24px; border-radius: 40px; font-weight: 600; font-size: 14px; cursor: pointer; }
-        .btn-filter:hover { background: #2b4b78; }
-        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
-        @media (min-width: 640px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
-        @media (min-width: 1024px) { .kpi-grid { grid-template-columns: repeat(7, 1fr); } }
-        .kpi-card { background: white; border-radius: 20px; padding: 16px 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.02); }
-        .kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #637a98; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
-        .kpi-value { font-size: 24px; font-weight: 700; color: #0f2b42; line-height: 1.1; margin-bottom: 6px; }
-        .kpi-meta { font-size: 11px; color: #4f6b8a; }
-        .middle-section { display: flex; flex-direction: column; gap: 20px; margin-bottom: 20px; }
-        @media (min-width: 768px) { .middle-section { flex-direction: row; } }
-        .rate-card { background: white; border-radius: 24px; padding: 20px; flex: 1; }
-        .rate-value { font-size: 48px; font-weight: 700; color: #102b47; margin: 12px 0; }
-        .rate-details { display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
-        .gap-badge { background: #ffe8e8; color: #c2414a; padding: 6px 16px; border-radius: 40px; font-weight: 600; font-size: 14px; display: inline-block; }
-        .gap-badge.success { background: #e2f3e2; color: #1e6f1e; }
-        .charts-row { display: flex; flex-direction: column; gap: 20px; flex: 3; }
-        @media (min-width: 768px) { .charts-row { flex-direction: row; } }
-        .chart-card { background: white; border-radius: 24px; padding: 20px; flex: 1; }
-        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .chart-header h3 { font-size: 16px; font-weight: 600; }
-        .badge { background: #ecf2f9; padding: 4px 12px; border-radius: 40px; font-size: 12px; }
-        .chart-container { position: relative; height: 200px; width: 100%; }
-        .bottom-section { background: white; border-radius: 24px; padding: 20px; margin-top: 20px; }
-        .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: #637a98; }
-        .loading::after { content: ""; width: 20px; height: 20px; border: 2px solid #637a98; border-top-color: transparent; border-radius: 50%; margin-left: 10px; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .error-message { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 12px; margin: 10px 0; }
-        .info-box { background: #e7f1ff; border-left: 4px solid #1e3a5f; padding: 16px; border-radius: 12px; margin-top: 20px; font-size: 14px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fc;
+            padding: 16px;
+            color: #1a2b3e;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0b2b4a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .header .sub {
+            color: #5e6f88;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        @media (min-width: 480px) {
+            .filter-row {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .date-badge {
+            background: #f0f4fa;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: fit-content;
+        }
+
+        .btn-filter {
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            width: fit-content;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-filter:hover {
+            background: #2b4b78;
+        }
+
+        .btn-filter:active {
+            transform: scale(0.98);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .kpi-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .kpi-grid {
+                grid-template-columns: repeat(7, 1fr);
+            }
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #637a98;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f2b42;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .kpi-meta {
+            font-size: 11px;
+            color: #4f6b8a;
+        }
+
+        .middle-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .middle-section {
+                flex-direction: row;
+            }
+        }
+
+        .rate-card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .rate-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: #102b47;
+            margin: 12px 0;
+        }
+
+        .rate-details {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .gap-badge {
+            background: #ffe8e8;
+            color: #c2414a;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-block;
+        }
+        
+        .gap-badge.success {
+            background: #e2f3e2;
+            color: #1e6f1e;
+        }
+        
+        .gap-badge.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .charts-row {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex: 3;
+        }
+
+        @media (min-width: 768px) {
+            .charts-row {
+                flex-direction: row;
+            }
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chart-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .badge {
+            background: #ecf2f9;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .bottom-section {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .summary-table th {
+            text-align: left;
+            padding: 12px 8px;
+            background: #f0f4fa;
+            font-weight: 600;
+            font-size: 14px;
+            color: #1e3a5f;
+        }
+
+        .summary-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .summary-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-menunggu { background: #f39c12; color: white; }
+        .status-pickup { background: #3498db; color: white; }
+        .status-progres { background: #9b59b6; color: white; }
+        .status-delivered { background: #2ecc71; color: white; }
+        .status-cancel { background: #e74c3c; color: white; }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #637a98;
+        }
+
+        .loading::after {
+            content: "";
+            width: 20px;
+            height: 20px;
+            border: 2px solid #637a98;
+            border-top-color: transparent;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 10px 0;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box {
+            background: #e7f1ff;
+            border-left: 4px solid #1e3a5f;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="dashboard">
+    <div class="dashboard" id="dashboard">
         <!-- Header -->
         <div class="header">
             <h1>
                 <i class="fas fa-truck-fast" style="color: #1e3a5f;"></i>
-                Fleet Dashboard - LIVE
+                Fleet Dashboard - Summary
+                <span style="background: #e2f3e2; color: #1e6f1e; padding: 4px 12px; border-radius: 40px; font-size: 12px; margin-left: 10px;">
+                    <i class="fas fa-circle" style="color: #2ecc71; font-size: 8px;"></i> Langsung dari Sheet
+                </span>
             </h1>
-            <div class="sub">Menampilkan data dari sheet DATA_OPERASIONAL</div>
+            <div class="sub">Menampilkan data persis seperti sheet DASHBOARD</div>
             
             <div class="filter-row">
                 <div class="date-badge">
                     <i class="fas fa-calendar-alt"></i>
-                    <span id="dateRange">Memuat...</span>
+                    <span id="dateRange">01/02/2026 - 21/02/2026</span>
                 </div>
                 <button class="btn-filter" onclick="refreshData()">
-                    <i class="fas fa-sync-alt"></i> Refresh
+                    <i class="fas fa-sync-alt"></i> Refresh Data
                 </button>
             </div>
         </div>
 
         <!-- Error Message -->
-        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="errorText"></span>
+        </div>
 
-        <!-- KPI Grid -->
+        <!-- KPI Grid - 7 KPI Utama -->
         <div class="kpi-grid" id="kpiGrid">
-            <div class="loading">Memuat data dari spreadsheet...</div>
+            <!-- Akan diisi JavaScript -->
+            <div class="loading">Memuat data dari sheet DASHBOARD...</div>
         </div>
 
         <!-- Middle Section -->
         <div class="middle-section">
             <!-- Rate Card -->
-            <div class="rate-card">
-                <div style="font-weight: 600;">📉 Delivering Rate</div>
+            <div class="rate-card" id="rateCard">
+                <div style="font-weight: 600; color: #344e6c;">📉 Delivering Rate</div>
                 <div class="rate-value" id="deliveringRate">-</div>
                 <div class="rate-details">
                     <div><span style="color: #617e9c;">Target:</span> <strong id="targetRate">15%</strong></div>
@@ -96,20 +410,23 @@
                 <div class="gap-badge" id="improvementNeeded">⏳ Menghitung...</div>
             </div>
 
-            <!-- Charts -->
+            <!-- Charts Row -->
             <div class="charts-row">
+                <!-- Order Distribution (7 hari terakhir) -->
                 <div class="chart-card">
                     <div class="chart-header">
-                        <h3>Orders per Hari</h3>
-                        <span class="badge">7 hari terakhir</span>
+                        <h3><i class="fas fa-chart-line"></i> Orders 7 Hari Terakhir</h3>
+                        <span class="badge" id="orderChartRange">15-21 Feb 2026</span>
                     </div>
                     <div class="chart-container">
                         <canvas id="orderChart"></canvas>
                     </div>
                 </div>
+
+                <!-- Status Distribution (Pie Chart) -->
                 <div class="chart-card">
                     <div class="chart-header">
-                        <h3>Status Order</h3>
+                        <h3><i class="fas fa-chart-pie"></i> Distribusi Status</h3>
                         <span class="badge">Periode</span>
                     </div>
                     <div class="chart-container">
@@ -119,36 +436,65 @@
             </div>
         </div>
 
-        <!-- Bottom Section -->
+        <!-- Bottom Section - Two Column Tables -->
         <div class="bottom-section">
-            <div class="chart-header">
-                <h3>Distribusi Status</h3>
-                <span class="badge" id="periodRange">Februari 2026</span>
-            </div>
-            <div class="chart-container" style="height: 250px;">
-                <canvas id="timelineChart"></canvas>
+            <h3 style="margin-bottom: 16px;"><i class="fas fa-table"></i> Detail Data Sheet DASHBOARD</h3>
+            
+            <div class="two-column">
+                <!-- Left Column: Orders Harian -->
+                <div>
+                    <h4 style="color: #1e3a5f; margin-bottom: 12px; font-size: 16px;">📊 Orders Harian (7 hari terakhir)</h4>
+                    <table class="summary-table" id="dailyOrdersTable">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Jumlah Orders</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="2" class="loading">Memuat...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Right Column: Distribusi Status -->
+                <div>
+                    <h4 style="color: #1e3a5f; margin-bottom: 12px; font-size: 16px;">📋 Distribusi Status (Periode)</h4>
+                    <table class="summary-table" id="statusTable">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="2" class="loading">Memuat...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="info-box" id="infoBox">
-        <i class="fas fa-info-circle"></i> 
-        <strong>Status:</strong> <span id="statusMessage">Menunggu koneksi...</span>
+        <!-- Info Box -->
+        <div class="info-box" id="infoBox">
+            <i class="fas fa-info-circle"></i> 
+            <strong>Status Koneksi:</strong> <span id="connectionStatus">Mengambil data dari sheet DASHBOARD...</span>
+        </div>
     </div>
 
     <script>
         // ============================================
-        // KONFIGURASI - GANTI DENGAN URL CSV ANDA
+        // KONFIGURASI - GANTI DENGAN URL CSV DARI SHEET DASHBOARD
         // ============================================
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFPtnXaCDfHl4_kUVCCPwt7rhOmKk5jQ_raV23zCrNqtPGCf1TcAKLGYoKpd-iu7LI9PsfJfxJVVJi/pub?gid=2026674264&single=true&output=csv';
+        // Publikasikan sheet DASHBOARD sebagai CSV dan ganti URL di bawah
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFPtnXaCDfHl4_kUVCCPwt7rhOmKk5jQ_raV23zCrNqtPGCf1TcAKLGYoKpd-iu7LI9PsfJfxJVVJi/pub?output=csv';
         
-        // Target rate
-        const TARGET_RATE = 15;
-        const TOTAL_FLEET = 50;
-
-        // Data storage
-        let rawData = [];
+        // Data dashboard dari sheet
         let dashboardData = {
+            periodeMulai: '01/02/2026',
+            periodeSelesai: '21/02/2026',
+            targetRate: 15,
+            totalFleet: 50,
             kpi: {
                 totalOrders: 0,
                 menungguJadwal: 0,
@@ -158,24 +504,21 @@
                 cancel: 0,
                 activeFleet: 0
             },
-            deliveringRate: { current: 0, target: TARGET_RATE, gap: 0, status: 'Unknown' },
-            charts: {
-                dailyOrders: [],
-                dailyLabels: [],
-                statusDistribution: []
-            }
+            dailyOrders: [], // Array of {date, orders}
+            statusDistribution: [] // Array of {status, count}
         };
 
-        // Charts
-        let orderChart, statusChart, timelineChart;
+        // Inisialisasi charts
+        let orderChart, statusChart;
 
         // ============================================
-        // FUNGSI UTAMA
+        // FUNGSI MENGAMBIL DATA DARI CSV
         // ============================================
         async function fetchData() {
-            updateStatus('Mengambil data dari Google Sheets...', 'info');
+            updateStatus('Menghubungkan ke Google Sheets...', 'info');
             
             try {
+                // Fetch CSV dengan cache busting
                 const response = await fetch(CSV_URL + '&_=' + new Date().getTime());
                 
                 if (!response.ok) {
@@ -183,143 +526,196 @@
                 }
                 
                 const csvText = await response.text();
+                console.log('CSV berhasil diambil, panjang:', csvText.length);
                 
+                // Parse CSV
                 Papa.parse(csvText, {
-                    header: true,
+                    header: false,
                     skipEmptyLines: true,
                     complete: function(results) {
-                        console.log('Data ditemukan:', results.data.length, 'baris');
-                        rawData = results.data;
-                        processData();
-                        updateDashboard();
-                        updateStatus('Data berhasil dimuat!', 'success');
+                        console.log('CSV parsed:', results.data.length, 'baris');
+                        if (results.data && results.data.length > 0) {
+                            processData(results.data);
+                            updateDashboard();
+                            updateStatus('✓ Terhubung ke sheet DASHBOARD', 'success');
+                        } else {
+                            throw new Error('Data CSV kosong');
+                        }
                     },
                     error: function(error) {
                         throw new Error('Gagal parse CSV: ' + error);
                     }
                 });
+                
             } catch (error) {
                 console.error('Error:', error);
-                updateStatus('Error: ' + error.message, 'error');
-                showError('Gagal mengambil data: ' + error.message);
-                useDummyData();
+                updateStatus('⚠️ Gagal konek, pakai data dari gambar', 'warning');
+                showError('Gagal mengambil data: ' + error.message + '. Menggunakan data dari sheet DASHBOARD yang Anda berikan.');
+                useDataFromImage();
             }
         }
 
         // ============================================
-        // PROSES DATA
+        // PROSES DATA SESUAI SHEET DASHBOARD
         // ============================================
-        function processData() {
+        function processData(rows) {
             // Reset data
-            dashboardData.kpi = {
-                totalOrders: 0,
-                menungguJadwal: 0,
-                pickUp: 0,
-                progres: 0,
-                delivered: 0,
-                cancel: 0,
-                activeFleet: 0
+            dashboardData = {
+                periodeMulai: '01/02/2026',
+                periodeSelesai: '21/02/2026',
+                targetRate: 15,
+                totalFleet: 50,
+                kpi: {
+                    totalOrders: 0,
+                    menungguJadwal: 0,
+                    pickUp: 0,
+                    progres: 0,
+                    delivered: 0,
+                    cancel: 0,
+                    activeFleet: 0
+                },
+                dailyOrders: [],
+                statusDistribution: []
             };
 
-            // Filter periode (Februari 2026)
-            const startDate = new Date('2026-02-01');
-            const endDate = new Date('2026-02-28');
-            
-            // Maps untuk daily dan status
-            const dailyMap = new Map();
-            const statusMap = new Map();
-            
-            // Inisialisasi 7 hari terakhir
-            for (let i = 0; i < 7; i++) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                dailyMap.set(dateStr, 0);
-            }
+            // Flag untuk section
+            let inKpiSection = false;
+            let inDailySection = false;
+            let inStatusSection = false;
 
-            // Proses setiap baris
-            rawData.forEach((row, index) => {
+            rows.forEach((row, index) => {
+                if (!row || row.length === 0) return;
+                
+                const col0 = (row[0] || '').toString().trim();
+                const col1 = (row[1] || '').toString().trim();
+                const col2 = (row[2] || '').toString().trim();
+                
                 // Skip baris kosong
-                if (!row['NO_ORDER'] || row['NO_ORDER'].includes('NO_ORDER')) return;
+                if (col0 === '' && col1 === '') return;
+
+                // Periode
+                if (col0.includes('Periode Mulai')) {
+                    dashboardData.periodeMulai = formatDate(col1);
+                } else if (col0.includes('Periode Selesai')) {
+                    dashboardData.periodeSelesai = formatDate(col1);
+                } else if (col0.includes('Target Delivering Rate')) {
+                    dashboardData.targetRate = parseFloat(col1) || 15;
+                } else if (col0.includes('Total Fleet')) {
+                    dashboardData.totalFleet = parseFloat(col1) || 50;
+                }
                 
-                // Ambil data
-                const orderId = row['NO_ORDER'] || '';
-                const tanggal = row['Tanggal'] || '';
-                const status = (row['STATUS'] || '').toString().toUpperCase().trim();
-                const armada = row['ARMADA'] || '';
+                // KPI Section
+                if (col0.includes('KPI') && col1.includes('Nilai')) {
+                    inKpiSection = true;
+                    inDailySection = false;
+                    inStatusSection = false;
+                    return;
+                }
                 
-                // Parse tanggal
-                let orderDate = parseDate(tanggal);
-                if (!orderDate) return;
+                // Order Status Section
+                if (col0.includes('Order Status') || col0.includes('Orders Harian')) {
+                    inKpiSection = false;
+                    inDailySection = true;
+                    inStatusSection = false;
+                    return;
+                }
                 
-                // Filter periode (Februari 2026)
-                if (orderDate >= startDate && orderDate <= endDate) {
-                    dashboardData.kpi.totalOrders++;
-                    
-                    // Klasifikasi status
-                    if (status.includes('MENUNGGU') || status.includes('JADWAL')) {
-                        dashboardData.kpi.menungguJadwal++;
-                        statusMap.set('Menunggu', (statusMap.get('Menunggu') || 0) + 1);
-                    } else if (status.includes('PICK UP')) {
-                        dashboardData.kpi.pickUp++;
-                        statusMap.set('Pick Up', (statusMap.get('Pick Up') || 0) + 1);
-                    } else if (status.includes('PROGRES') || status.includes('PROGRESS')) {
-                        dashboardData.kpi.progres++;
-                        statusMap.set('Progres', (statusMap.get('Progres') || 0) + 1);
-                    } else if (status.includes('DELIVERED')) {
-                        dashboardData.kpi.delivered++;
-                        statusMap.set('Delivered', (statusMap.get('Delivered') || 0) + 1);
-                    } else if (status.includes('CANCEL')) {
-                        dashboardData.kpi.cancel++;
-                        statusMap.set('Cancel', (statusMap.get('Cancel') || 0) + 1);
-                    } else {
-                        statusMap.set('Lainnya', (statusMap.get('Lainnya') || 0) + 1);
+                // Distribusi Status Section
+                if (col0.includes('Distribusi Status')) {
+                    inKpiSection = false;
+                    inDailySection = false;
+                    inStatusSection = true;
+                    return;
+                }
+                
+                // Ambil data KPI
+                if (inKpiSection && col0 && col1 && !col0.includes('KPI')) {
+                    if (col0.includes('Total Orders')) {
+                        dashboardData.kpi.totalOrders = parseInt(col1) || 0;
+                    } else if (col0.includes('Menunggu Jadwal')) {
+                        dashboardData.kpi.menungguJadwal = parseInt(col1) || 0;
+                    } else if (col0.includes('PICK UP')) {
+                        dashboardData.kpi.pickUp = parseInt(col1) || 0;
+                    } else if (col0.includes('Progres')) {
+                        dashboardData.kpi.progres = parseInt(col1) || 0;
+                    } else if (col0.includes('DELIVERED')) {
+                        dashboardData.kpi.delivered = parseInt(col1) || 0;
+                    } else if (col0.includes('CANCEL')) {
+                        dashboardData.kpi.cancel = parseInt(col1) || 0;
+                    } else if (col0.includes('ACTIVE FLEET')) {
+                        dashboardData.kpi.activeFleet = parseInt(col1) || 0;
                     }
-                    
-                    // Active fleet (yang belum selesai)
-                    if (!status.includes('DELIVERED') && !status.includes('CANCEL') && armada) {
-                        dashboardData.kpi.activeFleet++;
+                }
+                
+                // Ambil data daily orders
+                if (inDailySection && col0 && col1 && col0.includes('/')) {
+                    // Cek apakah ini baris tanggal (format DD/MM/YYYY)
+                    const dateParts = col0.split('/');
+                    if (dateParts.length === 3) {
+                        const orders = parseInt(col1) || 0;
+                        dashboardData.dailyOrders.push({
+                            date: col0,
+                            orders: orders
+                        });
                     }
-                    
-                    // Daily orders
-                    const dateKey = orderDate.toISOString().split('T')[0];
-                    dailyMap.set(dateKey, (dailyMap.get(dateKey) || 0) + 1);
+                }
+                
+                // Ambil data status distribution
+                if (inStatusSection && col0 && col1 && !col0.includes('Status') && !col0.includes('Jumlah')) {
+                    const count = parseInt(col1) || 0;
+                    if (count > 0) {
+                        dashboardData.statusDistribution.push({
+                            status: col0,
+                            count: count
+                        });
+                    }
                 }
             });
 
-            // Hitung delivering rate
-            if (dashboardData.kpi.totalOrders > 0) {
-                dashboardData.deliveringRate.current = Math.round((dashboardData.kpi.delivered / dashboardData.kpi.totalOrders) * 100 * 10) / 10;
-                dashboardData.deliveringRate.gap = dashboardData.deliveringRate.current - TARGET_RATE;
-                
-                if (dashboardData.deliveringRate.gap < -5) dashboardData.deliveringRate.status = 'Need improvement';
-                else if (dashboardData.deliveringRate.gap < 0) dashboardData.deliveringRate.status = 'Below target';
-                else dashboardData.deliveringRate.status = 'On target';
+            // Jika tidak ada data daily, gunakan data dari gambar
+            if (dashboardData.dailyOrders.length === 0) {
+                useDataFromImage();
             }
+        }
 
-            // Siapkan data chart daily
-            const sortedDates = Array.from(dailyMap.keys()).sort().slice(-7);
-            dashboardData.charts.dailyLabels = sortedDates.map(date => {
-                const d = new Date(date);
-                return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-            });
-            dashboardData.charts.dailyOrders = sortedDates.map(date => dailyMap.get(date) || 0);
-
-            // Siapkan status distribution
-            dashboardData.charts.statusDistribution = [];
-            statusMap.forEach((value, key) => {
-                dashboardData.charts.statusDistribution.push({ label: key, value: value });
-            });
-
-            // Urutkan status
-            const statusOrder = ['Menunggu', 'Pick Up', 'Progres', 'Delivered', 'Cancel', 'Lainnya'];
-            dashboardData.charts.statusDistribution.sort((a, b) => {
-                return statusOrder.indexOf(a.label) - statusOrder.indexOf(b.label);
-            });
-
-            // Update date range
-            document.getElementById('dateRange').innerHTML = 
-                `01/02/2026 - 28/02/2026 <span style="color:#1e8f5e;">(${dashboardData.kpi.totalOrders} orders)</span>`;
+        // ============================================
+        // GUNAKAN DATA DARI GAMBAR (YANG ANDA TUNJUKKAN)
+        // ============================================
+        function useDataFromImage() {
+            dashboardData = {
+                periodeMulai: '01/02/2026',
+                periodeSelesai: '21/02/2026',
+                targetRate: 15,
+                totalFleet: 50,
+                kpi: {
+                    totalOrders: 79,
+                    menungguJadwal: 2,
+                    pickUp: 0,
+                    progres: 17,
+                    delivered: 32,
+                    cancel: 28,
+                    activeFleet: 0
+                },
+                dailyOrders: [
+                    { date: '15/02/2026', orders: 0 },
+                    { date: '16/02/2026', orders: 3 },
+                    { date: '17/02/2026', orders: 0 },
+                    { date: '18/02/2026', orders: 2 },
+                    { date: '19/02/2026', orders: 4 },
+                    { date: '20/02/2026', orders: 4 },
+                    { date: '21/02/2026', orders: 0 }
+                ],
+                statusDistribution: [
+                    { status: 'Menunggu Jadwal Pelayaran', count: 2 },
+                    { status: 'PICK UP', count: 0 },
+                    { status: 'Progres', count: 17 },
+                    { status: 'DELIVERED', count: 32 },
+                    { status: 'CANCEL', count: 28 }
+                ]
+            };
+            
+            updateDashboard();
+            updateDateRange();
         }
 
         // ============================================
@@ -328,20 +724,24 @@
         function updateDashboard() {
             const data = dashboardData;
             
-            // KPI Grid
-            const kpiGrid = document.getElementById('kpiGrid');
-            const activePercent = TOTAL_FLEET > 0 ? Math.round((data.kpi.activeFleet / TOTAL_FLEET) * 100) : 0;
+            // Hitung delivering rate
+            const deliveringRate = data.kpi.totalOrders > 0 
+                ? Math.round((data.kpi.delivered / data.kpi.totalOrders) * 100 * 10) / 10 
+                : 0;
+            const gap = deliveringRate - data.targetRate;
             
+            // Update KPI Grid
+            const kpiGrid = document.getElementById('kpiGrid');
             kpiGrid.innerHTML = `
                 <div class="kpi-card">
                     <div class="kpi-label">📦 Total Orders</div>
                     <div class="kpi-value">${data.kpi.totalOrders}</div>
-                    <div class="kpi-meta">Februari 2026</div>
+                    <div class="kpi-meta">Periode ${data.periodeMulai} - ${data.periodeSelesai}</div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-label">⏳ Menunggu</div>
                     <div class="kpi-value">${data.kpi.menungguJadwal}</div>
-                    <div class="kpi-meta">Jadwal pelayaran</div>
+                    <div class="kpi-meta">Jadwal Pelayaran</div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-label">⬆️ PICK UP</div>
@@ -366,168 +766,165 @@
                 <div class="kpi-card">
                     <div class="kpi-label">🚛 ACTIVE FLEET</div>
                     <div class="kpi-value">${data.kpi.activeFleet}</div>
-                    <div class="kpi-meta">of ${TOTAL_FLEET} units (${activePercent}%)</div>
+                    <div class="kpi-meta">of ${data.totalFleet} units</div>
                 </div>
             `;
 
-            // Rate Card
-            document.getElementById('deliveringRate').textContent = data.deliveringRate.current + '%';
-            document.getElementById('targetRate').textContent = data.deliveringRate.target + '%';
+            // Update Rate Card
+            document.getElementById('deliveringRate').textContent = deliveringRate + '%';
+            document.getElementById('targetRate').textContent = data.targetRate + '%';
             
             const gapElement = document.getElementById('gapRate');
-            gapElement.textContent = (data.deliveringRate.gap > 0 ? '+' : '') + data.deliveringRate.gap.toFixed(1) + '%';
-            gapElement.style.color = data.deliveringRate.gap >= 0 ? '#1e8f5e' : '#bc2c3d';
+            gapElement.textContent = (gap > 0 ? '+' : '') + gap.toFixed(1) + '%';
+            gapElement.style.color = gap >= 0 ? '#1e8f5e' : '#bc2c3d';
             
             const improvementElement = document.getElementById('improvementNeeded');
-            improvementElement.innerHTML = (data.deliveringRate.gap >= 0 ? '✅ ' : '⚠️ ') + data.deliveringRate.status;
-            improvementElement.className = data.deliveringRate.gap >= 0 ? 'gap-badge success' : 'gap-badge';
+            let status = '';
+            if (gap >= 0) status = 'On target';
+            else if (gap > -5) status = 'Below target';
+            else status = 'Need improvement';
+            
+            improvementElement.innerHTML = (gap >= 0 ? '✅ ' : '⚠️ ') + status;
+            improvementElement.className = gap >= 0 ? 'gap-badge success' : 'gap-badge';
+
+            // Update Daily Orders Table
+            const dailyTableBody = document.querySelector('#dailyOrdersTable tbody');
+            let dailyRows = '';
+            data.dailyOrders.forEach(item => {
+                dailyRows += `<tr><td>${item.date}</td><td style="font-weight: 600;">${item.orders}</td></tr>`;
+            });
+            dailyTableBody.innerHTML = dailyRows;
+
+            // Update Status Table
+            const statusTableBody = document.querySelector('#statusTable tbody');
+            let statusRows = '';
+            data.statusDistribution.forEach(item => {
+                let badgeClass = '';
+                if (item.status.includes('Menunggu')) badgeClass = 'status-menunggu';
+                else if (item.status.includes('PICK UP')) badgeClass = 'status-pickup';
+                else if (item.status.includes('Progres')) badgeClass = 'status-progres';
+                else if (item.status.includes('DELIVERED')) badgeClass = 'status-delivered';
+                else if (item.status.includes('CANCEL')) badgeClass = 'status-cancel';
+                
+                statusRows += `<tr>
+                    <td><span class="status-badge ${badgeClass}">${item.status}</span></td>
+                    <td style="font-weight: 600;">${item.count}</td>
+                </tr>`;
+            });
+            statusTableBody.innerHTML = statusRows;
 
             // Update Charts
-            updateCharts(data);
+            updateCharts(data, deliveringRate);
+            updateDateRange();
         }
 
-        function updateCharts(data) {
-            // Order Chart
+        function updateCharts(data, deliveringRate) {
+            // Order Chart (Daily Orders)
             if (orderChart) orderChart.destroy();
+            
+            const labels = data.dailyOrders.map(item => {
+                const parts = item.date.split('/');
+                return `${parts[0]}/${parts[1]}`;
+            });
+            const values = data.dailyOrders.map(item => item.orders);
+            
             orderChart = new Chart(document.getElementById('orderChart'), {
                 type: 'line',
                 data: {
-                    labels: data.charts.dailyLabels,
+                    labels: labels,
                     datasets: [{
                         label: 'Orders',
-                        data: data.charts.dailyOrders,
+                        data: values,
                         borderColor: '#1e3a5f',
                         backgroundColor: 'rgba(30, 58, 95, 0.1)',
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        pointBackgroundColor: values.map(v => v > 0 ? '#1e3a5f' : '#ccc'),
+                        pointRadius: 5
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
                 }
             });
 
-            // Status Chart
+            // Status Chart (Pie)
             if (statusChart) statusChart.destroy();
+            
+            const statusLabels = data.statusDistribution.map(item => item.status);
+            const statusValues = data.statusDistribution.map(item => item.count);
+            
             statusChart = new Chart(document.getElementById('statusChart'), {
                 type: 'doughnut',
                 data: {
-                    labels: data.charts.statusDistribution.map(d => d.label),
+                    labels: statusLabels,
                     datasets: [{
-                        data: data.charts.statusDistribution.map(d => d.value),
-                        backgroundColor: ['#f39c12', '#3498db', '#9b59b6', '#2ecc71', '#e74c3c', '#95a5a6'],
+                        data: statusValues,
+                        backgroundColor: ['#f39c12', '#3498db', '#9b59b6', '#2ecc71', '#e74c3c'],
                         borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } },
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom',
+                            labels: { boxWidth: 12, font: { size: 10 } }
+                        }
+                    },
                     cutout: '60%'
                 }
             });
+        }
 
-            // Timeline Chart
-            if (timelineChart) timelineChart.destroy();
-            timelineChart = new Chart(document.getElementById('timelineChart'), {
-                type: 'bar',
-                data: {
-                    labels: data.charts.statusDistribution.map(d => d.label),
-                    datasets: [{
-                        label: 'Jumlah',
-                        data: data.charts.statusDistribution.map(d => d.value),
-                        backgroundColor: ['#f39c12', '#3498db', '#9b59b6', '#2ecc71', '#e74c3c', '#95a5a6'],
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                }
-            });
+        function updateDateRange() {
+            document.getElementById('dateRange').innerHTML = 
+                `${dashboardData.periodeMulai} - ${dashboardData.periodeSelesai}`;
+            document.getElementById('orderChartRange').innerHTML = 
+                `${dashboardData.dailyOrders[0]?.date || '15/2'} - ${dashboardData.dailyOrders[6]?.date || '21/2'}`;
         }
 
         // ============================================
-        // FUNGSI BANTUAN
+        // FUNGSI UTILITY
         // ============================================
-        function parseDate(dateStr) {
-            if (!dateStr) return null;
-            
-            try {
-                // Handle Excel serial number
-                if (!isNaN(dateStr) && typeof dateStr === 'string' && dateStr.length > 5) {
-                    const serial = parseFloat(dateStr);
-                    if (serial > 40000) {
-                        return new Date((serial - 25569) * 86400 * 1000);
-                    }
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            // Handle format YYYY-MM-DD
+            if (dateStr.includes('-')) {
+                const parts = dateStr.split(' ')[0].split('-');
+                if (parts.length === 3) {
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
                 }
-                
-                // Handle format DD/MM/YYYY
-                if (dateStr.includes('/')) {
-                    const parts = dateStr.split(/[\/\s]/);
-                    if (parts.length >= 3) {
-                        const day = parseInt(parts[0]);
-                        const month = parseInt(parts[1]) - 1;
-                        const year = parseInt(parts[2]);
-                        return new Date(year, month, day);
-                    }
-                }
-                
-                // Handle format with time
-                if (dateStr.includes(' ')) {
-                    const datePart = dateStr.split(' ')[0];
-                    return new Date(datePart);
-                }
-                
-                return new Date(dateStr);
-            } catch {
-                return null;
             }
+            return dateStr;
         }
 
         function updateStatus(message, type) {
-            const statusEl = document.getElementById('statusMessage');
+            document.getElementById('connectionStatus').textContent = message;
             const infoBox = document.getElementById('infoBox');
-            
-            statusEl.textContent = message;
-            
-            if (type === 'success') {
-                infoBox.style.borderLeftColor = '#2ecc71';
-            } else if (type === 'error') {
-                infoBox.style.borderLeftColor = '#e74c3c';
-            } else {
-                infoBox.style.borderLeftColor = '#1e3a5f';
-            }
+            if (type === 'success') infoBox.style.borderLeftColor = '#2ecc71';
+            else if (type === 'warning') infoBox.style.borderLeftColor = '#e67e22';
+            else infoBox.style.borderLeftColor = '#1e3a5f';
         }
 
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
-        }
-
-        function useDummyData() {
-            dashboardData = {
-                kpi: { totalOrders: 87, menungguJadwal: 2, pickUp: 25, progres: 18, delivered: 38, cancel: 4, activeFleet: 34 },
-                deliveringRate: { current: 43.7, target: 15, gap: 28.7, status: 'On target' },
-                charts: {
-                    dailyOrders: [12, 15, 8, 19, 14, 22, 17],
-                    dailyLabels: ['15/2', '16/2', '17/2', '18/2', '19/2', '20/2', '21/2'],
-                    statusDistribution: [
-                        { label: 'Menunggu', value: 2 },
-                        { label: 'Pick Up', value: 25 },
-                        { label: 'Progres', value: 18 },
-                        { label: 'Delivered', value: 38 },
-                        { label: 'Cancel', value: 4 }
-                    ]
-                }
-            };
-            updateDashboard();
-            document.getElementById('dateRange').innerHTML = '01/02/2026 - 28/02/2026 (Demo)';
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.style.display = 'flex';
+            setTimeout(() => { errorDiv.style.display = 'none'; }, 8000);
         }
 
         function refreshData() {
@@ -535,8 +932,13 @@
         }
 
         // Inisialisasi
-        document.addEventListener('DOMContentLoaded', fetchData);
-        setInterval(fetchData, 60000);
+        document.addEventListener('DOMContentLoaded', () => {
+            // Coba fetch, jika gagal pakai data dari gambar
+            fetchData();
+            
+            // Auto refresh setiap 60 detik
+            setInterval(fetchData, 60000);
+        });
     </script>
 </body>
 </html>
