@@ -1,0 +1,446 @@
+<script>
+  // ============================================
+  // KONFIGURASI - GANTI DENGAN URL CSV ANDA
+  // ============================================
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFPtnXaCDfHl4_kUVCCPwt7rhOmKk5jQ_raV23zCrNqtPGCf1TcAKLGYoKpd-iu7LI9PsfJfxJVVJi/pub?output=csv';
+
+  // Target rate
+  const TARGET_RATE = 15;
+  const TOTAL_FLEET = 50;
+
+  // Data storage
+  let rawData = [];
+  let dashboardData = {
+    kpi: {
+      totalOrders: 0,
+      menungguJadwal: 0,
+      pickUp: 0,
+      progres: 0,
+      delivered: 0,
+      cancel: 0,
+      activeFleet: 0
+    },
+    deliveringRate: { current: 0, target: TARGET_RATE, gap: 0, status: 'Unknown' },
+    charts: {
+      dailyOrders: [],
+      dailyLabels: [],
+      statusDistribution: []
+    }
+  };
+
+  // Charts
+  let orderChart, statusChart, timelineChart;
+
+  // ============================================
+  // FUNGSI UTAMA
+  // ============================================
+  async function fetchData() {
+    updateStatus('Mengambil data dari Google Sheets...', 'info');
+
+    try {
+      const response = await fetch(CSV_URL + '&_=' + new Date().getTime());
+      if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+
+      const csvText = await response.text();
+
+      Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          rawData = results.data || [];
+
+          // Debug cepat (bisa kamu hapus kalau sudah OK)
+          console.log('ROWS:', rawData.length);
+          console.log('HEADER KEYS:', Object.keys(rawData?.[0] || {}));
+          console.log('SAMPLE ROW:', rawData?.[0]);
+
+          processData();
+          updateDashboard();
+          updateStatus('Data berhasil dimuat!', 'success');
+        },
+        error: function (error) {
+          console.error('PapaParse error:', error);
+          updateStatus('Error parse CSV: ' + (error?.message || 'Unknown'), 'error');
+          showError('Gagal parse CSV: ' + (error?.message || 'Unknown'));
+          useDummyData();
+        }
+      });
+    } catch (error) {
+      console.error('Fetch error:', error);
+      updateStatus('Error: ' + error.message, 'error');
+      showError('Gagal mengambil data: ' + error.message);
+      useDummyData();
+    }
+  }
+
+  // ============================================
+  // NORMALISASI HEADER & AMBIL FIELD FLEKSIBEL
+  // ============================================
+  function normalizeRow(row) {
+    const out = {};
+    Object.keys(row || {}).forEach(k => {
+      const key = (k || '')
+        .toString()
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, '_'); // spasi jadi underscore
+      out[key] = (row[k] ?? '').toString().trim();
+    });
+    return out;
+  }
+
+  function pickFirst(obj, keys) {
+    for (const k of keys) {
+      const v = obj[k];
+      if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+    }
+    return '';
+  }
+
+  // ============================================
+  // PROSES DATA
+  // ============================================
+  function processData() {
+    // Reset
+    dashboardData.kpi = {
+      totalOrders: 0,
+      menungguJadwal: 0,
+      pickUp: 0,
+      progres: 0,
+      delivered: 0,
+      cancel: 0,
+      activeFleet: 0
+    };
+    dashboardData.deliveringRate = { current: 0, target: TARGET_RATE, gap: 0, status: 'Unknown' };
+    dashboardData.charts = { dailyOrders: [], dailyLabels: [], statusDistribution: [] };
+
+    // Filter periode (Februari 2026)
+    const startDate = new Date(2026, 1, 1);  // Feb = 1
+    const endDate = new Date(2026, 1, 28, 23, 59, 59, 999);
+
+    // Maps
+    const dailyMap = new Map();
+    const statusMap = new Map();
+    const activeFleetSet = new Set();
+
+    // init 7 hari terakhir
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setHours(0,0,0,0);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      dailyMap.set(dateStr, 0);
+    }
+
+    rawData.forEach((row) => {
+      const r = normalizeRow(row);
+
+      // Ambil field fleksibel (sesuaikan kalau di sheet kamu beda)
+      const orderId = pickFirst(r, [
+        'NO_ORDER', 'NOORDER', 'ORDER_ID', 'ORDERID', 'NO', 'NO_DO', 'NO_DO_ORDER'
+      ]);
+
+      const tanggal = pickFirst(r, [
+        'TANGGAL', 'TGL', 'TANGGAL_PICKUP', 'TANGGAL_MUAT', 'DATE', 'TANGGAL_ORDER'
+      ]);
+
+      const statusRaw = pickFirst(r, [
+        'STATUS', 'STATUS_ORDER', 'STATUS_DO', 'STATUS_PENGIRIMAN'
+      ]);
+
+      const armada = pickFirst(r, [
+        'ARMADA', 'KENDARAAN', 'NOPOL', 'NO_POL', 'TRUCK'
+      ]);
+
+      if (!orderId) return;
+
+      const orderDate = parseDate(tanggal);
+      if (!orderDate) return;
+
+      // Filter periode Feb 2026
+      if (orderDate < startDate || orderDate > endDate) return;
+
+      dashboardData.kpi.totalOrders++;
+
+      const status = statusRaw.toUpperCase().trim();
+
+      // klasifikasi status
+      if (status.includes('MENUNGGU') || status.includes('JADWAL')) {
+        dashboardData.kpi.menungguJadwal++;
+        statusMap.set('Menunggu', (statusMap.get('Menunggu') || 0) + 1);
+      } else if (status.includes('PICK') && status.includes('UP')) {
+        dashboardData.kpi.pickUp++;
+        statusMap.set('Pick Up', (statusMap.get('Pick Up') || 0) + 1);
+      } else if (status.includes('PROGRES') || status.includes('PROGRESS')) {
+        dashboardData.kpi.progres++;
+        statusMap.set('Progres', (statusMap.get('Progres') || 0) + 1);
+      } else if (status.includes('DELIVERED')) {
+        dashboardData.kpi.delivered++;
+        statusMap.set('Delivered', (statusMap.get('Delivered') || 0) + 1);
+      } else if (status.includes('CANCEL')) {
+        dashboardData.kpi.cancel++;
+        statusMap.set('Cancel', (statusMap.get('Cancel') || 0) + 1);
+      } else {
+        statusMap.set('Lainnya', (statusMap.get('Lainnya') || 0) + 1);
+      }
+
+      // Active fleet = armada unik yang belum selesai
+      if (!status.includes('DELIVERED') && !status.includes('CANCEL') && armada) {
+        activeFleetSet.add(armada);
+      }
+
+      // daily orders (yang masuk periode)
+      const dateKey = new Date(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate())
+        .toISOString().split('T')[0];
+      dailyMap.set(dateKey, (dailyMap.get(dateKey) || 0) + 1);
+    });
+
+    dashboardData.kpi.activeFleet = activeFleetSet.size;
+
+    // delivering rate
+    if (dashboardData.kpi.totalOrders > 0) {
+      dashboardData.deliveringRate.current =
+        Math.round((dashboardData.kpi.delivered / dashboardData.kpi.totalOrders) * 100 * 10) / 10;
+
+      dashboardData.deliveringRate.gap = dashboardData.deliveringRate.current - TARGET_RATE;
+
+      if (dashboardData.deliveringRate.gap < -5) dashboardData.deliveringRate.status = 'Need improvement';
+      else if (dashboardData.deliveringRate.gap < 0) dashboardData.deliveringRate.status = 'Below target';
+      else dashboardData.deliveringRate.status = 'On target';
+    }
+
+    // daily chart (ambil 7 tanggal terakhir dari dailyMap)
+    const sortedDates = Array.from(dailyMap.keys()).sort().slice(-7);
+    dashboardData.charts.dailyLabels = sortedDates.map(date => {
+      const d = new Date(date);
+      return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+    });
+    dashboardData.charts.dailyOrders = sortedDates.map(date => dailyMap.get(date) || 0);
+
+    // status distribution
+    dashboardData.charts.statusDistribution = [];
+    statusMap.forEach((value, key) => {
+      dashboardData.charts.statusDistribution.push({ label: key, value });
+    });
+
+    const statusOrder = ['Menunggu', 'Pick Up', 'Progres', 'Delivered', 'Cancel', 'Lainnya'];
+    dashboardData.charts.statusDistribution.sort((a, b) => statusOrder.indexOf(a.label) - statusOrder.indexOf(b.label));
+
+    // date badge
+    document.getElementById('dateRange').innerHTML =
+      `01/02/2026 - 28/02/2026 <span style="color:#1e8f5e;">(${dashboardData.kpi.totalOrders} orders)</span>`;
+  }
+
+  // ============================================
+  // UPDATE UI
+  // ============================================
+  function updateDashboard() {
+    const data = dashboardData;
+
+    // KPI Grid
+    const kpiGrid = document.getElementById('kpiGrid');
+    const activePercent = TOTAL_FLEET > 0 ? Math.round((data.kpi.activeFleet / TOTAL_FLEET) * 100) : 0;
+
+    kpiGrid.innerHTML = `
+      <div class="kpi-card">
+        <div class="kpi-label">📦 Total Orders</div>
+        <div class="kpi-value">${data.kpi.totalOrders}</div>
+        <div class="kpi-meta">Februari 2026</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">⏳ Menunggu</div>
+        <div class="kpi-value">${data.kpi.menungguJadwal}</div>
+        <div class="kpi-meta">Jadwal pelayaran</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">⬆️ PICK UP</div>
+        <div class="kpi-value">${data.kpi.pickUp}</div>
+        <div class="kpi-meta">Dalam proses</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🚚 PROGRES</div>
+        <div class="kpi-value">${data.kpi.progres}</div>
+        <div class="kpi-meta">Dalam perjalanan</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">✅ DELIVERED</div>
+        <div class="kpi-value">${data.kpi.delivered}</div>
+        <div class="kpi-meta">Selesai</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">❌ CANCEL</div>
+        <div class="kpi-value">${data.kpi.cancel}</div>
+        <div class="kpi-meta">Dibatalkan</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🚛 ACTIVE FLEET</div>
+        <div class="kpi-value">${data.kpi.activeFleet}</div>
+        <div class="kpi-meta">of ${TOTAL_FLEET} units (${activePercent}%)</div>
+      </div>
+    `;
+
+    // Rate Card
+    document.getElementById('deliveringRate').textContent = data.deliveringRate.current + '%';
+    document.getElementById('targetRate').textContent = data.deliveringRate.target + '%';
+
+    const gapElement = document.getElementById('gapRate');
+    gapElement.textContent = (data.deliveringRate.gap > 0 ? '+' : '') + data.deliveringRate.gap.toFixed(1) + '%';
+    gapElement.style.color = data.deliveringRate.gap >= 0 ? '#1e8f5e' : '#bc2c3d';
+
+    const improvementElement = document.getElementById('improvementNeeded');
+    improvementElement.innerHTML = (data.deliveringRate.gap >= 0 ? '✅ ' : '⚠️ ') + data.deliveringRate.status;
+    improvementElement.className = data.deliveringRate.gap >= 0 ? 'gap-badge success' : 'gap-badge';
+
+    updateCharts(data);
+  }
+
+  function updateCharts(data) {
+    // Order Chart
+    if (orderChart) orderChart.destroy();
+    orderChart = new Chart(document.getElementById('orderChart'), {
+      type: 'line',
+      data: {
+        labels: data.charts.dailyLabels,
+        datasets: [{
+          label: 'Orders',
+          data: data.charts.dailyOrders,
+          borderColor: '#1e3a5f',
+          backgroundColor: 'rgba(30, 58, 95, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // Status Chart
+    if (statusChart) statusChart.destroy();
+    statusChart = new Chart(document.getElementById('statusChart'), {
+      type: 'doughnut',
+      data: {
+        labels: data.charts.statusDistribution.map(d => d.label),
+        datasets: [{
+          data: data.charts.statusDistribution.map(d => d.value),
+          backgroundColor: ['#f39c12', '#3498db', '#9b59b6', '#2ecc71', '#e74c3c', '#95a5a6'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        cutout: '60%'
+      }
+    });
+
+    // Timeline Chart
+    if (timelineChart) timelineChart.destroy();
+    timelineChart = new Chart(document.getElementById('timelineChart'), {
+      type: 'bar',
+      data: {
+        labels: data.charts.statusDistribution.map(d => d.label),
+        datasets: [{
+          label: 'Jumlah',
+          data: data.charts.statusDistribution.map(d => d.value),
+          backgroundColor: ['#f39c12', '#3498db', '#9b59b6', '#2ecc71', '#e74c3c', '#95a5a6'],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  // ============================================
+  // HELPER
+  // ============================================
+  function parseDate(v) {
+    if (v === null || v === undefined) return null;
+    const s = v.toString().trim();
+    if (!s) return null;
+
+    // Serial number
+    if (!isNaN(s)) {
+      const n = Number(s);
+      if (n > 30000) return new Date((n - 25569) * 86400 * 1000);
+    }
+
+    // YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+      const d = new Date(s);
+      return isNaN(d) ? null : d;
+    }
+
+    // DD/MM/YYYY atau MM/DD/YYYY
+    if (s.includes('/')) {
+      const parts = s.split(/[\/\s]/).filter(Boolean);
+      if (parts.length >= 3) {
+        const a = parseInt(parts[0], 10);
+        const b = parseInt(parts[1], 10);
+        const y = parseInt(parts[2], 10);
+
+        let day, month;
+        if (a > 12) { day = a; month = b; }
+        else if (b > 12) { day = b; month = a; }
+        else { day = a; month = b; } // default DD/MM (Indonesia)
+
+        const d = new Date(y, month - 1, day);
+        return isNaN(d) ? null : d;
+      }
+    }
+
+    // fallback
+    const d = new Date(s);
+    return isNaN(d) ? null : d;
+  }
+
+  function updateStatus(message, type) {
+    const statusEl = document.getElementById('statusMessage');
+    const infoBox = document.getElementById('infoBox');
+    statusEl.textContent = message;
+
+    if (type === 'success') infoBox.style.borderLeftColor = '#2ecc71';
+    else if (type === 'error') infoBox.style.borderLeftColor = '#e74c3c';
+    else infoBox.style.borderLeftColor = '#1e3a5f';
+  }
+
+  function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    setTimeout(() => { errorDiv.style.display = 'none'; }, 6000);
+  }
+
+  function useDummyData() {
+    dashboardData = {
+      kpi: { totalOrders: 87, menungguJadwal: 2, pickUp: 25, progres: 18, delivered: 38, cancel: 4, activeFleet: 34 },
+      deliveringRate: { current: 43.7, target: 15, gap: 28.7, status: 'On target' },
+      charts: {
+        dailyOrders: [12, 15, 8, 19, 14, 22, 17],
+        dailyLabels: ['15 Feb', '16 Feb', '17 Feb', '18 Feb', '19 Feb', '20 Feb', '21 Feb'],
+        statusDistribution: [
+          { label: 'Menunggu', value: 2 },
+          { label: 'Pick Up', value: 25 },
+          { label: 'Progres', value: 18 },
+          { label: 'Delivered', value: 38 },
+          { label: 'Cancel', value: 4 }
+        ]
+      }
+    };
+    updateDashboard();
+    document.getElementById('dateRange').innerHTML = '01/02/2026 - 28/02/2026 (Demo)';
+  }
+
+  function refreshData() { fetchData(); }
+
+  // Init
+  document.addEventListener('DOMContentLoaded', fetchData);
+  setInterval(fetchData, 60000);
+</script>
