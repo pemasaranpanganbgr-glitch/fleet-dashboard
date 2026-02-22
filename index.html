@@ -265,54 +265,231 @@
     .donutCenter .big{font-size:44px;font-weight:950;line-height:1}
     .donutCenter .small{font-size:13px;color:var(--muted);font-weight:900;letter-spacing:.6px;text-transform:uppercase;margin-top:4px}
 
-    /* Map mock (static svg + pins) */
-    .mapBox{
-      height:320px;
-      border-radius:16px;
-      overflow:hidden;
-      border:1px solid rgba(15,23,42,.10);
-      position:relative;
-      background:
-        radial-gradient(700px 340px at 70% 55%, rgba(47,116,255,.12), transparent 60%),
-        linear-gradient(180deg, rgba(15,42,71,.12), rgba(15,42,71,.03)),
-        #f5f7fc;
+    /* ====== MAP STYLES YANG DITINGKATKAN ====== */
+    .mapBox {
+        height: 380px;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(15,23,42,0.15);
+        position: relative;
+        background: linear-gradient(180deg, #8ab3d7 0%, #2c4b6e 100%);
+        box-shadow: inset 0 0 30px rgba(0,20,50,0.2);
     }
-    .mapBox svg{width:100%;height:100%;display:block}
-    .pin{
-      position:absolute;
-      transform:translate(-50%, -100%);
-      display:grid;gap:2px;
-      cursor:default;
-      filter:drop-shadow(0 10px 10px rgba(0,0,0,.20));
+
+    .mapBox svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
     }
-    .pin .dot{
-      width:18px;height:18px;border-radius:50%;
-      background:var(--red);
-      border:3px solid #fff;
-      box-shadow:0 6px 12px rgba(0,0,0,.25);
-      position:relative;
+
+    .map-depth-overlay {
+        position: absolute;
+        inset: 0;
+        background: 
+            radial-gradient(ellipse at 20% 30%, rgba(255,255,240,0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 70%, rgba(180,210,240,0.2) 0%, transparent 60%),
+            linear-gradient(180deg, rgba(150,190,230,0.1) 0%, rgba(30,60,100,0.3) 100%);
+        pointer-events: none;
+        z-index: 5;
+        transition: opacity 0.3s ease;
     }
-    .pin .dot:after{
-      content:"";
-      position:absolute;left:50%;top:100%;
-      transform:translateX(-50%);
-      width:0;height:0;
-      border-left:6px solid transparent;
-      border-right:6px solid transparent;
-      border-top:10px solid var(--red);
-      filter:drop-shadow(0 6px 8px rgba(0,0,0,.18));
+
+    .mapBox:hover .map-depth-overlay {
+        opacity: 0.7;
     }
-    .pin .lbl{
-      background:rgba(255,255,255,.92);
-      border:1px solid rgba(15,23,42,.10);
-      padding:6px 8px;border-radius:12px;
-      font-size:11px;font-weight:900;color:#111827;
-      white-space:nowrap;
+
+    .pin {
+        position: absolute;
+        transform: translate(-50%, -100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        filter: drop-shadow(0 8px 12px rgba(0,0,0,0.25));
+        transition: all 0.3s ease;
+        z-index: 10;
     }
-    .pin.p2 .dot{background:var(--gold)}
-    .pin.p2 .dot:after{border-top-color:var(--gold)}
-    .pin.p3 .dot{background:var(--blue)}
-    .pin.p3 .dot:after{border-top-color:var(--blue)}
+
+    .pin:hover {
+        transform: translate(-50%, -110%);
+        z-index: 100;
+        filter: drop-shadow(0 12px 20px rgba(0,0,0,0.35));
+    }
+
+    .pin .dot {
+        border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+    .pin .dot:after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 100%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 12px solid;
+        border-top-color: inherit;
+        filter: drop-shadow(0 6px 8px rgba(0,0,0,0.18));
+        transition: all 0.2s ease;
+    }
+
+    .pin:hover .dot:after {
+        border-top-width: 16px;
+    }
+
+    .pin .lbl {
+        background: rgba(255,255,255,0.98);
+        border: 1px solid rgba(15,23,42,0.1);
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #111827;
+        white-space: nowrap;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.2s ease;
+        pointer-events: none;
+        min-width: 120px;
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    .pin:hover .lbl {
+        opacity: 1;
+        transform: translateY(0);
+        white-space: normal;
+        word-wrap: break-word;
+    }
+
+    .pin .lbl strong {
+        font-size: 14px;
+        font-weight: 900;
+        color: #000;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .pin .lbl small {
+        color: #6b7280;
+        font-size: 10px;
+        font-weight: 600;
+        display: block;
+        margin-top: 4px;
+    }
+
+    /* Map legend */
+    .map-legend {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(255,255,255,0.95);
+        border: 1px solid rgba(15,23,42,0.1);
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 10px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        z-index: 20;
+        max-width: 200px;
+        backdrop-filter: blur(4px);
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .legend-text {
+        color: #374151;
+        font-weight: 600;
+        font-size: 11px;
+    }
+
+    /* Region stats panel */
+    .region-stats {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255,255,255,0.95);
+        border: 1px solid rgba(15,23,42,0.1);
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 11px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        z-index: 20;
+        max-width: 220px;
+        backdrop-filter: blur(4px);
+    }
+
+    .region-stats h4 {
+        margin: 0 0 8px 0;
+        color: #111827;
+        font-size: 12px;
+        font-weight: 900;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 4px;
+    }
+
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        padding-bottom: 2px;
+        border-bottom: 1px dashed rgba(0,0,0,0.05);
+    }
+
+    .stat-label {
+        color: #4b5563;
+        font-weight: 600;
+    }
+
+    .stat-value {
+        font-weight: 800;
+        color: #111827;
+    }
+
+    /* Wave animation */
+    .wave-effect {
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+            45deg,
+            rgba(255,255,255,0.03) 0px,
+            rgba(255,255,255,0.03) 20px,
+            transparent 20px,
+            transparent 40px
+        );
+        animation: wave-move 20s linear infinite;
+        pointer-events: none;
+        z-index: 4;
+    }
+
+    @keyframes wave-move {
+        from { background-position: 0 0; }
+        to { background-position: 100px 50px; }
+    }
 
     /* Tables */
     table{width:100%;border-collapse:collapse}
@@ -542,27 +719,10 @@
           <div class="t">Peta Distribusi</div>
           <div class="pill">Top Kota = Pin</div>
         </div>
-        <div class="bd">
-          <div class="mapBox" id="mapBox">
-            <!-- Simple Indonesia silhouette (stylized) -->
-            <svg viewBox="0 0 1200 600" aria-hidden="true">
-              <rect x="0" y="0" width="1200" height="600" fill="#f5f7fc"/>
-              <g opacity="0.12">
-                <path d="M132 282c42-21 72-34 101-33 40 2 66 32 102 32 40 0 96-50 142-52 53-3 80 32 124 32 55 0 93-40 146-35 47 5 74 40 116 40 41 0 80-23 120-26 63-4 114 38 158 33 41-4 65-31 91-43 23-10 61-13 92 0v56c-39-14-83-9-111 4-22 10-50 40-95 44-55 5-103-34-160-31-50 2-85 27-129 27-48 0-77-39-118-42-51-3-92 35-150 35-51 0-81-34-128-31-52 3-96 52-146 52-54 0-76-30-111-32-28-2-57 11-94 29z"
-                      fill="#0f2a47"/>
-                <path d="M195 340c55-20 98-30 132-28 44 3 70 29 112 28 45-1 98-44 150-45 58-2 86 32 134 32 62 0 104-36 158-32 54 4 82 36 130 36 45 0 88-22 134-23 72-2 128 33 177 28 47-5 73-30 102-41 25-10 66-12 100 0v45c-42-13-91-7-122 6-23 10-54 39-104 45-60 7-113-29-178-28-54 1-92 25-141 25-56 0-88-33-135-35-56-2-99 32-164 32-57 0-90-31-141-29-58 2-105 43-158 44-59 1-84-26-123-28-32-2-66 8-112 26z"
-                      fill="#071424"/>
-              </g>
-              <g opacity="0.10">
-                <path d="M80 430h1040" stroke="#0f172a" stroke-width="2" stroke-dasharray="6 10"/>
-                <path d="M80 180h1040" stroke="#0f172a" stroke-width="2" stroke-dasharray="6 10"/>
-              </g>
-            </svg>
-
-            <!-- Pins will be injected by JS -->
-          </div>
-          <div class="note" style="margin-top:10px">
-            Pin otomatis dari Top 6 kota (estimasi posisi). Bisa kamu ubah koordinatnya di kode <b>CITY_COORDS</b>.
+        <div class="bd" style="padding:0">
+          <div class="mapBox" id="mapBox"></div>
+          <div class="note" style="margin:10px 14px">
+            Pin otomatis dari Top 10 kota • Ukuran pin = volume distribusi • Hover untuk detail
           </div>
         </div>
       </div>
@@ -685,24 +845,67 @@
         CANCEL: ['cancel', 'batal', 'cancelled', 'dibatalkan', 'void']
       };
 
-      // Estimasi koordinat pin (percent) - silakan edit sesuai kebutuhan
+      // Estimasi koordinat pin (percent) dengan region - VERSI LENGKAP
       const CITY_COORDS = {
-        "Medan":      { x: 18, y: 30 },
-        "Aceh":       { x: 11, y: 26 },
-        "Jakarta":    { x: 33, y: 56 },
-        "Bandung":    { x: 35, y: 60 },
-        "Cirebon":    { x: 39, y: 58 },
-        "Surabaya":   { x: 46, y: 66 },
-        "Malang":     { x: 48, y: 70 },
-        "Semarang":   { x: 42, y: 63 },
-        "Makassar":   { x: 72, y: 74 },
-        "Balikpapan": { x: 66, y: 62 },
-        "Banjarmasin":{ x: 62, y: 70 },
-        "Batam":      { x: 24, y: 42 },
-        "Pekanbaru":  { x: 22, y: 44 },
-        "Palembang":  { x: 30, y: 52 },
-        "Manado":     { x: 82, y: 56 },
-        "Jayapura":   { x: 94, y: 58 },
+        // Pulau Sumatera
+        "Medan":      { x: 18, y: 30, region: "Sumatera" },
+        "Aceh":       { x: 11, y: 26, region: "Sumatera" },
+        "Pekanbaru":  { x: 22, y: 44, region: "Sumatera" },
+        "Padang":     { x: 20, y: 48, region: "Sumatera" },
+        "Palembang":  { x: 30, y: 52, region: "Sumatera" },
+        "Lampung":    { x: 32, y: 58, region: "Sumatera" },
+        "Batam":      { x: 24, y: 42, region: "Sumatera" },
+        "Jambi":      { x: 26, y: 50, region: "Sumatera" },
+        "Bengkulu":   { x: 24, y: 54, region: "Sumatera" },
+        "Riau":       { x: 21, y: 42, region: "Sumatera" },
+        
+        // Pulau Jawa
+        "Jakarta":    { x: 33, y: 56, region: "Jawa" },
+        "Bandung":    { x: 35, y: 60, region: "Jawa" },
+        "Bogor":      { x: 33, y: 58, region: "Jawa" },
+        "Bekasi":     { x: 34, y: 57, region: "Jawa" },
+        "Depok":      { x: 34, y: 58, region: "Jawa" },
+        "Tangerang":  { x: 32, y: 57, region: "Jawa" },
+        "Cirebon":    { x: 39, y: 58, region: "Jawa" },
+        "Semarang":   { x: 42, y: 63, region: "Jawa" },
+        "Yogyakarta": { x: 44, y: 65, region: "Jawa" },
+        "Solo":       { x: 45, y: 66, region: "Jawa" },
+        "Surabaya":   { x: 46, y: 66, region: "Jawa" },
+        "Malang":     { x: 48, y: 70, region: "Jawa" },
+        "Kediri":     { x: 47, y: 68, region: "Jawa" },
+        "Madiun":     { x: 44, y: 67, region: "Jawa" },
+        
+        // Kalimantan
+        "Pontianak":  { x: 44, y: 48, region: "Kalimantan" },
+        "Palangkaraya": { x: 52, y: 56, region: "Kalimantan" },
+        "Banjarmasin":{ x: 62, y: 70, region: "Kalimantan" },
+        "Samarinda":  { x: 68, y: 58, region: "Kalimantan" },
+        "Balikpapan": { x: 66, y: 62, region: "Kalimantan" },
+        "Tarakan":    { x: 70, y: 54, region: "Kalimantan" },
+        "Ketapang":   { x: 48, y: 56, region: "Kalimantan" },
+        
+        // Sulawesi
+        "Makassar":   { x: 72, y: 74, region: "Sulawesi" },
+        "Manado":     { x: 82, y: 56, region: "Sulawesi" },
+        "Palu":       { x: 72, y: 64, region: "Sulawesi" },
+        "Kendari":    { x: 80, y: 76, region: "Sulawesi" },
+        "Gorontalo":  { x: 78, y: 62, region: "Sulawesi" },
+        "Palopo":     { x: 74, y: 70, region: "Sulawesi" },
+        
+        // Papua & Maluku
+        "Jayapura":   { x: 94, y: 58, region: "Papua" },
+        "Ambon":      { x: 86, y: 70, region: "Maluku" },
+        "Ternate":    { x: 82, y: 58, region: "Maluku" },
+        "Sorong":     { x: 88, y: 54, region: "Papua" },
+        "Merauke":    { x: 98, y: 70, region: "Papua" },
+        "Biak":       { x: 92, y: 56, region: "Papua" },
+        
+        // Bali & Nusa Tenggara
+        "Denpasar":   { x: 54, y: 72, region: "Bali" },
+        "Mataram":    { x: 60, y: 74, region: "NTB" },
+        "Kupang":     { x: 80, y: 84, region: "NTT" },
+        "Maumere":    { x: 76, y: 80, region: "NTT" },
+        "Labuan Bajo": { x: 70, y: 78, region: "NTT" }
       };
 
       // ================= STATE =================
@@ -872,6 +1075,257 @@
         });
       }
 
+      // ================= FUNGSI PETA =================
+      function generateMapSVG() {
+        return `
+          <svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid meet" style="position: absolute; top: 0; left: 0; z-index: 1;">
+            <defs>
+              <linearGradient id="ocean-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#8ab3d7" />
+                <stop offset="50%" stop-color="#5780a3" />
+                <stop offset="100%" stop-color="#2c4b6e" />
+              </linearGradient>
+              <pattern id="wave-pattern" patternUnits="userSpaceOnUse" width="60" height="30" patternTransform="rotate(10)">
+                <path d="M0 15 Q15 0, 30 15 T60 15" stroke="#ffffff" stroke-width="0.3" fill="none" opacity="0.1" />
+              </pattern>
+            </defs>
+            
+            <!-- Ocean Background -->
+            <rect width="1200" height="600" fill="url(#ocean-gradient)" />
+            
+            <!-- Wave Pattern -->
+            <rect width="1200" height="600" fill="url(#wave-pattern)" />
+            
+            <!-- Continental Shelf / Shallow Water -->
+            <g opacity="0.2">
+              <path d="M100,200 Q250,150 400,200 T700,180 T1000,220" stroke="#bed9ff" stroke-width="20" fill="none" opacity="0.2" />
+              <path d="M150,350 Q350,300 550,330 T950,370" stroke="#bed9ff" stroke-width="25" fill="none" opacity="0.15" />
+            </g>
+            
+            <!-- Main Landmass - Sumatera -->
+            <path d="M150,180 L200,230 L180,290 L220,340 L190,400 L230,450 L200,500 L170,480 L130,430 L100,380 L120,310 L90,250 L110,200 L150,180" 
+                  fill="#b8d399" stroke="#5f7d4a" stroke-width="1.5" opacity="0.9" />
+            
+            <!-- Java -->
+            <path d="M320,470 L360,460 L400,480 L440,470 L480,490 L520,480 L560,500 L520,520 L480,520 L440,530 L400,520 L360,510 L320,490 L320,470" 
+                  fill="#b8d399" stroke="#5f7d4a" stroke-width="1.5" opacity="0.9" />
+            
+            <!-- Kalimantan -->
+            <path d="M520,320 L570,300 L630,310 L680,340 L670,390 L620,420 L560,410 L510,380 L500,340 L520,320" 
+                  fill="#b8d399" stroke="#5f7d4a" stroke-width="1.5" opacity="0.9" />
+            
+            <!-- Sulawesi -->
+            <path d="M730,390 L780,370 L820,390 M790,420 L830,440 L800,480 L750,460 L720,430 L730,390" 
+                  fill="#b8d399" stroke="#5f7d4a" stroke-width="1.5" opacity="0.9" />
+            
+            <!-- Papua -->
+            <path d="M950,340 L1020,330 L1080,360 L1100,410 L1060,460 L1000,470 L940,440 L920,390 L950,340" 
+                  fill="#b8d399" stroke="#5f7d4a" stroke-width="1.5" opacity="0.9" />
+            
+            <!-- Bali & Nusa Tenggara -->
+            <path d="M570,540 L600,530 L630,540 L660,550 L640,580 L600,570 L570,560 L570,540" 
+                  fill="#b8d399" stroke="#5f7d4a" stroke-width="1.5" opacity="0.9" />
+            
+            <!-- Topographic Details (mountains) -->
+            <g opacity="0.15">
+              <circle cx="250" cy="250" r="15" fill="#4f6d3a" />
+              <circle cx="380" cy="300" r="12" fill="#4f6d3a" />
+              <circle cx="550" cy="350" r="20" fill="#4f6d3a" />
+              <circle cx="780" cy="380" r="18" fill="#4f6d3a" />
+              <circle cx="980" cy="380" r="25" fill="#4f6d3a" />
+            </g>
+            
+            <!-- Latitude/Longitude Grid -->
+            <g opacity="0.1" stroke="#4a6a8a" stroke-width="0.5">
+              ${Array.from({ length: 6 }, (_, i) => {
+                const y = 100 + (i * 80);
+                return `<line x1="80" y1="${y}" x2="1120" y2="${y}" stroke-dasharray="8 6" />`;
+              }).join('')}
+              ${Array.from({ length: 8 }, (_, i) => {
+                const x = 120 + (i * 120);
+                return `<line x1="${x}" y1="60" x2="${x}" y2="540" stroke-dasharray="8 6" />`;
+              }).join('')}
+            </g>
+            
+            <!-- Sea names -->
+            <g fill="#3d5a7a" font-size="10" opacity="0.3" font-weight="bold">
+              <text x="100" y="90">Samudera Hindia</text>
+              <text x="800" y="110">Samudera Pasifik</text>
+              <text x="400" y="200">Laut Natuna</text>
+              <text x="630" y="260">Laut Sulawesi</text>
+              <text x="700" y="500">Laut Banda</text>
+              <text x="480" y="580">Samudera Hindia</text>
+            </g>
+          </svg>
+        `;
+      }
+
+      function addMapLegend(box) {
+        const oldLegend = box.querySelector('.map-legend');
+        if (oldLegend) oldLegend.remove();
+
+        const legend = document.createElement('div');
+        legend.className = 'map-legend';
+        
+        const regions = [
+          { name: 'Sumatera', color: '#e74c3c' },
+          { name: 'Jawa', color: '#2f74ff' },
+          { name: 'Kalimantan', color: '#1fbf64' },
+          { name: 'Sulawesi', color: '#ff8a00' },
+          { name: 'Papua', color: '#9b59b6' },
+          { name: 'Maluku', color: '#e67e22' },
+          { name: 'Bali & Nusa', color: '#f1c40f' }
+        ];
+        
+        legend.innerHTML = `
+          <div style="margin-bottom: 8px; font-weight: 900; color: #111827; font-size: 12px;">Legenda Wilayah</div>
+          ${regions.map(r => `
+            <div class="legend-item">
+              <div class="legend-color" style="background: ${r.color};"></div>
+              <span class="legend-text">${r.name}</span>
+            </div>
+          `).join('')}
+          <div style="margin-top: 8px; font-size: 9px; color: #9ca3af; border-top: 1px solid #eee; padding-top: 4px;">
+            ⚪ Ukuran pin = volume distribusi
+          </div>
+        `;
+        
+        box.appendChild(legend);
+      }
+
+      function calculateRegionStats(data) {
+        const stats = {};
+        data.forEach(item => {
+          const city = item.kota;
+          const coords = CITY_COORDS[city];
+          if (coords && coords.region) {
+            stats[coords.region] = (stats[coords.region] || 0) + (item.qty || 0);
+          }
+        });
+        return stats;
+      }
+
+      function addRegionStats(box, data) {
+        const stats = calculateRegionStats(data);
+        
+        const oldStats = box.querySelector('.region-stats');
+        if (oldStats) oldStats.remove();
+        
+        const statsDiv = document.createElement('div');
+        statsDiv.className = 'region-stats';
+        
+        let statsHtml = '<h4>Distribusi per Wilayah</h4>';
+        Object.entries(stats).sort((a,b) => b[1] - a[1]).forEach(([region, qty]) => {
+          statsHtml += `
+            <div class="stat-row">
+              <span class="stat-label">${region}</span>
+              <span class="stat-value">${formatNumber(qty)} L</span>
+            </div>
+          `;
+        });
+        
+        statsDiv.innerHTML = statsHtml;
+        box.appendChild(statsDiv);
+      }
+
+      function renderMapPins(topCities, allData) {
+        const box = $('mapBox');
+        if (!box) return;
+
+        // Bersihkan pin lama
+        box.querySelectorAll('.pin').forEach(p => p.remove());
+
+        // Hitung total QTY untuk skala pin
+        const maxQty = Math.max(...topCities.map(d => d[1]));
+        
+        topCities.slice(0, 8).forEach((d, idx) => {
+          const city = d[0];
+          const qty = d[1];
+          const percentage = (qty / maxQty) * 100;
+
+          const c = CITY_COORDS[city] || null;
+          if (!c) return;
+
+          // Ukuran pin berdasarkan volume
+          const size = 18 + (percentage * 0.15);
+          
+          // Warna berdasarkan region
+          const colors = {
+            'Sumatera': '#e74c3c',
+            'Jawa': '#2f74ff',
+            'Kalimantan': '#1fbf64',
+            'Sulawesi': '#ff8a00',
+            'Papua': '#9b59b6',
+            'Maluku': '#e67e22',
+            'Bali': '#f1c40f',
+            'NTB': '#16a085',
+            'NTT': '#d35400'
+          };
+          
+          const color = colors[c.region] || '#ffb000';
+
+          const pin = document.createElement('div');
+          pin.className = `pin region-${c.region ? c.region.toLowerCase() : 'other'}`;
+          
+          pin.style.left = c.x + '%';
+          pin.style.top = c.y + '%';
+
+          const dot = document.createElement('div');
+          dot.className = 'dot';
+          dot.style.width = size + 'px';
+          dot.style.height = size + 'px';
+          dot.style.backgroundColor = color;
+          
+          // Sesuaikan ukuran triangle
+          dot.style.setProperty('--triangle-size', (size * 0.4) + 'px');
+          
+          // Tooltip
+          const lbl = document.createElement('div');
+          lbl.className = 'lbl';
+          lbl.innerHTML = `
+            <strong>${city}</strong>
+            <span style="color: ${color}; font-weight: 900; font-size: 13px;">${formatNumber(qty)} Liter</span>
+            <small>${c.region || 'Unknown'}</small>
+          `;
+
+          pin.appendChild(dot);
+          pin.appendChild(lbl);
+          
+          box.appendChild(pin);
+        });
+      }
+
+      function renderMapBox(data) {
+        const box = $('mapBox');
+        if (!box) return;
+
+        // Clear previous content
+        box.innerHTML = '';
+
+        // Add SVG Map Background
+        box.innerHTML = generateMapSVG();
+        
+        // Add depth overlay
+        const depthOverlay = document.createElement('div');
+        depthOverlay.className = 'map-depth-overlay';
+        box.appendChild(depthOverlay);
+
+        // Add wave effect
+        const waveEffect = document.createElement('div');
+        waveEffect.className = 'wave-effect';
+        box.appendChild(waveEffect);
+
+        // Add region stats
+        addRegionStats(box, data);
+        
+        // Add legend
+        addMapLegend(box);
+        
+        // Render pins
+        const cityData = groupAndSum(data, it => it.kota, 10);
+        renderMapPins(cityData, data);
+      }
+
       // ================= FETCH =================
       async function fetchData(useCache=true){
         if (useCache && State.cache.data && State.cache.timestamp){
@@ -940,7 +1394,6 @@
         setBar('barOnDelivery', pctOnDel);
         setBar('barCancel', pctCancel);
 
-        // Bar Total (hiasan) - skalakan relatif ke 100
         setBar('barTotalOrder', 100);
         setBar('barTotalQty', 100);
 
@@ -1058,7 +1511,7 @@
           });
         }
 
-        // ===== SLA Gauges (semi) =====
+        // ===== SLA Gauges =====
         const deliveredOrders = uniqueData.filter(d=>d.statusCategory==='DELIVERED');
         const slaValid = deliveredOrders.filter(d=>d.tglMuat && d.actualMuat);
         const onTime = slaValid.filter(d=>d.actualMuat <= d.tglMuat).length;
@@ -1092,40 +1545,8 @@
         if (ctxOn) State.charts.slaOn = makeGauge(ctxOn, Math.max(0,Math.min(100,onTimePct)), '#1fbf64');
         if (ctxDl) State.charts.slaDl = makeGauge(ctxDl, Math.max(0,Math.min(100,delayPct)),  '#e74c3c');
 
-        // ===== Map Pins =====
-        renderMapPins(cityData.slice(0,6));
-      }
-
-      function renderMapPins(topCities){
-        const box = $('mapBox');
-        if (!box) return;
-
-        // bersihkan pin lama
-        box.querySelectorAll('.pin').forEach(p=>p.remove());
-
-        topCities.forEach((d, idx)=>{
-          const city = d[0];
-          const qty  = d[1];
-
-          const c = CITY_COORDS[city] || CITY_COORDS[city.toUpperCase()] || null;
-          if (!c) return;
-
-          const pin = document.createElement('div');
-          pin.className = 'pin ' + (idx===0 ? 'p1' : idx===1 ? 'p2' : 'p3');
-          pin.style.left = c.x + '%';
-          pin.style.top  = c.y + '%';
-
-          const dot = document.createElement('div');
-          dot.className = 'dot';
-
-          const lbl = document.createElement('div');
-          lbl.className = 'lbl';
-          lbl.textContent = `${city} • ${formatNumber(qty)}`;
-
-          pin.appendChild(dot);
-          pin.appendChild(lbl);
-          box.appendChild(pin);
-        });
+        // ===== Render Map =====
+        renderMapBox(data);
       }
 
       function renderRealTimeTable(data){
