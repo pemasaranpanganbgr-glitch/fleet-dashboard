@@ -746,16 +746,17 @@
       'use strict';
 
       // ================= KONFIGURASI =================
-      const CONFIG = {
-        CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRAqs3OR5iSyutu1ozCM5Q4JFXNKOV4AhOB7u2d2SCUfbV2SasQ17VBH924VxdTxoN4aYq3W3qZu8X/pub?gid=166266133&single=true&output=csv",
-        CHART_COLORS: {
-          delivered: '#2ecc71',
-          onDelivery: '#3498db',
-          progress: '#f1c40f',
-          cancel: '#e74c3c'
-        },
-        CACHE_DURATION: 30000
-      };
+     const CONFIG = {
+  API_URL: "https://script.google.com/macros/s/AKfycbxti-32M_QwIxNEYWv96s6S2eej9pC1uX2u0bxA2fYho8XzbjFXEi5K43WkW24fzh_fzg/exec", // https://script.google.com/macros/s/XXXX/exec
+  CHART_COLORS: {
+    delivered: '#2ecc71',
+    onDelivery: '#3498db',
+    progress: '#f1c40f',
+    cancel: '#e74c3c',
+    partial: '#9b59b6'
+  },
+  CACHE_DURATION: 30000
+};
 
       // Mapping kolom (0-based index)
       const COLUMN_MAP = {
@@ -1087,67 +1088,56 @@
 
       // ================= FAST DATA FETCHING =================
       async function fetchData(useCache = true) {
-        if (useCache && State.cache.data && State.cache.timestamp) {
-          const age = Date.now() - State.cache.timestamp;
-          if (age < CONFIG.CACHE_DURATION) {
-            console.log('Using cached data');
-            return State.cache.data;
-          }
-        }
+  if (useCache && State.cache.data && State.cache.timestamp) {
+    const age = Date.now() - State.cache.timestamp;
+    if (age < CONFIG.CACHE_DURATION) {
+      console.log('Using cached data');
+      return State.cache.data;
+    }
+  }
 
-        showRefreshIndicator(true);
-        State.isRefreshing = true;
-        
-        try {
-          const result = await new Promise((resolve, reject) => {
-            Papa.parse(CONFIG.CSV_URL, {
-              download: true,
-              header: false,
-              skipEmptyLines: true,
-              complete: resolve,
-              error: reject,
-              fastMode: true
-            });
-          });
+  showRefreshIndicator(true);
+  State.isRefreshing = true;
 
-          if (!result.data || result.data.length < 2) {
-            throw new Error('Data tidak ditemukan');
-          }
+  try {
+    // cache buster biar browser gak nyimpen
+    const url = `${CONFIG.API_URL}?t=${Date.now()}`;
 
-          const dataRows = result.data.slice(1);
-          
-          let processedData = [];
-          for (let i = 0; i < dataRows.length; i++) {
-            const item = processRow(dataRows[i]);
-            if (item && item.orderCode) {
-              processedData.push(item);
-            }
-          }
-          
-          console.log(`Loaded ${processedData.length} rows`);
-          
-          State.cache = {
-            data: processedData,
-            timestamp: Date.now()
-          };
-          
-          State.lastFetch = new Date();
-          return processedData;
-          
-        } catch (error) {
-          console.error('Fetch error:', error);
-          showMessage('error', `Gagal load data: ${error.message}`);
-          
-          if (State.cache.data) {
-            showMessage('info', 'Menggunakan data tersimpan');
-            return State.cache.data;
-          }
-          throw error;
-        } finally {
-          showRefreshIndicator(false);
-          State.isRefreshing = false;
-        }
-      }
+    const res = await fetch(url, { cache: "no-store" });
+    const json = await res.json();
+
+    if (!json.ok) throw new Error(json.error || "API error");
+    if (!json.data || json.data.length < 2) throw new Error("Data kosong / tidak ditemukan");
+
+    // json.data = [ [header...], [row...], [row...] ]
+    const dataRows = json.data.slice(1);
+
+    let processedData = [];
+    for (let i = 0; i < dataRows.length; i++) {
+      const item = processRow(dataRows[i]); // tetap pakai mapping index kamu
+      if (item && item.orderCode) processedData.push(item);
+    }
+
+    State.cache = { data: processedData, timestamp: Date.now() };
+    State.lastFetch = new Date();
+
+    return processedData;
+
+  } catch (error) {
+    console.error('Fetch error:', error);
+    showMessage('error', `Gagal load data: ${error.message}`);
+
+    if (State.cache.data) {
+      showMessage('info', 'Menggunakan data tersimpan');
+      return State.cache.data;
+    }
+    throw error;
+
+  } finally {
+    showRefreshIndicator(false);
+    State.isRefreshing = false;
+  }
+}
 
       // ================= RENDERING =================
       function renderKPI(stats) {
