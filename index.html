@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Distribusi Minyak 2026</title>
+  <title>Dashboard Distribusi Minyak 2026 - BGR Logistik</title>
   
   <!-- Meta tags -->
   <meta name="description" content="Dashboard distribusi minyak dengan refresh cepat" />
@@ -98,13 +98,13 @@
       50% { opacity: 0.5; transform: scale(0.8); }
     }
 
-    /* Header */
+    /* Header - MODIFIED dengan logo BGR */
     header {
       display: flex;
       gap: 16px;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
+      padding: 12px 20px;
       border: 1px solid var(--line);
       background: rgba(12, 31, 53, 0.55);
       border-radius: var(--radius-lg);
@@ -113,36 +113,60 @@
       flex-wrap: wrap;
     }
 
-    .title {
+    .brand-container {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
     }
 
-    .badge {
-      width: 44px;
-      height: 44px;
-      border-radius: var(--radius-md);
-      background: linear-gradient(135deg, rgba(255, 176, 0, 0.25), rgba(68, 156, 255, 0.2));
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--line);
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .badge span {
-      font-size: 22px;
+    .brand-logo img {
+      height: 50px;
+      width: auto;
+      max-width: 180px;
+      object-fit: contain;
+      filter: brightness(0) invert(1); /* Membuat logo putih agar sesuai dengan tema gelap */
+      transition: var(--transition);
+    }
+
+    .brand-logo img:hover {
+      filter: brightness(0) invert(0.9);
+    }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--line);
+      padding-left: 16px;
     }
 
     h1 {
       margin: 0;
       font-size: clamp(18px, 4vw, 24px);
       font-weight: 800;
+      color: var(--text-primary);
     }
 
     .sub {
       color: var(--text-secondary);
       font-size: 12px;
       margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sub-separator {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+      display: inline-block;
     }
 
     /* Controls */
@@ -241,6 +265,16 @@
       .kpis { grid-template-columns: repeat(2, 1fr); }
       .controls { flex-direction: column; align-items: stretch; }
       .ctrl { flex-wrap: wrap; }
+      
+      .brand-container {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .title {
+        border-left: none;
+        padding-left: 0;
+      }
     }
 
     /* Cards */
@@ -270,7 +304,39 @@
       padding: 16px;
     }
 
-    /* KPI Cards - MODIFIED untuk menampilkan QTY per status */
+    /* Chart container untuk SLA */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    .chart-center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .chart-center-text .big-number {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .chart-center-text .small-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* KPI Cards */
     .kpi {
       padding: 16px;
       border-radius: var(--radius-lg);
@@ -443,13 +509,6 @@
     ::-webkit-scrollbar-thumb:hover {
       background: var(--accent-secondary);
     }
-
-    /* KPI Detail Tooltip */
-    .kpi-detail {
-      font-size: 10px;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
   </style>
 </head>
 
@@ -461,13 +520,23 @@
   </div>
 
   <div class="wrap">
-    <!-- Header -->
+    <!-- Header - MODIFIED dengan logo BGR Logistik -->
     <header>
-      <div class="title">
-        <div class="badge"><span>🛢️</span></div>
-        <div>
+      <div class="brand-container">
+        <div class="brand-logo">
+          <img class="brand-logo-dark" 
+               src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" 
+               srcset="https://www.bgrlogistik.id/bgr/img/logo_bli.png 2x" 
+               alt="PT BGR Logistik Indonesia"
+               onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%2250%22%20viewBox%3D%220%200%20120%2050%22%3E%3Ctext%20x%3D%2210%22%20y%3D%2235%22%20font-family%3D%22Arial%22%20font-size%3D%2220%22%20fill%3D%22%23ffb000%22%3EBGR%3C%2Ftext%3E%3C%2Fsvg%3E';">
+        </div>
+        <div class="title">
           <h1>Dashboard Distribusi Minyak 2026</h1>
-          <p class="sub">• Data real-time</p>
+          <p class="sub">
+            <span>BGR Logistik</span>
+            <span class="sub-separator"></span>
+            <span>Fast refresh • Data real-time</span>
+          </p>
         </div>
       </div>
 
@@ -492,10 +561,10 @@
       </div>
     </header>
 
-    <!-- KPI Section - MODIFIED dengan tampilan baru -->
+    <!-- KPI Section -->
     <div class="grid kpis">
       <!-- Total Order -->
-      <div class="kpi" id="kpiTotalOrderCard">
+      <div class="kpi">
         <div class="header">
           <div class="lbl">Total Order</div>
           <div class="icon">📊</div>
@@ -559,7 +628,7 @@
         </div>
       </div>
 
-      <!-- Summary Card (tambahan untuk info cepat) -->
+      <!-- Summary Card -->
       <div class="kpi">
         <div class="header">
           <div class="lbl">Rata-rata</div>
@@ -615,10 +684,16 @@
           <div class="pill" id="slaPill">-</div>
         </div>
         <div class="bd">
-          <canvas id="chartSLA"></canvas>
-          <p class="note" style="margin-top:12px">
+          <div class="chart-container">
+            <canvas id="chartSLA"></canvas>
+            <div class="chart-center-text" id="slaCenterText">
+              <div class="big-number" id="slaTotalDelivered">-</div>
+              <div class="small-label">Total Delivered</div>
+            </div>
+          </div>
+          <p class="note" style="margin-top:12px; text-align:center;">
             On Time: Actual Muat ≤ Tgl Muat<br>
-            Berdasarkan status Delivered
+            <span id="slaDetail">-</span>
           </p>
         </div>
       </div>
@@ -875,7 +950,10 @@
             cancel: { count: 0, qty: 0, percentage: 0 },
             avgQtyPerOrder: 0,
             onTimePercentage: 0,
-            slaSampleSize: 0
+            slaSampleSize: 0,
+            slaOnTime: 0,
+            slaDelay: 0,
+            slaNoData: 0
           };
         }
 
@@ -916,14 +994,14 @@
         cancel.percentage = totalCount ? (cancel.count / totalCount) * 100 : 0;
         
         // SLA
-        const slaData = uniqueData.filter(item => 
-          item.statusCategory === 'DELIVERED' && 
-          item.tglMuat && item.actualMuat
-        );
-        
-        const onTimeCount = slaData.filter(item => 
-          item.actualMuat <= item.tglMuat
+        const deliveredOrders = uniqueData.filter(item => item.statusCategory === 'DELIVERED');
+        const slaOnTime = deliveredOrders.filter(item => 
+          item.tglMuat && item.actualMuat && item.actualMuat <= item.tglMuat
         ).length;
+        const slaDelay = deliveredOrders.filter(item => 
+          item.tglMuat && item.actualMuat && item.actualMuat > item.tglMuat
+        ).length;
+        const slaNoData = deliveredOrders.length - slaOnTime - slaDelay;
 
         return {
           totalOrders: totalUniqueOrders,
@@ -933,8 +1011,11 @@
           progress,
           cancel,
           avgQtyPerOrder: totalUniqueOrders ? totalQty / totalUniqueOrders : 0,
-          onTimePercentage: slaData.length ? (onTimeCount / slaData.length) * 100 : 0,
-          slaSampleSize: slaData.length
+          onTimePercentage: deliveredOrders.length ? (slaOnTime / deliveredOrders.length) * 100 : 0,
+          slaSampleSize: deliveredOrders.length,
+          slaOnTime,
+          slaDelay,
+          slaNoData
         };
       }
 
@@ -1068,9 +1149,12 @@
         // Average
         $('kpiAvgQty').textContent = formatNumberDecimal(stats.avgQtyPerOrder, 1);
         
+        // SLA Info
         $('slaPill').textContent = stats.slaSampleSize ? 
-          `Sampel: ${stats.slaSampleSize} order (${formatNumberDecimal(stats.onTimePercentage, 1)}% on time)` : 
-          'Data SLA tidak lengkap';
+          `Total: ${stats.slaSampleSize} order` : 'Data SLA tidak lengkap';
+        
+        $('slaTotalDelivered').textContent = formatNumber(stats.slaSampleSize);
+        $('slaDetail').textContent = `On Time: ${stats.slaOnTime} order (${formatNumberDecimal(stats.onTimePercentage, 1)}%) • Delay: ${stats.slaDelay} order`;
       }
 
       function renderCharts(data, stats) {
@@ -1188,21 +1272,12 @@
         // SLA Chart
         const ctxSLA = $('chartSLA')?.getContext('2d');
         if (ctxSLA) {
-          const deliveredOrders = uniqueData.filter(d => d.statusCategory === 'DELIVERED');
-          const onTime = deliveredOrders.filter(d => 
-            d.tglMuat && d.actualMuat && d.actualMuat <= d.tglMuat
-          ).length;
-          const delay = deliveredOrders.filter(d => 
-            d.tglMuat && d.actualMuat && d.actualMuat > d.tglMuat
-          ).length;
-          const noData = deliveredOrders.length - onTime - delay;
-
           State.charts.sla = new Chart(ctxSLA, {
             type: 'doughnut',
             data: {
               labels: ['On Time', 'Delay', 'No Data'],
               datasets: [{
-                data: [onTime, delay, noData],
+                data: [stats.slaOnTime, stats.slaDelay, stats.slaNoData],
                 backgroundColor: ['#2ecc71', '#e74c3c', '#95a5a6'],
                 borderWidth: 0
               }]
@@ -1210,10 +1285,24 @@
             options: {
               responsive: true,
               maintainAspectRatio: true,
+              cutout: '80%',
               plugins: {
-                legend: { position: 'bottom', labels: { color: '#e9f1fb', font: { size: 11 } } }
-              },
-              cutout: '70%'
+                legend: { 
+                  position: 'bottom', 
+                  labels: { color: '#e9f1fb', font: { size: 11 } } 
+                },
+                tooltip: {
+                  callbacks: {
+                    label: (context) => {
+                      const label = context.label || '';
+                      const value = context.raw || 0;
+                      const total = stats.slaSampleSize;
+                      const percentage = total ? ((value / total) * 100).toFixed(1) : 0;
+                      return `${label}: ${value} order (${percentage}%)`;
+                    }
+                  }
+                }
+              }
             }
           });
         }
