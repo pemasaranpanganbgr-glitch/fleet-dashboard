@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Chart.js - Lightweight version -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <!-- PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -98,7 +98,7 @@
       50% { opacity: 0.5; transform: scale(0.8); }
     }
 
-    /* Header - MODIFIED dengan logo BGR */
+    /* Header */
     header {
       display: flex;
       gap: 16px;
@@ -130,7 +130,7 @@
       width: auto;
       max-width: 180px;
       object-fit: contain;
-      filter: brightness(0) invert(1); /* Membuat logo putih agar sesuai dengan tema gelap */
+      filter: brightness(0) invert(1);
       transition: var(--transition);
     }
 
@@ -520,7 +520,7 @@
   </div>
 
   <div class="wrap">
-    <!-- Header - MODIFIED dengan logo BGR Logistik -->
+    <!-- Header dengan Logo BGR -->
     <header>
       <div class="brand-container">
         <div class="brand-logo">
@@ -563,7 +563,7 @@
 
     <!-- KPI Section -->
     <div class="grid kpis">
-      <!-- Total Order -->
+      <!-- Total Order (berdasarkan kode unik) -->
       <div class="kpi">
         <div class="header">
           <div class="lbl">Total Order</div>
@@ -572,7 +572,7 @@
         <div class="main-value" id="kpiTotalOrder">-</div>
         <div class="qty-value" id="kpiTotalQty">- Qty</div>
         <div class="sub-info">
-          <span id="kpiTotalOrderDetail">Order unik</span> • Total volume
+          <span id="kpiTotalOrderDetail">Kode unik di kolom C</span> • Total volume di kolom F
         </div>
       </div>
 
@@ -728,9 +728,9 @@
         </div>
         <div class="bd">
           <div class="note" style="margin-bottom:12px">
-            <div>• Total Baris: <span id="totalRowsDetail">-</span></div>
-            <div>• Total Order: <span id="totalOrdersDetail">-</span></div>
-            <div>• Total QTY: <span id="totalQtyDetail">-</span></div>
+            <div>• Total Baris Data: <span id="totalRowsDetail">-</span></div>
+            <div>• Total Order (Kode Unik): <span id="totalOrdersDetail">-</span></div>
+            <div>• Total QTY (Semua Baris): <span id="totalQtyDetail">-</span></div>
             <div>• Rata-rata QTY/Order: <span id="avgQtyDetail">-</span></div>
             <div>• Auto Refresh: <span id="refreshStatus">30s</span></div>
           </div>
@@ -754,20 +754,20 @@
           progress: '#f1c40f',
           cancel: '#e74c3c'
         },
-        CACHE_DURATION: 30000 // 30 detik cache
+        CACHE_DURATION: 30000
       };
 
-      // Mapping kolom
+      // Mapping kolom (0-based index)
       const COLUMN_MAP = {
-        orderCode: 2,
-        pabrik: 3,
-        kota: 5,
-        qty: 6,
-        status: 14,
-        tglMuat: 9,
-        actualMuat: 10,
-        noPolisi: 12,
-        tglInput: 1
+        tglInput: 1,        // Kolom B
+        orderCode: 2,        // Kolom C - KODE UNIK untuk total order
+        pabrik: 3,           // Kolom D
+        kota: 5,             // Kolom F
+        qty: 6,              // Kolom G - QTY untuk dijumlah
+        tglMuat: 9,          // Kolom J
+        actualMuat: 10,      // Kolom K
+        noPolisi: 12,        // Kolom M
+        status: 14           // Kolom O
       };
 
       // Mapping status
@@ -863,10 +863,11 @@
       function parseNumber(value) {
         if (!value) return 0;
         try {
+          // Hapus titik ribuan, ganti koma desimal dengan titik
           let cleaned = value.toString()
-            .replace(/\./g, '')
-            .replace(',', '.')
-            .replace(/[^\d.-]/g, '');
+            .replace(/\./g, '')        // Hapus titik (pemisah ribuan)
+            .replace(',', '.')          // Ganti koma dengan titik untuk desimal
+            .replace(/[^\d.-]/g, '');   // Hapus karakter non-numerik
           const num = Number(cleaned);
           return Number.isFinite(num) ? num : 0;
         } catch {
@@ -916,10 +917,10 @@
         if (!Array.isArray(row)) return null;
         
         return {
-          orderCode: row[COLUMN_MAP.orderCode] || '',
+          orderCode: row[COLUMN_MAP.orderCode] || '',        // Kolom C untuk kode unik
           pabrik: row[COLUMN_MAP.pabrik] || 'Unknown',
           kota: row[COLUMN_MAP.kota] || 'Unknown',
-          qty: parseNumber(row[COLUMN_MAP.qty]),
+          qty: parseNumber(row[COLUMN_MAP.qty]),             // Kolom G untuk quantity
           status: row[COLUMN_MAP.status] || '',
           statusCategory: getStatusCategory(row[COLUMN_MAP.status]),
           tglMuat: parseDate(row[COLUMN_MAP.tglMuat]),
@@ -929,21 +930,12 @@
         };
       }
 
-      function getUniqueOrders(data) {
-        const uniqueOrders = new Map();
-        data.forEach(item => {
-          if (item.orderCode && !uniqueOrders.has(item.orderCode)) {
-            uniqueOrders.set(item.orderCode, item);
-          }
-        });
-        return Array.from(uniqueOrders.values());
-      }
-
+      // Fungsi untuk menghitung statistik - FOKUS UTAMA
       function calculateStats(data) {
         if (!data || data.length === 0) {
           return {
-            totalOrders: 0,
-            totalQty: 0,
+            totalOrders: 0,           // Jumlah kode unik di kolom C
+            totalQty: 0,              // Jumlah semua quantity di kolom F
             delivered: { count: 0, qty: 0, percentage: 0 },
             onDelivery: { count: 0, qty: 0, percentage: 0 },
             progress: { count: 0, qty: 0, percentage: 0 },
@@ -957,32 +949,59 @@
           };
         }
 
-        const uniqueData = getUniqueOrders(data);
-        const totalUniqueOrders = uniqueData.length;
-        const totalQty = data.reduce((sum, item) => sum + (item.qty || 0), 0);
-        
+        // ===== MENGHITUNG TOTAL ORDER (KODE UNIK DI KOLOM C) =====
+        const uniqueOrders = new Set();
+        data.forEach(item => {
+          if (item.orderCode) {
+            uniqueOrders.add(item.orderCode);  // Menyimpan kode unik
+          }
+        });
+        const totalUniqueOrders = uniqueOrders.size;  // TOTAL ORDER = jumlah kode unik
+
+        // ===== MENJUMLAHKAN TOTAL QUANTITY (SEMUA BARIS DI KOLOM F) =====
+        let totalQty = 0;
+        data.forEach(item => {
+          totalQty += item.qty || 0;  // Menambahkan semua quantity
+        });
+
+        // Inisialisasi counter per status
         let delivered = { count: 0, qty: 0 };
         let onDelivery = { count: 0, qty: 0 };
         let progress = { count: 0, qty: 0 };
         let cancel = { count: 0, qty: 0 };
         
-        // Count orders (unique)
-        uniqueData.forEach(item => {
-          switch(item.statusCategory) {
-            case 'DELIVERED': delivered.count++; break;
-            case 'ON_DELIVERY': onDelivery.count++; break;
-            case 'CANCEL': cancel.count++; break;
-            default: progress.count++;
-          }
-        });
+        // Hitung per status berdasarkan KODE UNIK (untuk count)
+        // Kita perlu track kode unik yang sudah dihitung per status
+        const processedOrders = new Set();
         
-        // Sum QTY (all data)
         data.forEach(item => {
+          const orderCode = item.orderCode;
+          if (!orderCode) return;
+          
+          // Hitung quantity per status (semua baris)
           switch(item.statusCategory) {
-            case 'DELIVERED': delivered.qty += item.qty || 0; break;
-            case 'ON_DELIVERY': onDelivery.qty += item.qty || 0; break;
-            case 'CANCEL': cancel.qty += item.qty || 0; break;
-            default: progress.qty += item.qty || 0;
+            case 'DELIVERED': 
+              delivered.qty += item.qty || 0; 
+              break;
+            case 'ON_DELIVERY': 
+              onDelivery.qty += item.qty || 0; 
+              break;
+            case 'CANCEL': 
+              cancel.qty += item.qty || 0; 
+              break;
+            default: 
+              progress.qty += item.qty || 0;
+          }
+          
+          // Hitung count per status (hanya sekali per kode unik)
+          if (!processedOrders.has(orderCode)) {
+            processedOrders.add(orderCode);
+            switch(item.statusCategory) {
+              case 'DELIVERED': delivered.count++; break;
+              case 'ON_DELIVERY': onDelivery.count++; break;
+              case 'CANCEL': cancel.count++; break;
+              default: progress.count++;
+            }
           }
         });
         
@@ -993,26 +1012,38 @@
         progress.percentage = totalCount ? (progress.count / totalCount) * 100 : 0;
         cancel.percentage = totalCount ? (cancel.count / totalCount) * 100 : 0;
         
-        // SLA
-        const deliveredOrders = uniqueData.filter(item => item.statusCategory === 'DELIVERED');
-        const slaOnTime = deliveredOrders.filter(item => 
+        // SLA untuk delivered
+        const deliveredOrders = new Set();
+        const deliveredData = [];
+        
+        // Kumpulkan data delivered unik
+        data.forEach(item => {
+          if (item.statusCategory === 'DELIVERED' && item.orderCode && !deliveredOrders.has(item.orderCode)) {
+            deliveredOrders.add(item.orderCode);
+            deliveredData.push(item);
+          }
+        });
+        
+        const slaOnTime = deliveredData.filter(item => 
           item.tglMuat && item.actualMuat && item.actualMuat <= item.tglMuat
         ).length;
-        const slaDelay = deliveredOrders.filter(item => 
+        
+        const slaDelay = deliveredData.filter(item => 
           item.tglMuat && item.actualMuat && item.actualMuat > item.tglMuat
         ).length;
-        const slaNoData = deliveredOrders.length - slaOnTime - slaDelay;
+        
+        const slaNoData = deliveredData.length - slaOnTime - slaDelay;
 
         return {
-          totalOrders: totalUniqueOrders,
-          totalQty,
+          totalOrders: totalUniqueOrders,           // Hasil dari Set uniqueOrders
+          totalQty: totalQty,                        // Hasil penjumlahan semua qty
           delivered,
           onDelivery,
           progress,
           cancel,
           avgQtyPerOrder: totalUniqueOrders ? totalQty / totalUniqueOrders : 0,
-          onTimePercentage: deliveredOrders.length ? (slaOnTime / deliveredOrders.length) * 100 : 0,
-          slaSampleSize: deliveredOrders.length,
+          onTimePercentage: deliveredData.length ? (slaOnTime / deliveredData.length) * 100 : 0,
+          slaSampleSize: deliveredData.length,
           slaOnTime,
           slaDelay,
           slaNoData
@@ -1122,9 +1153,10 @@
       function renderKPI(stats) {
         if (!stats) return;
         
-        // Total
+        // Total Order (kode unik) dan Total QTY (semua baris)
         $('kpiTotalOrder').textContent = formatNumber(stats.totalOrders);
         $('kpiTotalQty').textContent = `${formatNumber(stats.totalQty)} Qty`;
+        $('kpiTotalOrderDetail').textContent = `${stats.totalOrders} kode unik`;
         
         // Delivered
         $('kpiDelivered').textContent = formatNumber(stats.delivered.count);
@@ -1148,6 +1180,7 @@
         
         // Average
         $('kpiAvgQty').textContent = formatNumberDecimal(stats.avgQtyPerOrder, 1);
+        $('kpiTotalRows').textContent = `${formatNumber(stats.totalOrders)} order • ${formatNumber(stats.totalQty)} Qty`;
         
         // SLA Info
         $('slaPill').textContent = stats.slaSampleSize ? 
@@ -1164,8 +1197,6 @@
         Object.values(State.charts).forEach(chart => {
           if (chart) chart.destroy();
         });
-
-        const uniqueData = getUniqueOrders(data);
 
         // Status Chart
         const ctxStatus = $('chartStatus')?.getContext('2d');
@@ -1211,9 +1242,8 @@
         }
 
         $('statusNote').textContent = 
-          `Total ${stats.totalOrders} order • QTY: ${formatNumber(stats.totalQty)} • ` +
-          `Delivered ${stats.delivered.count} (${formatNumber(stats.delivered.qty)} Qty) • ` +
-          `On Delivery ${stats.onDelivery.count} (${formatNumber(stats.onDelivery.qty)} Qty)`;
+          `Total ${stats.totalOrders} order unik • Total QTY: ${formatNumber(stats.totalQty)} • ` +
+          `Delivered ${stats.delivered.count} order (${formatNumber(stats.delivered.qty)} Qty)`;
 
         // City Chart
         const cityData = groupAndSum(data, item => item.kota, 8);
@@ -1370,9 +1400,8 @@
           $('lastUpdate').textContent = State.lastFetch ? 
             State.lastFetch.toLocaleTimeString('id-ID') : 'Loading...';
           
-          $('totalRows').textContent = `${filteredData.length} baris`;
           $('totalRowsDetail').textContent = `${filteredData.length} baris`;
-          $('totalOrdersDetail').textContent = `${stats.totalOrders} order`;
+          $('totalOrdersDetail').textContent = `${stats.totalOrders} kode unik`;
           $('totalQtyDetail').textContent = formatNumber(stats.totalQty);
           $('avgQtyDetail').textContent = formatNumberDecimal(stats.avgQtyPerOrder, 1);
           
@@ -1387,7 +1416,7 @@
             $('dataPeriod').textContent = periodText;
           }
           
-          showMessage('success', `Update: ${filteredData.length} baris`);
+          showMessage('success', `Update: ${filteredData.length} baris data`);
           
         } catch (error) {
           showMessage('error', error.message);
