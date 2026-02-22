@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Distribusi Minyak 2026 - BGR Logistik</title>
+  <title>Dashboard Distribusi Minyak - BGR Logistik</title>
   
   <!-- Meta tags -->
-  <meta name="description" content="Dashboard distribusi minyak dengan refresh cepat" />
+  <meta name="description" content="Dashboard distribusi minyak" />
   <meta name="theme-color" content="#071424" />
 
   <!-- Google Font -->
@@ -20,6 +20,7 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
+    /* [SAME STYLES AS BEFORE] */
     * {
       margin: 0;
       padding: 0;
@@ -38,6 +39,7 @@
       --warning: #f1c40f;
       --danger: #e74c3c;
       --info: #3498db;
+      --partial: #9b59b6;
       --line: rgba(255, 255, 255, 0.08);
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
       --radius-sm: 10px;
@@ -62,42 +64,6 @@
       padding: 20px 16px;
     }
 
-    /* Fast Refresh Indicator */
-    .refresh-indicator {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(12, 31, 53, 0.9);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 11px;
-      color: var(--text-secondary);
-      display: none;
-      align-items: center;
-      gap: 6px;
-      z-index: 1000;
-      box-shadow: var(--shadow);
-    }
-
-    .refresh-indicator.show {
-      display: flex;
-    }
-
-    .refresh-indicator .dot {
-      width: 8px;
-      height: 8px;
-      background: var(--accent-primary);
-      border-radius: 50%;
-      animation: pulse 1s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-
     /* Header */
     header {
       display: flex;
@@ -119,23 +85,12 @@
       gap: 16px;
     }
 
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
     .brand-logo img {
       height: 50px;
       width: auto;
       max-width: 180px;
       object-fit: contain;
       filter: brightness(0) invert(1);
-      transition: var(--transition);
-    }
-
-    .brand-logo img:hover {
-      filter: brightness(0) invert(0.9);
     }
 
     .title {
@@ -149,7 +104,6 @@
       margin: 0;
       font-size: clamp(18px, 4vw, 24px);
       font-weight: 800;
-      color: var(--text-primary);
     }
 
     .sub {
@@ -161,15 +115,6 @@
       gap: 8px;
     }
 
-    .sub-separator {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--text-secondary);
-      display: inline-block;
-    }
-
-    /* Controls */
     .controls {
       display: flex;
       gap: 10px;
@@ -202,16 +147,6 @@
       padding: 8px 12px;
       font-size: 12px;
       outline: none;
-      transition: var(--transition);
-    }
-
-    input:hover, select:hover {
-      border-color: var(--accent-secondary);
-    }
-
-    input:focus, select:focus {
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 0 2px rgba(255, 176, 0, 0.2);
     }
 
     button {
@@ -231,10 +166,6 @@
     button.secondary {
       background: rgba(15, 42, 71, 0.65);
       color: var(--text-primary);
-    }
-
-    button.secondary:hover {
-      background: rgba(15, 42, 71, 0.8);
     }
 
     /* Grid Layouts */
@@ -259,22 +190,6 @@
     @media (max-width: 1200px) {
       .kpis { grid-template-columns: repeat(3, 1fr); }
       .main, .bottom { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 640px) {
-      .kpis { grid-template-columns: repeat(2, 1fr); }
-      .controls { flex-direction: column; align-items: stretch; }
-      .ctrl { flex-wrap: wrap; }
-      
-      .brand-container {
-        width: 100%;
-        justify-content: space-between;
-      }
-      
-      .title {
-        border-left: none;
-        padding-left: 0;
-      }
     }
 
     /* Cards */
@@ -304,50 +219,12 @@
       padding: 16px;
     }
 
-    /* Chart container untuk SLA */
-    .chart-container {
-      position: relative;
-      width: 100%;
-      height: auto;
-      margin: 0 auto;
-    }
-
-    .chart-center-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .chart-center-text .big-number {
-      font-size: 36px;
-      font-weight: 900;
-      color: var(--text-primary);
-      line-height: 1.2;
-    }
-
-    .chart-center-text .small-label {
-      font-size: 11px;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
     /* KPI Cards */
     .kpi {
       padding: 16px;
       border-radius: var(--radius-lg);
       background: rgba(15, 42, 71, 0.55);
       border: 1px solid var(--line);
-      transition: var(--transition);
-    }
-
-    .kpi:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent-secondary);
     }
 
     .kpi .header {
@@ -362,7 +239,6 @@
       color: var(--text-secondary);
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .kpi .icon {
@@ -392,17 +268,9 @@
     .kpi .sub-info {
       font-size: 11px;
       color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 4px;
       border-top: 1px solid var(--line);
       padding-top: 8px;
       margin-top: 4px;
-    }
-
-    .kpi .sub-info span {
-      color: var(--text-primary);
-      font-weight: 600;
     }
 
     /* Tables */
@@ -419,7 +287,6 @@
       font-weight: 700;
       font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     td {
@@ -428,51 +295,15 @@
       font-size: 12px;
     }
 
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
     /* Status Colors */
     .status-delivered { color: var(--success); }
     .status-ondelivery { color: var(--info); }
     .status-progress { color: var(--warning); }
     .status-cancel { color: var(--danger); }
+    .status-partial { color: var(--partial); }
 
-    /* Messages */
     .note {
       color: var(--text-secondary);
-      font-size: 12px;
-    }
-
-    .error-message {
-      color: var(--danger);
-      padding: 8px 12px;
-      border-radius: var(--radius-sm);
-      background: rgba(231, 76, 60, 0.1);
-      border: 1px solid rgba(231, 76, 60, 0.2);
-      margin-top: 8px;
-      font-size: 12px;
-    }
-
-    .success-message {
-      color: var(--success);
-      padding: 8px 12px;
-      border-radius: var(--radius-sm);
-      background: rgba(46, 204, 113, 0.1);
-      margin-top: 8px;
-      font-size: 12px;
-    }
-
-    .info-message {
-      color: var(--info);
-      padding: 8px 12px;
-      border-radius: var(--radius-sm);
-      background: rgba(52, 152, 219, 0.1);
-      margin-top: 8px;
       font-size: 12px;
     }
 
@@ -482,7 +313,6 @@
       font-size: 11px;
       border: 1px solid var(--line);
       background: rgba(0, 0, 0, 0.25);
-      color: var(--text-secondary);
     }
 
     canvas {
@@ -491,51 +321,128 @@
       height: auto !important;
     }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar {
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    .refresh-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(12, 31, 53, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      display: none;
+      align-items: center;
+      gap: 6px;
+      z-index: 1000;
+    }
+
+    .refresh-indicator.show {
+      display: flex;
+    }
+
+    .refresh-indicator .dot {
       width: 8px;
       height: 8px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      animation: pulse 1s ease-in-out infinite;
     }
 
-    ::-webkit-scrollbar-track {
-      background: var(--bg-secondary);
+    .partial-detail {
+      background: rgba(155, 89, 182, 0.1);
+      border-left: 3px solid var(--partial);
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: var(--radius-sm);
     }
 
-    ::-webkit-scrollbar-thumb {
-      background: var(--bg-tertiary);
-      border-radius: 4px;
+    .partial-breakdown {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+      flex-wrap: wrap;
     }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--accent-secondary);
+    .breakdown-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .badge-delivered { background: rgba(46, 204, 113, 0.2); color: var(--success); }
+    .badge-progress { background: rgba(241, 196, 15, 0.2); color: var(--warning); }
+    .badge-cancel { background: rgba(231, 76, 60, 0.2); color: var(--danger); }
+    .badge-ondelivery { background: rgba(52, 152, 219, 0.2); color: var(--info); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* Auto-refresh status bar */
+    .auto-refresh-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #2ecc71;
+      border-radius: 50%;
+      animation: livePulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); background: #f1c40f; }
+      100% { opacity: 1; transform: scale(1); background: #2ecc71; }
     }
   </style>
 </head>
 
 <body>
-  <!-- Fast Refresh Indicator -->
   <div id="refreshIndicator" class="refresh-indicator">
     <div class="dot"></div>
     <span>Mengupdate data...</span>
   </div>
 
   <div class="wrap">
-    <!-- Header dengan Logo BGR -->
     <header>
       <div class="brand-container">
         <div class="brand-logo">
-          <img class="brand-logo-dark" 
-               src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" 
+          <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" 
                srcset="https://www.bgrlogistik.id/bgr/img/logo_bli.png 2x" 
-               alt="PT BGR Logistik Indonesia"
-               onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%2250%22%20viewBox%3D%220%200%20120%2050%22%3E%3Ctext%20x%3D%2210%22%20y%3D%2235%22%20font-family%3D%22Arial%22%20font-size%3D%2220%22%20fill%3D%22%23ffb000%22%3EBGR%3C%2Ftext%3E%3C%2Fsvg%3E';">
+               alt="PT BGR Logistik Indonesia">
         </div>
         <div class="title">
-          <h1>Dashboard Distribusi Minyak 2026</h1>
+          <h1>Dashboard Distribusi Minyak</h1>
           <p class="sub">
             <span>BGR Logistik</span>
-            <span class="sub-separator"></span>
-            <span>Fast refresh • Data real-time</span>
+            <span>•</span>
+            <span id="liveStatus">🟢 Live</span>
           </p>
         </div>
       </div>
@@ -551,98 +458,28 @@
           <label>Auto Refresh</label>
           <select id="refreshSec">
             <option value="0">Off</option>
+            <option value="5">5 dtk (Real-time)</option>
             <option value="10">10 dtk</option>
             <option value="30" selected>30 dtk</option>
             <option value="60">60 dtk</option>
+            <option value="300">5 menit</option>
           </select>
         </div>
-        <button id="btnRefresh">↻ Refresh</button>
+        <div class="auto-refresh-status" id="autoRefreshStatus">
+          <span class="live-dot"></span>
+          <span id="nextUpdateText">Update dalam 30s</span>
+        </div>
+        <button id="btnRefresh">↻ Refresh Now</button>
         <button id="btnReset" class="secondary">✕ Reset</button>
       </div>
     </header>
 
     <!-- KPI Section -->
-    <div class="grid kpis">
-      <!-- Total Order (berdasarkan kode unik) -->
-      <div class="kpi">
-        <div class="header">
-          <div class="lbl">Total Order</div>
-          <div class="icon">📊</div>
-        </div>
-        <div class="main-value" id="kpiTotalOrder">-</div>
-        <div class="qty-value" id="kpiTotalQty">- Qty</div>
-        <div class="sub-info">
-          <span id="kpiTotalOrderDetail">Kode unik di kolom C</span> • Total volume di kolom F
-        </div>
-      </div>
-
-      <!-- Delivered -->
-      <div class="kpi">
-        <div class="header">
-          <div class="lbl">Delivered</div>
-          <div class="icon">✅</div>
-        </div>
-        <div class="main-value" id="kpiDelivered">-</div>
-        <div class="qty-value" id="kpiDeliveredQty">- Qty</div>
-        <div class="sub-info">
-          <span>Order</span> • <span id="kpiDeliveredPct">-</span> dari total
-        </div>
-      </div>
-
-      <!-- On Delivery -->
-      <div class="kpi">
-        <div class="header">
-          <div class="lbl">On Delivery</div>
-          <div class="icon">🚚</div>
-        </div>
-        <div class="main-value" id="kpiOnDelivery">-</div>
-        <div class="qty-value" id="kpiOnDeliveryQty">- Qty</div>
-        <div class="sub-info">
-          <span>Order</span> • <span id="kpiOnDeliveryPct">-</span> dari total
-        </div>
-      </div>
-
-      <!-- Progress -->
-      <div class="kpi">
-        <div class="header">
-          <div class="lbl">Progress</div>
-          <div class="icon">⏳</div>
-        </div>
-        <div class="main-value" id="kpiProgress">-</div>
-        <div class="qty-value" id="kpiProgressQty">- Qty</div>
-        <div class="sub-info">
-          <span>Order</span> • <span id="kpiProgressPct">-</span> dari total
-        </div>
-      </div>
-
-      <!-- Cancel -->
-      <div class="kpi">
-        <div class="header">
-          <div class="lbl">Cancel</div>
-          <div class="icon">⛔</div>
-        </div>
-        <div class="main-value" id="kpiCancel">-</div>
-        <div class="qty-value" id="kpiCancelQty">- Qty</div>
-        <div class="sub-info">
-          <span>Order</span> • <span id="kpiCancelPct">-</span> dari total
-        </div>
-      </div>
-
-      <!-- Summary Card -->
-      <div class="kpi">
-        <div class="header">
-          <div class="lbl">Rata-rata</div>
-          <div class="icon">📈</div>
-        </div>
-        <div class="main-value" id="kpiAvgQty">-</div>
-        <div class="qty-value" id="kpiTotalRows">- Baris</div>
-        <div class="sub-info">
-          <span id="dataPeriod">-</span>
-        </div>
-      </div>
+    <div class="grid kpis" id="kpiContainer">
+      <!-- Akan diisi oleh JavaScript -->
     </div>
 
-    <!-- Main Charts -->
+    <!-- Charts -->
     <div class="grid main">
       <div class="card">
         <div class="hd">
@@ -651,7 +488,7 @@
         </div>
         <div class="bd">
           <canvas id="chartStatus"></canvas>
-          <div class="note" id="statusNote" style="margin-top:12px"></div>
+          <div id="statusNote" class="note" style="margin-top:12px"></div>
         </div>
       </div>
 
@@ -680,21 +517,11 @@
     <div class="grid bottom">
       <div class="card">
         <div class="hd">
-          <div class="t">SLA Ketepatan Waktu</div>
-          <div class="pill" id="slaPill">-</div>
+          <div class="t">Order PARTIAL</div>
+          <div class="pill" id="partialPill">-</div>
         </div>
-        <div class="bd">
-          <div class="chart-container">
-            <canvas id="chartSLA"></canvas>
-            <div class="chart-center-text" id="slaCenterText">
-              <div class="big-number" id="slaTotalDelivered">-</div>
-              <div class="small-label">Total Delivered</div>
-            </div>
-          </div>
-          <p class="note" style="margin-top:12px; text-align:center;">
-            On Time: Actual Muat ≤ Tgl Muat<br>
-            <span id="slaDetail">-</span>
-          </p>
+        <div class="bd" id="partialContainer">
+          <p class="note">Tidak ada order PARTIAL</p>
         </div>
       </div>
 
@@ -724,15 +551,17 @@
       <div class="card">
         <div class="hd">
           <div class="t">Ringkasan Data</div>
-          <div class="pill">Info</div>
+          <div class="pill">Info Detail</div>
         </div>
         <div class="bd">
           <div class="note" style="margin-bottom:12px">
             <div>• Total Baris Data: <span id="totalRowsDetail">-</span></div>
             <div>• Total Order (Kode Unik): <span id="totalOrdersDetail">-</span></div>
-            <div>• Total QTY (Semua Baris): <span id="totalQtyDetail">-</span></div>
-            <div>• Rata-rata QTY/Order: <span id="avgQtyDetail">-</span></div>
+            <div>• Total Quantity: <span id="totalQtyDetail">-</span></div>
+            <div>• Rata-rata QTY per Order: <span id="avgQtyDetail">-</span></div>
             <div>• Auto Refresh: <span id="refreshStatus">30s</span></div>
+            <div>• Data Source: <span id="dataSource">Google Sheets</span></div>
+            <div>• Last Update: <span id="lastUpdateTime">-</span></div>
           </div>
           <div id="messageContainer"></div>
           <div id="errorContainer" style="display:none"></div>
@@ -746,29 +575,36 @@
       'use strict';
 
       // ================= KONFIGURASI =================
-     const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbxti-32M_QwIxNEYWv96s6S2eej9pC1uX2u0bxA2fYho8XzbjFXEi5K43WkW24fzh_fzg/exec", // https://script.google.com/macros/s/XXXX/exec
-  CHART_COLORS: {
-    delivered: '#2ecc71',
-    onDelivery: '#3498db',
-    progress: '#f1c40f',
-    cancel: '#e74c3c',
-    partial: '#9b59b6'
-  },
-  CACHE_DURATION: 30000
-};
+      const CONFIG = {
+        // GANTI URL INI DENGAN URL PUBLISH CSV ANDA!
+        CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRAqs3OR5iSyutu1ozCM5Q4JFXNKOV4AhOB7u2d2SCUfbV2SasQ17VBH924VxdTxoN4aYq3W3qZu8X/pub?gid=166266133&single=true&output=csv",
+        
+        // Alternative: Jika URL di atas tidak bekerja, gunakan URL ini:
+        // CSV_URL: "https://docs.google.com/spreadsheets/d/1hBx_GuUchBIVkIbDBN6FWt-qA1Db9lM1qyBq_JjjPRI/export?format=csv&gid=166266133",
+        
+        CHART_COLORS: {
+          delivered: '#2ecc71',
+          onDelivery: '#3498db',
+          progress: '#f1c40f',
+          cancel: '#e74c3c',
+          partial: '#9b59b6'
+        },
+        CACHE_DURATION: 0, // Set 0 untuk selalu ambil data baru (real-time)
+        RETRY_DELAY: 3000, // 3 detik
+        MAX_RETRIES: 1
+      };
 
-      // Mapping kolom (0-based index)
+      // Mapping kolom berdasarkan index (0-based)
       const COLUMN_MAP = {
-        tglInput: 1,        // Kolom B
-        orderCode: 2,        // Kolom C - KODE UNIK untuk total order
-        pabrik: 3,           // Kolom D
-        kota: 5,             // Kolom F
-        qty: 6,              // Kolom G - QTY untuk dijumlah
-        tglMuat: 9,          // Kolom J
-        actualMuat: 10,      // Kolom K
-        noPolisi: 12,        // Kolom M
-        status: 14           // Kolom O
+        orderCode: 2,      // Kolom C (index 2) - Kode unik
+        pabrik: 3,         // Kolom D (index 3)
+        kota: 5,           // Kolom F (index 5)
+        qty: 6,            // Kolom G (index 6) - Quantity
+        status: 14,        // Kolom O (index 14)
+        tglMuat: 9,        // Kolom J (index 9)
+        actualMuat: 10,    // Kolom K (index 10)
+        noPolisi: 12,      // Kolom M (index 12)
+        tglInput: 1        // Kolom B (index 1)
       };
 
       // Mapping status
@@ -785,12 +621,12 @@
         filteredData: null,
         charts: {},
         refreshTimer: null,
+        countdownTimer: null,
         isRefreshing: false,
         lastFetch: null,
-        cache: {
-          data: null,
-          timestamp: null
-        }
+        nextUpdateTime: null,
+        retryCount: 0,
+        fetchController: null // Untuk cancel fetch jika perlu
       };
 
       // ================= UTILITY FUNCTIONS =================
@@ -852,7 +688,9 @@
             return new Intl.DateTimeFormat('id-ID', {
               day: '2-digit', 
               month: '2-digit', 
-              year: 'numeric'
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
             }).format(date);
           }
           return '-';
@@ -861,14 +699,26 @@
         }
       }
 
+      function formatTimeOnly(date) {
+        if (!date) return '-';
+        try {
+          return new Intl.DateTimeFormat('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          }).format(date);
+        } catch {
+          return '-';
+        }
+      }
+
       function parseNumber(value) {
         if (!value) return 0;
         try {
-          // Hapus titik ribuan, ganti koma desimal dengan titik
           let cleaned = value.toString()
-            .replace(/\./g, '')        // Hapus titik (pemisah ribuan)
-            .replace(',', '.')          // Ganti koma dengan titik untuk desimal
-            .replace(/[^\d.-]/g, '');   // Hapus karakter non-numerik
+            .replace(/\./g, '')
+            .replace(',', '.')
+            .replace(/[^\d.-]/g, '');
           const num = Number(cleaned);
           return Number.isFinite(num) ? num : 0;
         } catch {
@@ -903,13 +753,33 @@
 
       function getStatusCategory(status) {
         if (!status) return 'PROGRESS';
+        
         const normalized = status.toString().toLowerCase().trim();
         
-        for (const [category, keywords] of Object.entries(STATUS_MAP)) {
-          if (keywords.some(k => normalized.includes(k))) {
-            return category;
-          }
+        if (normalized.includes('delivered') || 
+            normalized.includes('selesai') || 
+            normalized.includes('terkirim') ||
+            normalized.includes('complete') ||
+            normalized.includes('done')) {
+          return 'DELIVERED';
         }
+        
+        if (normalized.includes('on delivery') || 
+            normalized.includes('delivery') || 
+            normalized.includes('dalam perjalanan') ||
+            normalized.includes('shipping') ||
+            normalized.includes('pickup')) {
+          return 'ON_DELIVERY';
+        }
+        
+        if (normalized.includes('cancel') || 
+            normalized.includes('batal') || 
+            normalized.includes('cancelled') ||
+            normalized.includes('void') ||
+            normalized.includes('dibatalkan')) {
+          return 'CANCEL';
+        }
+        
         return 'PROGRESS';
       }
 
@@ -918,10 +788,10 @@
         if (!Array.isArray(row)) return null;
         
         return {
-          orderCode: row[COLUMN_MAP.orderCode] || '',        // Kolom C untuk kode unik
+          orderCode: row[COLUMN_MAP.orderCode] || '',
           pabrik: row[COLUMN_MAP.pabrik] || 'Unknown',
           kota: row[COLUMN_MAP.kota] || 'Unknown',
-          qty: parseNumber(row[COLUMN_MAP.qty]),             // Kolom G untuk quantity
+          qty: parseNumber(row[COLUMN_MAP.qty]),
           status: row[COLUMN_MAP.status] || '',
           statusCategory: getStatusCategory(row[COLUMN_MAP.status]),
           tglMuat: parseDate(row[COLUMN_MAP.tglMuat]),
@@ -931,123 +801,144 @@
         };
       }
 
-      // Fungsi untuk menghitung statistik - FOKUS UTAMA
+      // ================= PERHITUNGAN UTAMA dengan STATUS PARTIAL =================
       function calculateStats(data) {
         if (!data || data.length === 0) {
           return {
-            totalOrders: 0,           // Jumlah kode unik di kolom C
-            totalQty: 0,              // Jumlah semua quantity di kolom F
+            totalOrders: 0,
+            totalQty: 0,
             delivered: { count: 0, qty: 0, percentage: 0 },
             onDelivery: { count: 0, qty: 0, percentage: 0 },
             progress: { count: 0, qty: 0, percentage: 0 },
             cancel: { count: 0, qty: 0, percentage: 0 },
-            avgQtyPerOrder: 0,
-            onTimePercentage: 0,
-            slaSampleSize: 0,
-            slaOnTime: 0,
-            slaDelay: 0,
-            slaNoData: 0
+            partial: { count: 0, qty: 0, percentage: 0, details: [] },
+            avgQtyPerOrder: 0
           };
         }
 
-        // ===== MENGHITUNG TOTAL ORDER (KODE UNIK DI KOLOM C) =====
-        const uniqueOrders = new Set();
+        // STEP 1: Kumpulkan semua status per order
+        const orderStatuses = new Map();
+        const orderQtyByStatus = new Map();
+        
         data.forEach(item => {
-          if (item.orderCode) {
-            uniqueOrders.add(item.orderCode);  // Menyimpan kode unik
+          if (!item.orderCode) return;
+          
+          const orderCode = item.orderCode;
+          const status = item.statusCategory;
+          const qty = item.qty || 0;
+          
+          if (!orderStatuses.has(orderCode)) {
+            orderStatuses.set(orderCode, new Set());
+          }
+          orderStatuses.get(orderCode).add(status);
+          
+          const key = `${orderCode}-${status}`;
+          orderQtyByStatus.set(key, (orderQtyByStatus.get(key) || 0) + qty);
+        });
+
+        // STEP 2: Tentukan status FINAL untuk setiap order
+        const orderFinalStatus = new Map();
+        const orderDetails = new Map();
+        
+        orderStatuses.forEach((statusSet, orderCode) => {
+          const uniqueStatuses = Array.from(statusSet);
+          const isPartial = uniqueStatuses.length > 1;
+          
+          let finalStatus;
+          if (isPartial) {
+            finalStatus = 'PARTIAL';
+          } else {
+            finalStatus = uniqueStatuses[0];
+          }
+          
+          orderFinalStatus.set(orderCode, finalStatus);
+          
+          if (isPartial) {
+            const details = [];
+            uniqueStatuses.forEach(status => {
+              const key = `${orderCode}-${status}`;
+              const qty = orderQtyByStatus.get(key) || 0;
+              details.push({ status, qty });
+            });
+            orderDetails.set(orderCode, details);
           }
         });
-        const totalUniqueOrders = uniqueOrders.size;  // TOTAL ORDER = jumlah kode unik
 
-        // ===== MENJUMLAHKAN TOTAL QUANTITY (SEMUA BARIS DI KOLOM F) =====
-        let totalQty = 0;
-        data.forEach(item => {
-          totalQty += item.qty || 0;  // Menambahkan semua quantity
-        });
-
-        // Inisialisasi counter per status
+        // STEP 3: Hitung COUNT dan QUANTITY
         let delivered = { count: 0, qty: 0 };
         let onDelivery = { count: 0, qty: 0 };
         let progress = { count: 0, qty: 0 };
         let cancel = { count: 0, qty: 0 };
-        
-        // Hitung per status berdasarkan KODE UNIK (untuk count)
-        // Kita perlu track kode unik yang sudah dihitung per status
-        const processedOrders = new Set();
-        
-        data.forEach(item => {
-          const orderCode = item.orderCode;
-          if (!orderCode) return;
-          
-          // Hitung quantity per status (semua baris)
-          switch(item.statusCategory) {
-            case 'DELIVERED': 
-              delivered.qty += item.qty || 0; 
-              break;
-            case 'ON_DELIVERY': 
-              onDelivery.qty += item.qty || 0; 
-              break;
-            case 'CANCEL': 
-              cancel.qty += item.qty || 0; 
-              break;
-            default: 
-              progress.qty += item.qty || 0;
-          }
-          
-          // Hitung count per status (hanya sekali per kode unik)
-          if (!processedOrders.has(orderCode)) {
-            processedOrders.add(orderCode);
-            switch(item.statusCategory) {
-              case 'DELIVERED': delivered.count++; break;
-              case 'ON_DELIVERY': onDelivery.count++; break;
-              case 'CANCEL': cancel.count++; break;
-              default: progress.count++;
+        let partial = { count: 0, qty: 0, details: [] };
+
+        orderFinalStatus.forEach((finalStatus, orderCode) => {
+          let totalOrderQty = 0;
+          data.forEach(item => {
+            if (item.orderCode === orderCode) {
+              totalOrderQty += item.qty || 0;
             }
+          });
+          
+          switch(finalStatus) {
+            case 'DELIVERED':
+              delivered.count++;
+              delivered.qty += totalOrderQty;
+              break;
+            case 'ON_DELIVERY':
+              onDelivery.count++;
+              onDelivery.qty += totalOrderQty;
+              break;
+            case 'PROGRESS':
+              progress.count++;
+              progress.qty += totalOrderQty;
+              break;
+            case 'CANCEL':
+              cancel.count++;
+              cancel.qty += totalOrderQty;
+              break;
+            case 'PARTIAL':
+              partial.count++;
+              partial.qty += totalOrderQty;
+              if (orderDetails.has(orderCode)) {
+                partial.details.push({
+                  orderCode,
+                  breakdown: orderDetails.get(orderCode)
+                });
+              }
+              break;
           }
         });
-        
-        // Calculate percentages
-        const totalCount = delivered.count + onDelivery.count + progress.count + cancel.count;
-        delivered.percentage = totalCount ? (delivered.count / totalCount) * 100 : 0;
-        onDelivery.percentage = totalCount ? (onDelivery.count / totalCount) * 100 : 0;
-        progress.percentage = totalCount ? (progress.count / totalCount) * 100 : 0;
-        cancel.percentage = totalCount ? (cancel.count / totalCount) * 100 : 0;
-        
-        // SLA untuk delivered
-        const deliveredOrders = new Set();
-        const deliveredData = [];
-        
-        // Kumpulkan data delivered unik
+
+        // STEP 4: Hitung persentase
+        const totalOrders = orderFinalStatus.size;
+        let totalQty = 0;
         data.forEach(item => {
-          if (item.statusCategory === 'DELIVERED' && item.orderCode && !deliveredOrders.has(item.orderCode)) {
-            deliveredOrders.add(item.orderCode);
-            deliveredData.push(item);
-          }
+          totalQty += item.qty || 0;
         });
         
-        const slaOnTime = deliveredData.filter(item => 
-          item.tglMuat && item.actualMuat && item.actualMuat <= item.tglMuat
-        ).length;
-        
-        const slaDelay = deliveredData.filter(item => 
-          item.tglMuat && item.actualMuat && item.actualMuat > item.tglMuat
-        ).length;
-        
-        const slaNoData = deliveredData.length - slaOnTime - slaDelay;
+        delivered.percentage = totalOrders ? (delivered.count / totalOrders) * 100 : 0;
+        onDelivery.percentage = totalOrders ? (onDelivery.count / totalOrders) * 100 : 0;
+        progress.percentage = totalOrders ? (progress.count / totalOrders) * 100 : 0;
+        cancel.percentage = totalOrders ? (cancel.count / totalOrders) * 100 : 0;
+        partial.percentage = totalOrders ? (partial.count / totalOrders) * 100 : 0;
+
+        console.log('=== STATUS FINAL ORDER ===');
+        console.log(`Total Orders: ${totalOrders}`);
+        console.log(`✅ DELIVERED   : ${delivered.count} orders`);
+        console.log(`🚚 ON_DELIVERY : ${onDelivery.count} orders`);
+        console.log(`⏳ PROGRESS    : ${progress.count} orders`);
+        console.log(`⛔ CANCEL      : ${cancel.count} orders`);
+        console.log(`⚡ PARTIAL     : ${partial.count} orders`);
 
         return {
-          totalOrders: totalUniqueOrders,           // Hasil dari Set uniqueOrders
-          totalQty: totalQty,                        // Hasil penjumlahan semua qty
+          totalOrders,
+          totalQty,
           delivered,
           onDelivery,
           progress,
           cancel,
-          avgQtyPerOrder: totalUniqueOrders ? totalQty / totalUniqueOrders : 0,
-          onTimePercentage: deliveredData.length ? (slaOnTime / deliveredData.length) * 100 : 0,
-          slaSampleSize: deliveredData.length,
-          slaOnTime,
-          slaDelay,
-          slaNoData
+          partial,
+          avgQtyPerOrder: totalOrders ? totalQty / totalOrders : 0
         };
       }
 
@@ -1086,98 +977,125 @@
         });
       }
 
-      // ================= FAST DATA FETCHING =================
-      async function fetchData(useCache = true) {
-  if (useCache && State.cache.data && State.cache.timestamp) {
-    const age = Date.now() - State.cache.timestamp;
-    if (age < CONFIG.CACHE_DURATION) {
-      console.log('Using cached data');
-      return State.cache.data;
-    }
-  }
-
-  showRefreshIndicator(true);
-  State.isRefreshing = true;
-
-  try {
-    // cache buster biar browser gak nyimpen
-    const url = `${CONFIG.API_URL}?t=${Date.now()}`;
-
-    const res = await fetch(url, { cache: "no-store" });
-    const json = await res.json();
-
-    if (!json.ok) throw new Error(json.error || "API error");
-    if (!json.data || json.data.length < 2) throw new Error("Data kosong / tidak ditemukan");
-
-    // json.data = [ [header...], [row...], [row...] ]
-    const dataRows = json.data.slice(1);
-
-    let processedData = [];
-    for (let i = 0; i < dataRows.length; i++) {
-      const item = processRow(dataRows[i]); // tetap pakai mapping index kamu
-      if (item && item.orderCode) processedData.push(item);
-    }
-
-    State.cache = { data: processedData, timestamp: Date.now() };
-    State.lastFetch = new Date();
-
-    return processedData;
-
-  } catch (error) {
-    console.error('Fetch error:', error);
-    showMessage('error', `Gagal load data: ${error.message}`);
-
-    if (State.cache.data) {
-      showMessage('info', 'Menggunakan data tersimpan');
-      return State.cache.data;
-    }
-    throw error;
-
-  } finally {
-    showRefreshIndicator(false);
-    State.isRefreshing = false;
-  }
-}
-
       // ================= RENDERING =================
       function renderKPI(stats) {
         if (!stats) return;
         
-        // Total Order (kode unik) dan Total QTY (semua baris)
-        $('kpiTotalOrder').textContent = formatNumber(stats.totalOrders);
-        $('kpiTotalQty').textContent = `${formatNumber(stats.totalQty)} Qty`;
-        $('kpiTotalOrderDetail').textContent = `${stats.totalOrders} kode unik`;
+        const kpiContainer = $('kpiContainer');
+        if (!kpiContainer) return;
         
-        // Delivered
-        $('kpiDelivered').textContent = formatNumber(stats.delivered.count);
-        $('kpiDeliveredQty').textContent = `${formatNumber(stats.delivered.qty)} Qty`;
-        $('kpiDeliveredPct').textContent = `${formatNumberDecimal(stats.delivered.percentage, 1)}%`;
+        kpiContainer.innerHTML = `
+          <!-- Total Order -->
+          <div class="kpi">
+            <div class="header">
+              <div class="lbl">Total Order</div>
+              <div class="icon">📊</div>
+            </div>
+            <div class="main-value">${formatNumber(stats.totalOrders)}</div>
+            <div class="qty-value">${formatNumber(stats.totalQty)} Qty</div>
+            <div class="sub-info">${stats.totalOrders} kode unik • Total baris: ${State.filteredData?.length || 0}</div>
+          </div>
+
+          <!-- Delivered -->
+          <div class="kpi">
+            <div class="header">
+              <div class="lbl">Delivered</div>
+              <div class="icon">✅</div>
+            </div>
+            <div class="main-value">${formatNumber(stats.delivered.count)}</div>
+            <div class="qty-value">${formatNumber(stats.delivered.qty)} Qty</div>
+            <div class="sub-info">${formatNumberDecimal(stats.delivered.percentage, 1)}% dari total order</div>
+          </div>
+
+          <!-- On Delivery -->
+          <div class="kpi">
+            <div class="header">
+              <div class="lbl">On Delivery</div>
+              <div class="icon">🚚</div>
+            </div>
+            <div class="main-value">${formatNumber(stats.onDelivery.count)}</div>
+            <div class="qty-value">${formatNumber(stats.onDelivery.qty)} Qty</div>
+            <div class="sub-info">${formatNumberDecimal(stats.onDelivery.percentage, 1)}% dari total order</div>
+          </div>
+
+          <!-- Progress -->
+          <div class="kpi">
+            <div class="header">
+              <div class="lbl">Progress</div>
+              <div class="icon">⏳</div>
+            </div>
+            <div class="main-value">${formatNumber(stats.progress.count)}</div>
+            <div class="qty-value">${formatNumber(stats.progress.qty)} Qty</div>
+            <div class="sub-info">${formatNumberDecimal(stats.progress.percentage, 1)}% dari total order</div>
+          </div>
+
+          <!-- Cancel -->
+          <div class="kpi">
+            <div class="header">
+              <div class="lbl">Cancel</div>
+              <div class="icon">⛔</div>
+            </div>
+            <div class="main-value">${formatNumber(stats.cancel.count)}</div>
+            <div class="qty-value">${formatNumber(stats.cancel.qty)} Qty</div>
+            <div class="sub-info">${formatNumberDecimal(stats.cancel.percentage, 1)}% dari total order</div>
+          </div>
+
+          <!-- Partial -->
+          <div class="kpi">
+            <div class="header">
+              <div class="lbl">Partial</div>
+              <div class="icon">⚡</div>
+            </div>
+            <div class="main-value">${formatNumber(stats.partial.count)}</div>
+            <div class="qty-value">${formatNumber(stats.partial.qty)} Qty</div>
+            <div class="sub-info">${formatNumberDecimal(stats.partial.percentage, 1)}% dari total order</div>
+          </div>
+        `;
+      }
+
+      function renderPartialDetails(stats) {
+        const partialContainer = $('partialContainer');
+        const partialPill = $('partialPill');
         
-        // On Delivery
-        $('kpiOnDelivery').textContent = formatNumber(stats.onDelivery.count);
-        $('kpiOnDeliveryQty').textContent = `${formatNumber(stats.onDelivery.qty)} Qty`;
-        $('kpiOnDeliveryPct').textContent = `${formatNumberDecimal(stats.onDelivery.percentage, 1)}%`;
+        if (!partialContainer || !partialPill) return;
         
-        // Progress
-        $('kpiProgress').textContent = formatNumber(stats.progress.count);
-        $('kpiProgressQty').textContent = `${formatNumber(stats.progress.qty)} Qty`;
-        $('kpiProgressPct').textContent = `${formatNumberDecimal(stats.progress.percentage, 1)}%`;
+        if (stats.partial.count === 0) {
+          partialPill.textContent = 'Tidak ada';
+          partialContainer.innerHTML = '<p class="note">✨ Semua order memiliki status murni (100% sama)</p>';
+          return;
+        }
         
-        // Cancel
-        $('kpiCancel').textContent = formatNumber(stats.cancel.count);
-        $('kpiCancelQty').textContent = `${formatNumber(stats.cancel.qty)} Qty`;
-        $('kpiCancelPct').textContent = `${formatNumberDecimal(stats.cancel.percentage, 1)}%`;
+        partialPill.textContent = `${stats.partial.count} order`;
         
-        // Average
-        $('kpiAvgQty').textContent = formatNumberDecimal(stats.avgQtyPerOrder, 1);
-        $('kpiTotalRows').textContent = `${formatNumber(stats.totalOrders)} order • ${formatNumber(stats.totalQty)} Qty`;
+        let html = `<div class="partial-detail">`;
+        html += `<p style="margin-bottom:8px; font-weight:700;">⚡ ${stats.partial.count} Order dengan Status Campuran:</p>`;
         
-        // SLA Info
-        $('slaPill').textContent = stats.slaSampleSize ? 
-          `Total: ${stats.slaSampleSize} order` : 'Data SLA tidak lengkap';
+        stats.partial.details.forEach(detail => {
+          html += `<div style="margin-top:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:6px;">`;
+          html += `<div style="font-weight:700; margin-bottom:6px;">📋 ${detail.orderCode}</div>`;
+          html += `<div class="partial-breakdown">`;
+          
+          detail.breakdown.forEach(b => {
+            const percentage = ((b.qty / stats.partial.qty) * 100).toFixed(1);
+            let badgeClass = '';
+            switch(b.status) {
+              case 'DELIVERED': badgeClass = 'badge-delivered'; break;
+              case 'ON_DELIVERY': badgeClass = 'badge-ondelivery'; break;
+              case 'PROGRESS': badgeClass = 'badge-progress'; break;
+              case 'CANCEL': badgeClass = 'badge-cancel'; break;
+            }
+            
+            html += `<div class="breakdown-item">`;
+            html += `<span class="badge ${badgeClass}">${b.status}</span>`;
+            html += `<span>${formatNumber(b.qty)} Qty (${percentage}%)</span>`;
+            html += `</div>`;
+          });
+          
+          html += `</div></div>`;
+        });
         
-        $('slaTotalDelivered').textContent = formatNumber(stats.slaSampleSize);
-        $('slaDetail').textContent = `On Time: ${stats.slaOnTime} order (${formatNumberDecimal(stats.onTimePercentage, 1)}%) • Delay: ${stats.slaDelay} order`;
+        html += `</div>`;
+        partialContainer.innerHTML = html;
       }
 
       function renderCharts(data, stats) {
@@ -1194,15 +1112,22 @@
           State.charts.status = new Chart(ctxStatus, {
             type: 'doughnut',
             data: {
-              labels: ['Delivered', 'On Delivery', 'Progress', 'Cancel'],
+              labels: ['Delivered', 'On Delivery', 'Progress', 'Cancel', 'Partial'],
               datasets: [{
                 data: [
                   stats.delivered.count,
                   stats.onDelivery.count,
                   stats.progress.count,
-                  stats.cancel.count
+                  stats.cancel.count,
+                  stats.partial.count
                 ],
-                backgroundColor: Object.values(CONFIG.CHART_COLORS),
+                backgroundColor: [
+                  CONFIG.CHART_COLORS.delivered,
+                  CONFIG.CHART_COLORS.onDelivery,
+                  CONFIG.CHART_COLORS.progress,
+                  CONFIG.CHART_COLORS.cancel,
+                  CONFIG.CHART_COLORS.partial
+                ],
                 borderWidth: 0
               }]
             },
@@ -1219,8 +1144,11 @@
                     label: (context) => {
                       const label = context.label || '';
                       const value = context.raw || 0;
-                      const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                      const total = stats.totalOrders;
                       const percentage = total ? ((value / total) * 100).toFixed(1) : 0;
+                      if (label === 'Partial') {
+                        return `${label}: ${value} order dengan status campuran (${percentage}%)`;
+                      }
                       return `${label}: ${value} order (${percentage}%)`;
                     }
                   }
@@ -1231,9 +1159,18 @@
           });
         }
 
-        $('statusNote').textContent = 
-          `Total ${stats.totalOrders} order unik • Total QTY: ${formatNumber(stats.totalQty)} • ` +
-          `Delivered ${stats.delivered.count} order (${formatNumber(stats.delivered.qty)} Qty)`;
+        // Status Note
+        const statusNote = $('statusNote');
+        if (statusNote) {
+          statusNote.innerHTML = `
+            Total ${stats.totalOrders} order • Total QTY: ${formatNumber(stats.totalQty)}<br>
+            <span style="color: #2ecc71">✅ Delivered: ${formatNumber(stats.delivered.qty)} QTY</span> • 
+            <span style="color: #3498db">🚚 On Delivery: ${formatNumber(stats.onDelivery.qty)} QTY</span> • 
+            <span style="color: #f1c40f">⏳ Progress: ${formatNumber(stats.progress.qty)} QTY</span> • 
+            <span style="color: #e74c3c">⛔ Cancel: ${formatNumber(stats.cancel.qty)} QTY</span><br>
+            <span style="color: #9b59b6">⚡ Partial: ${stats.partial.count} order dengan status campuran</span>
+          `;
+        }
 
         // City Chart
         const cityData = groupAndSum(data, item => item.kota, 8);
@@ -1288,44 +1225,6 @@
             }
           });
         }
-
-        // SLA Chart
-        const ctxSLA = $('chartSLA')?.getContext('2d');
-        if (ctxSLA) {
-          State.charts.sla = new Chart(ctxSLA, {
-            type: 'doughnut',
-            data: {
-              labels: ['On Time', 'Delay', 'No Data'],
-              datasets: [{
-                data: [stats.slaOnTime, stats.slaDelay, stats.slaNoData],
-                backgroundColor: ['#2ecc71', '#e74c3c', '#95a5a6'],
-                borderWidth: 0
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: true,
-              cutout: '80%',
-              plugins: {
-                legend: { 
-                  position: 'bottom', 
-                  labels: { color: '#e9f1fb', font: { size: 11 } } 
-                },
-                tooltip: {
-                  callbacks: {
-                    label: (context) => {
-                      const label = context.label || '';
-                      const value = context.raw || 0;
-                      const total = stats.slaSampleSize;
-                      const percentage = total ? ((value / total) * 100).toFixed(1) : 0;
-                      return `${label}: ${value} order (${percentage}%)`;
-                    }
-                  }
-                }
-              }
-            }
-          });
-        }
       }
 
       function renderRealTimeTable(data) {
@@ -1368,32 +1267,179 @@
         });
       }
 
-      // ================= FAST REFRESH =================
-      async function refresh(skipCache = false) {
+      function updateLastUpdateTime() {
+        const lastUpdateElem = $('lastUpdate');
+        const lastUpdateTimeElem = $('lastUpdateTime');
+        
+        if (State.lastFetch) {
+          const timeStr = formatTimeOnly(State.lastFetch);
+          if (lastUpdateElem) lastUpdateElem.textContent = timeStr;
+          if (lastUpdateTimeElem) lastUpdateTimeElem.textContent = formatDate(State.lastFetch);
+        }
+      }
+
+      // ================= AUTO-REFRESH COUNTDOWN =================
+      function startCountdown(seconds) {
+        if (State.countdownTimer) {
+          clearInterval(State.countdownTimer);
+        }
+        
+        if (seconds <= 0) {
+          $('nextUpdateText').textContent = 'Auto-refresh off';
+          return;
+        }
+        
+        let timeLeft = seconds;
+        State.nextUpdateTime = Date.now() + (seconds * 1000);
+        
+        State.countdownTimer = setInterval(() => {
+          const now = Date.now();
+          const remaining = Math.max(0, Math.round((State.nextUpdateTime - now) / 1000));
+          
+          const nextText = $('nextUpdateText');
+          if (nextText) {
+            if (remaining <= 0) {
+              nextText.textContent = 'Updating...';
+            } else {
+              nextText.textContent = `Update dalam ${remaining}s`;
+            }
+          }
+        }, 100);
+      }
+
+      // ================= FETCH DATA dengan REAL-TIME MECHANISM =================
+      async function fetchData(forceRefresh = true) {
+        // Cancel previous fetch if any
+        if (State.fetchController) {
+          State.fetchController.abort();
+        }
+        
+        State.fetchController = new AbortController();
+        
+        showRefreshIndicator(true);
+        State.isRefreshing = true;
+        
+        // Tambahkan timestamp ke URL untuk menghindari cache
+        const cacheBuster = forceRefresh ? `&_t=${Date.now()}` : '';
+        const urlWithCacheBuster = CONFIG.CSV_URL + cacheBuster;
+        
+        // Set timeout untuk fetch
+        const timeoutId = setTimeout(() => {
+          State.fetchController.abort();
+        }, 10000); // 10 detik timeout
+        
+        try {
+          console.log('Fetching data from:', urlWithCacheBuster);
+          
+          const result = await new Promise((resolve, reject) => {
+            Papa.parse(urlWithCacheBuster, {
+              download: true,
+              header: false,
+              skipEmptyLines: true,
+              complete: resolve,
+              error: reject,
+              fastMode: true,
+              downloadRequestHeaders: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+              }
+            });
+          });
+
+          clearTimeout(timeoutId);
+
+          if (!result.data || result.data.length < 2) {
+            throw new Error('Data tidak ditemukan');
+          }
+
+          const dataRows = result.data.slice(1);
+          
+          let processedData = [];
+          for (let i = 0; i < dataRows.length; i++) {
+            const item = processRow(dataRows[i]);
+            if (item && item.orderCode) {
+              processedData.push(item);
+            }
+          }
+          
+          console.log(`✅ Loaded ${processedData.length} rows data at ${new Date().toLocaleTimeString()}`);
+          
+          State.retryCount = 0; // Reset retry count on success
+          State.lastFetch = new Date();
+          
+          return processedData;
+          
+        } catch (error) {
+          clearTimeout(timeoutId);
+          
+          if (error.name === 'AbortError') {
+            console.log('Fetch aborted (timeout or cancelled)');
+            return State.cache?.data || [];
+          }
+          
+          console.error('Fetch error:', error);
+          
+          // Retry logic
+          if (State.retryCount < CONFIG.MAX_RETRIES) {
+            State.retryCount++;
+            console.log(`Retry ${State.retryCount}/${CONFIG.MAX_RETRIES} in ${CONFIG.RETRY_DELAY}ms...`);
+            
+            showMessage('warning', `Koneksi error, mencoba lagi (${State.retryCount}/${CONFIG.MAX_RETRIES})...`, 3000);
+            
+            await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY));
+            return fetchData(forceRefresh);
+          }
+          
+          showMessage('error', `Gagal load data: ${error.message}. Menggunakan data terakhir.`);
+          
+          // Return cached data if available
+          return State.cache?.data || [];
+          
+        } finally {
+          showRefreshIndicator(false);
+          State.isRefreshing = false;
+          State.fetchController = null;
+          updateLastUpdateTime();
+        }
+      }
+
+      // ================= REFRESH dengan REAL-TIME UPDATE =================
+      async function refresh(forceRefresh = true) {
         if (State.isRefreshing) return;
 
         try {
-          const data = await fetchData(!skipCache);
+          const data = await fetchData(forceRefresh);
+          
+          // Update cache
+          State.cache = {
+            data: data,
+            timestamp: Date.now()
+          };
           
           const fromDate = $('fromDate')?.value;
           const toDate = $('toDate')?.value;
           
           const filteredData = filterDataByDate(data, fromDate, toDate);
+          State.filteredData = filteredData;
+          
           const stats = calculateStats(filteredData);
           
           // Update UI
           renderKPI(stats);
+          renderPartialDetails(stats);
           renderCharts(filteredData, stats);
           renderRealTimeTable(filteredData);
           
           // Update info
-          $('lastUpdate').textContent = State.lastFetch ? 
-            State.lastFetch.toLocaleTimeString('id-ID') : 'Loading...';
+          updateLastUpdateTime();
           
           $('totalRowsDetail').textContent = `${filteredData.length} baris`;
-          $('totalOrdersDetail').textContent = `${stats.totalOrders} kode unik`;
+          $('totalOrdersDetail').textContent = `${stats.totalOrders} order (kode unik)`;
           $('totalQtyDetail').textContent = formatNumber(stats.totalQty);
           $('avgQtyDetail').textContent = formatNumberDecimal(stats.avgQtyPerOrder, 1);
+          
+          // Live status indicator
+          $('liveStatus').innerHTML = '🟢 Live';
           
           // Periode data
           const dates = filteredData
@@ -1403,17 +1449,23 @@
           
           if (dates.length > 0) {
             const periodText = `${formatDate(dates[0])} - ${formatDate(dates[dates.length-1])}`;
-            $('dataPeriod').textContent = periodText;
+            const dataPeriod = $('dataPeriod');
+            if (dataPeriod) dataPeriod.textContent = periodText;
           }
           
-          showMessage('success', `Update: ${filteredData.length} baris data`);
+          // Update countdown with new interval
+          const refreshSec = Number($('refreshSec')?.value || 30);
+          startCountdown(refreshSec);
+          
+          showMessage('success', `Update: ${filteredData.length} baris data, ${stats.totalOrders} kode unik`, 1500);
           
         } catch (error) {
           showMessage('error', error.message);
+          $('liveStatus').innerHTML = '🔴 Error';
         }
       }
 
-      // ================= AUTO REFRESH =================
+      // ================= AUTO REFRESH SETUP =================
       function setupAutoRefresh() {
         if (State.refreshTimer) {
           clearInterval(State.refreshTimer);
@@ -1426,18 +1478,60 @@
         const seconds = Number(select.value || 0);
         
         if (seconds > 0) {
+          // Set interval untuk refresh
           State.refreshTimer = setInterval(() => {
             refresh(true);
           }, seconds * 1000);
+          
           $('refreshStatus').textContent = `${seconds}s`;
+          startCountdown(seconds);
         } else {
           $('refreshStatus').textContent = 'Off';
+          if (State.countdownTimer) {
+            clearInterval(State.countdownTimer);
+            $('nextUpdateText').textContent = 'Auto-refresh off';
+          }
+        }
+      }
+
+      // ================= CHECK FOR SPREADSHEET CHANGES =================
+      // Method tambahan: Long polling setiap 5 detik untuk cek perubahan
+      async function checkForChanges() {
+        if (State.isRefreshing) return;
+        
+        // Cek dengan HEAD request (lightweight)
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          
+          const response = await fetch(CONFIG.CSV_URL, {
+            method: 'HEAD',
+            cache: 'no-cache',
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          // Dapatkan last-modified header
+          const lastModified = response.headers.get('last-modified');
+          
+          if (lastModified && State.lastModified && lastModified !== State.lastModified) {
+            console.log('Spreadsheet changed! Refreshing...');
+            State.lastModified = lastModified;
+            refresh(true);
+          } else if (!State.lastModified) {
+            State.lastModified = lastModified;
+          }
+        } catch (error) {
+          // Silent fail for HEAD request
         }
       }
 
       // ================= INIT =================
       function init() {
-        console.log('Starting fast dashboard...');
+        console.log('=== DASHBOARD DISTRIBUSI MINYAK ===');
+        console.log('Mode: REAL-TIME AUTO UPDATE');
+        console.log('Data akan otomatis update setiap kali spreadsheet berubah');
         
         // Set default dates
         const today = new Date();
@@ -1455,7 +1549,12 @@
         }
 
         // Event listeners
-        $('btnRefresh')?.addEventListener('click', () => refresh(true));
+        $('btnRefresh')?.addEventListener('click', () => {
+          refresh(true);
+          // Reset countdown
+          const seconds = Number($('refreshSec')?.value || 30);
+          startCountdown(seconds);
+        });
         
         $('btnReset')?.addEventListener('click', () => {
           if (fromInput) fromInput.value = thirtyDaysAgo.toISOString().split('T')[0];
@@ -1463,15 +1562,24 @@
           refresh(true);
         });
         
-        $('refreshSec')?.addEventListener('change', setupAutoRefresh);
+        $('refreshSec')?.addEventListener('change', () => {
+          setupAutoRefresh();
+          refresh(true);
+        });
+        
         $('fromDate')?.addEventListener('change', () => refresh(true));
         $('toDate')?.addEventListener('change', () => refresh(true));
 
         // First load
-        refresh();
+        refresh(true);
 
         // Auto refresh setup
         setupAutoRefresh();
+
+        // Check for changes every 10 seconds (lightweight polling)
+        setInterval(() => {
+          checkForChanges();
+        }, 10000);
 
         // Visibility change
         document.addEventListener('visibilitychange', () => {
@@ -1482,8 +1590,14 @@
             }
           } else {
             setupAutoRefresh();
-            refresh();
+            refresh(true);
           }
+        });
+
+        // Network status
+        window.addEventListener('online', () => {
+          console.log('Back online, refreshing...');
+          refresh(true);
         });
       }
 
