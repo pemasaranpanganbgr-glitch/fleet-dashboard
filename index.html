@@ -56,12 +56,16 @@
                   var(--bg-primary);
       min-height: 100vh;
       line-height: 1.5;
+      display: flex;
+      flex-direction: column;
     }
 
     .wrap {
       max-width: 1400px;
       margin: 0 auto;
       padding: 20px 16px;
+      flex: 1;
+      width: 100%;
     }
 
     /* Header */
@@ -122,6 +126,12 @@
       align-items: center;
     }
 
+    .control-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
     .ctrl {
       display: flex;
       gap: 8px;
@@ -136,6 +146,7 @@
       font-size: 12px;
       color: var(--text-secondary);
       font-weight: 600;
+      white-space: nowrap;
     }
 
     input, select, button {
@@ -168,6 +179,40 @@
       color: var(--text-primary);
     }
 
+    .auto-refresh-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      min-width: 140px;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #2ecc71;
+      border-radius: 50%;
+      animation: livePulse 1.5s ease-in-out infinite;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-width: fit-content;
+    }
+
+    @keyframes livePulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); background: #f1c40f; }
+      100% { opacity: 1; transform: scale(1); background: #2ecc71; }
+    }
+
     /* Grid Layouts */
     .grid {
       display: grid;
@@ -190,6 +235,17 @@
     @media (max-width: 1200px) {
       .kpis { grid-template-columns: repeat(3, 1fr); }
       .main, .bottom { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .control-group {
+        flex-wrap: wrap;
+        width: 100%;
+      }
+      
+      .auto-refresh-status {
+        min-width: 100px;
+      }
     }
 
     /* Cards */
@@ -396,29 +452,92 @@
       50% { opacity: 0.5; transform: scale(0.8); }
     }
 
-    /* Auto-refresh status bar */
-    .auto-refresh-status {
+    /* ========== FOOTER STYLES ========== */
+    .footer {
+      margin-top: 40px;
+      padding: 20px 0;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .footer-logo {
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(0,0,0,0.3);
-      padding: 4px 12px;
-      border-radius: 20px;
+      gap: 12px;
+    }
+
+    .footer-logo img {
+      height: 30px;
+      width: auto;
+      opacity: 0.7;
+      filter: brightness(0) invert(1);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-primary);
+    }
+
+    .footer-info {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-info span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer-info i {
+      color: var(--accent-primary);
+    }
+
+    .copyright {
+      width: 100%;
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
       font-size: 11px;
+      opacity: 0.7;
     }
 
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background: #2ecc71;
-      border-radius: 50%;
-      animation: livePulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes livePulse {
-      0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); background: #f1c40f; }
-      100% { opacity: 1; transform: scale(1); background: #2ecc71; }
+    @media (max-width: 768px) {
+      .footer {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .footer-logo {
+        justify-content: center;
+      }
+      
+      .footer-links {
+        justify-content: center;
+      }
+      
+      .footer-info {
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -448,29 +567,41 @@
       </div>
 
       <div class="controls">
-        <div class="ctrl">
-          <label>Periode</label>
-          <input type="date" id="fromDate" />
-          <span class="note">s/d</span>
-          <input type="date" id="toDate" />
+        <!-- Group 1: Date Range -->
+        <div class="control-group">
+          <div class="ctrl">
+            <label>Periode</label>
+            <input type="date" id="fromDate" />
+            <span class="note">s/d</span>
+            <input type="date" id="toDate" />
+          </div>
         </div>
-        <div class="ctrl">
-          <label>Auto Refresh</label>
-          <select id="refreshSec">
-            <option value="0">Off</option>
-            <option value="5">5 dtk (Real-time)</option>
-            <option value="10">10 dtk</option>
-            <option value="30" selected>30 dtk</option>
-            <option value="60">60 dtk</option>
-            <option value="300">5 menit</option>
-          </select>
+
+        <!-- Group 2: Auto Refresh Settings -->
+        <div class="control-group">
+          <div class="ctrl">
+            <label>Auto Refresh</label>
+            <select id="refreshSec">
+              <option value="0">Off</option>
+              <option value="5">5 dtk (Real-time)</option>
+              <option value="10">10 dtk</option>
+              <option value="30">30 dtk</option>
+              <option value="60">60 dtk</option>
+              <option value="300" selected>5 menit</option>
+            </select>
+          </div>
+          
+          <div class="auto-refresh-status" id="autoRefreshStatus">
+            <span class="live-dot"></span>
+            <span id="nextUpdateText">Update dalam 30s</span>
+          </div>
         </div>
-        <div class="auto-refresh-status" id="autoRefreshStatus">
-          <span class="live-dot"></span>
-          <span id="nextUpdateText">Update dalam 30s</span>
+
+        <!-- Group 3: Action Buttons -->
+        <div class="button-group">
+          <button id="btnRefresh">↻ Refresh Now</button>
+          <button id="btnReset" class="secondary">✕ Reset</button>
         </div>
-        <button id="btnRefresh">↻ Refresh Now</button>
-        <button id="btnReset" class="secondary">✕ Reset</button>
       </div>
     </header>
 
@@ -568,6 +699,23 @@
         </div>
       </div>
     </div>
+
+    <!-- ========== FOOTER SECTION ========== -->
+    <footer class="footer">
+      <div class="footer-logo">
+        <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
+              </div>
+      
+         
+      <div class="footer-info">
+        <span>📊 Versi 1.0.0</span>
+        
+      </div>
+      
+      <div class="copyright © 2026 By RH">
+        <span>MonitoringDistribusi Minyak</span>
+      </div>
+    </footer>
   </div>
 
   <script>
@@ -579,9 +727,6 @@
         // GANTI URL INI DENGAN URL PUBLISH CSV ANDA!
         CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRAqs3OR5iSyutu1ozCM5Q4JFXNKOV4AhOB7u2d2SCUfbV2SasQ17VBH924VxdTxoN4aYq3W3qZu8X/pub?gid=166266133&single=true&output=csv",
         
-        // Alternative: Jika URL di atas tidak bekerja, gunakan URL ini:
-        // CSV_URL: "https://docs.google.com/spreadsheets/d/1hBx_GuUchBIVkIbDBN6FWt-qA1Db9lM1qyBq_JjjPRI/export?format=csv&gid=166266133",
-        
         CHART_COLORS: {
           delivered: '#2ecc71',
           onDelivery: '#3498db',
@@ -589,8 +734,8 @@
           cancel: '#e74c3c',
           partial: '#9b59b6'
         },
-        CACHE_DURATION: 0, // Set 0 untuk selalu ambil data baru (real-time)
-        RETRY_DELAY: 3000, // 3 detik
+        CACHE_DURATION: 0,
+        RETRY_DELAY: 3000,
         MAX_RETRIES: 1
       };
 
@@ -602,17 +747,9 @@
         qty: 6,            // Kolom G (index 6) - Quantity
         status: 14,        // Kolom O (index 14)
         tglMuat: 9,        // Kolom J (index 9)
-        actualMuat: 10,    // Kolom K (index 10)
+        actualMuat: 16,    // Kolom Q (index 16)
         noPolisi: 12,      // Kolom M (index 12)
         tglInput: 1        // Kolom B (index 1)
-      };
-
-      // Mapping status
-      const STATUS_MAP = {
-        DELIVERED: ['delivered', 'selesai', 'done', 'terkirim', 'complete'],
-        ON_DELIVERY: ['on delivery', 'delivery', 'dalam perjalanan', 'pickup', 'shipping'],
-        PROGRESS: ['progress', 'proses', 'diproses', 'menunggu', 'pending'],
-        CANCEL: ['cancel', 'batal', 'cancelled', 'dibatalkan', 'void']
       };
 
       // ================= STATE =================
@@ -626,7 +763,7 @@
         lastFetch: null,
         nextUpdateTime: null,
         retryCount: 0,
-        fetchController: null // Untuk cancel fetch jika perlu
+        fetchController: null
       };
 
       // ================= UTILITY FUNCTIONS =================
@@ -731,14 +868,12 @@
         try {
           const str = value.toString().trim();
           
-          // Format DD/MM/YYYY
           const dmyMatch = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
           if (dmyMatch) {
             const [_, day, month, year] = dmyMatch;
             return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
           }
           
-          // Format YYYY-MM-DD
           const ymdMatch = str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
           if (ymdMatch) {
             const [_, year, month, day] = ymdMatch;
@@ -816,7 +951,6 @@
           };
         }
 
-        // STEP 1: Kumpulkan semua status per order
         const orderStatuses = new Map();
         const orderQtyByStatus = new Map();
         
@@ -836,7 +970,6 @@
           orderQtyByStatus.set(key, (orderQtyByStatus.get(key) || 0) + qty);
         });
 
-        // STEP 2: Tentukan status FINAL untuk setiap order
         const orderFinalStatus = new Map();
         const orderDetails = new Map();
         
@@ -864,7 +997,6 @@
           }
         });
 
-        // STEP 3: Hitung COUNT dan QUANTITY
         let delivered = { count: 0, qty: 0 };
         let onDelivery = { count: 0, qty: 0 };
         let progress = { count: 0, qty: 0 };
@@ -909,7 +1041,6 @@
           }
         });
 
-        // STEP 4: Hitung persentase
         const totalOrders = orderFinalStatus.size;
         let totalQty = 0;
         data.forEach(item => {
@@ -921,14 +1052,6 @@
         progress.percentage = totalOrders ? (progress.count / totalOrders) * 100 : 0;
         cancel.percentage = totalOrders ? (cancel.count / totalOrders) * 100 : 0;
         partial.percentage = totalOrders ? (partial.count / totalOrders) * 100 : 0;
-
-        console.log('=== STATUS FINAL ORDER ===');
-        console.log(`Total Orders: ${totalOrders}`);
-        console.log(`✅ DELIVERED   : ${delivered.count} orders`);
-        console.log(`🚚 ON_DELIVERY : ${onDelivery.count} orders`);
-        console.log(`⏳ PROGRESS    : ${progress.count} orders`);
-        console.log(`⛔ CANCEL      : ${cancel.count} orders`);
-        console.log(`⚡ PARTIAL     : ${partial.count} orders`);
 
         return {
           totalOrders,
@@ -985,7 +1108,6 @@
         if (!kpiContainer) return;
         
         kpiContainer.innerHTML = `
-          <!-- Total Order -->
           <div class="kpi">
             <div class="header">
               <div class="lbl">Total Order</div>
@@ -996,7 +1118,6 @@
             <div class="sub-info">${stats.totalOrders} kode unik • Total baris: ${State.filteredData?.length || 0}</div>
           </div>
 
-          <!-- Delivered -->
           <div class="kpi">
             <div class="header">
               <div class="lbl">Delivered</div>
@@ -1007,7 +1128,6 @@
             <div class="sub-info">${formatNumberDecimal(stats.delivered.percentage, 1)}% dari total order</div>
           </div>
 
-          <!-- On Delivery -->
           <div class="kpi">
             <div class="header">
               <div class="lbl">On Delivery</div>
@@ -1018,7 +1138,6 @@
             <div class="sub-info">${formatNumberDecimal(stats.onDelivery.percentage, 1)}% dari total order</div>
           </div>
 
-          <!-- Progress -->
           <div class="kpi">
             <div class="header">
               <div class="lbl">Progress</div>
@@ -1029,7 +1148,6 @@
             <div class="sub-info">${formatNumberDecimal(stats.progress.percentage, 1)}% dari total order</div>
           </div>
 
-          <!-- Cancel -->
           <div class="kpi">
             <div class="header">
               <div class="lbl">Cancel</div>
@@ -1040,7 +1158,6 @@
             <div class="sub-info">${formatNumberDecimal(stats.cancel.percentage, 1)}% dari total order</div>
           </div>
 
-          <!-- Partial -->
           <div class="kpi">
             <div class="header">
               <div class="lbl">Partial</div>
@@ -1076,7 +1193,6 @@
           html += `<div class="partial-breakdown">`;
           
           detail.breakdown.forEach(b => {
-            const percentage = ((b.qty / stats.partial.qty) * 100).toFixed(1);
             let badgeClass = '';
             switch(b.status) {
               case 'DELIVERED': badgeClass = 'badge-delivered'; break;
@@ -1087,7 +1203,7 @@
             
             html += `<div class="breakdown-item">`;
             html += `<span class="badge ${badgeClass}">${b.status}</span>`;
-            html += `<span>${formatNumber(b.qty)} Qty (${percentage}%)</span>`;
+            html += `<span>${formatNumber(b.qty)} Qty</span>`;
             html += `</div>`;
           });
           
@@ -1101,12 +1217,10 @@
       function renderCharts(data, stats) {
         if (!data || !stats) return;
         
-        // Destroy old charts
         Object.values(State.charts).forEach(chart => {
           if (chart) chart.destroy();
         });
 
-        // Status Chart
         const ctxStatus = $('chartStatus')?.getContext('2d');
         if (ctxStatus && stats.totalOrders > 0) {
           State.charts.status = new Chart(ctxStatus, {
@@ -1159,7 +1273,6 @@
           });
         }
 
-        // Status Note
         const statusNote = $('statusNote');
         if (statusNote) {
           statusNote.innerHTML = `
@@ -1172,7 +1285,6 @@
           `;
         }
 
-        // City Chart
         const cityData = groupAndSum(data, item => item.kota, 8);
         const ctxCity = $('chartCity')?.getContext('2d');
         if (ctxCity && cityData.length > 0) {
@@ -1199,7 +1311,6 @@
           });
         }
 
-        // Factory Chart
         const factoryData = groupAndSum(data, item => item.pabrik, 6);
         const ctxFactory = $('chartFactory')?.getContext('2d');
         if (ctxFactory && factoryData.length > 0) {
@@ -1307,9 +1418,8 @@
         }, 100);
       }
 
-      // ================= FETCH DATA dengan REAL-TIME MECHANISM =================
+      // ================= FETCH DATA =================
       async function fetchData(forceRefresh = true) {
-        // Cancel previous fetch if any
         if (State.fetchController) {
           State.fetchController.abort();
         }
@@ -1319,14 +1429,12 @@
         showRefreshIndicator(true);
         State.isRefreshing = true;
         
-        // Tambahkan timestamp ke URL untuk menghindari cache
         const cacheBuster = forceRefresh ? `&_t=${Date.now()}` : '';
         const urlWithCacheBuster = CONFIG.CSV_URL + cacheBuster;
         
-        // Set timeout untuk fetch
         const timeoutId = setTimeout(() => {
           State.fetchController.abort();
-        }, 10000); // 10 detik timeout
+        }, 10000);
         
         try {
           console.log('Fetching data from:', urlWithCacheBuster);
@@ -1364,7 +1472,7 @@
           
           console.log(`✅ Loaded ${processedData.length} rows data at ${new Date().toLocaleTimeString()}`);
           
-          State.retryCount = 0; // Reset retry count on success
+          State.retryCount = 0;
           State.lastFetch = new Date();
           
           return processedData;
@@ -1379,7 +1487,6 @@
           
           console.error('Fetch error:', error);
           
-          // Retry logic
           if (State.retryCount < CONFIG.MAX_RETRIES) {
             State.retryCount++;
             console.log(`Retry ${State.retryCount}/${CONFIG.MAX_RETRIES} in ${CONFIG.RETRY_DELAY}ms...`);
@@ -1392,7 +1499,6 @@
           
           showMessage('error', `Gagal load data: ${error.message}. Menggunakan data terakhir.`);
           
-          // Return cached data if available
           return State.cache?.data || [];
           
         } finally {
@@ -1403,14 +1509,13 @@
         }
       }
 
-      // ================= REFRESH dengan REAL-TIME UPDATE =================
+      // ================= REFRESH =================
       async function refresh(forceRefresh = true) {
         if (State.isRefreshing) return;
 
         try {
           const data = await fetchData(forceRefresh);
           
-          // Update cache
           State.cache = {
             data: data,
             timestamp: Date.now()
@@ -1424,13 +1529,11 @@
           
           const stats = calculateStats(filteredData);
           
-          // Update UI
           renderKPI(stats);
           renderPartialDetails(stats);
           renderCharts(filteredData, stats);
           renderRealTimeTable(filteredData);
           
-          // Update info
           updateLastUpdateTime();
           
           $('totalRowsDetail').textContent = `${filteredData.length} baris`;
@@ -1438,22 +1541,8 @@
           $('totalQtyDetail').textContent = formatNumber(stats.totalQty);
           $('avgQtyDetail').textContent = formatNumberDecimal(stats.avgQtyPerOrder, 1);
           
-          // Live status indicator
           $('liveStatus').innerHTML = '🟢 Live';
           
-          // Periode data
-          const dates = filteredData
-            .map(d => d.tglInput || d.tglMuat || d.actualMuat)
-            .filter(d => d)
-            .sort((a, b) => a - b);
-          
-          if (dates.length > 0) {
-            const periodText = `${formatDate(dates[0])} - ${formatDate(dates[dates.length-1])}`;
-            const dataPeriod = $('dataPeriod');
-            if (dataPeriod) dataPeriod.textContent = periodText;
-          }
-          
-          // Update countdown with new interval
           const refreshSec = Number($('refreshSec')?.value || 30);
           startCountdown(refreshSec);
           
@@ -1478,7 +1567,6 @@
         const seconds = Number(select.value || 0);
         
         if (seconds > 0) {
-          // Set interval untuk refresh
           State.refreshTimer = setInterval(() => {
             refresh(true);
           }, seconds * 1000);
@@ -1494,12 +1582,10 @@
         }
       }
 
-      // ================= CHECK FOR SPREADSHEET CHANGES =================
-      // Method tambahan: Long polling setiap 5 detik untuk cek perubahan
+      // ================= CHECK FOR CHANGES =================
       async function checkForChanges() {
         if (State.isRefreshing) return;
         
-        // Cek dengan HEAD request (lightweight)
         try {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 3000);
@@ -1512,7 +1598,6 @@
           
           clearTimeout(timeoutId);
           
-          // Dapatkan last-modified header
           const lastModified = response.headers.get('last-modified');
           
           if (lastModified && State.lastModified && lastModified !== State.lastModified) {
@@ -1523,17 +1608,14 @@
             State.lastModified = lastModified;
           }
         } catch (error) {
-          // Silent fail for HEAD request
+          // Silent fail
         }
       }
 
       // ================= INIT =================
       function init() {
         console.log('=== DASHBOARD DISTRIBUSI MINYAK ===');
-        console.log('Mode: REAL-TIME AUTO UPDATE');
-        console.log('Data akan otomatis update setiap kali spreadsheet berubah');
         
-        // Set default dates
         const today = new Date();
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(today.getDate() - 30);
@@ -1548,10 +1630,8 @@
           toInput.value = today.toISOString().split('T')[0];
         }
 
-        // Event listeners
         $('btnRefresh')?.addEventListener('click', () => {
           refresh(true);
-          // Reset countdown
           const seconds = Number($('refreshSec')?.value || 30);
           startCountdown(seconds);
         });
@@ -1570,18 +1650,13 @@
         $('fromDate')?.addEventListener('change', () => refresh(true));
         $('toDate')?.addEventListener('change', () => refresh(true));
 
-        // First load
         refresh(true);
-
-        // Auto refresh setup
         setupAutoRefresh();
 
-        // Check for changes every 10 seconds (lightweight polling)
         setInterval(() => {
           checkForChanges();
         }, 10000);
 
-        // Visibility change
         document.addEventListener('visibilitychange', () => {
           if (document.hidden) {
             if (State.refreshTimer) {
@@ -1594,14 +1669,12 @@
           }
         });
 
-        // Network status
         window.addEventListener('online', () => {
           console.log('Back online, refreshing...');
           refresh(true);
         });
       }
 
-      // Start
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
       } else {
