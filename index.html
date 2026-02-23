@@ -452,7 +452,50 @@
       50% { opacity: 0.5; transform: scale(0.8); }
     }
 
-    /* ========== FOOTER STYLES ========== */
+    /* Master Order Summary Card */
+    .master-card {
+      background: linear-gradient(135deg, rgba(255, 176, 0, 0.15), rgba(255, 176, 0, 0.05));
+      border: 1px solid rgba(255, 176, 0, 0.3);
+      margin-bottom: 20px;
+    }
+
+    .master-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .master-stat-item {
+      text-align: center;
+    }
+
+    .master-stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .master-stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent-primary);
+    }
+
+    .master-stat-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+      .master-stats {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+
+    /* Footer */
     .footer {
       margin-top: 40px;
       padding: 20px 0;
@@ -479,13 +522,13 @@
       filter: brightness(0) invert(1);
     }
 
-    .-links {
+    .footer-links {
       display: flex;
       gap: 24px;
       flex-wrap: wrap;
     }
 
-    .-links a {
+    .footer-links a {
       color: var(--text-secondary);
       text-decoration: none;
       transition: var(--transition);
@@ -519,25 +562,6 @@
       border-top: 1px solid var(--line);
       font-size: 11px;
       opacity: 0.7;
-    }
-
-    @media (max-width: 768px) {
-      .footer {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .footer-logo {
-        justify-content: center;
-      }
-      
-      .footer-links {
-        justify-content: center;
-      }
-      
-      .footer-info {
-        justify-content: center;
-      }
     }
   </style>
 </head>
@@ -605,12 +629,37 @@
       </div>
     </header>
 
-    <!-- KPI Section -->
-    <div class="grid kpis" id="kpiContainer">
-      <!-- Akan diisi oleh JavaScript -->
+    <!-- MASTER ORDER SUMMARY CARD (Tabel AN-AS) -->
+    <div class="card master-card">
+      <div class="hd">
+        <div class="t">📋 RINGKASAN MASTER ORDER (Tabel AN-AS)</div>
+        <div class="pill">Sumber Order Masuk</div>
+      </div>
+      <div class="master-stats">
+        <div class="master-stat-item">
+          <div class="master-stat-label">Total Order Masuk</div>
+          <div class="master-stat-value" id="masterTotalOrders">0</div>
+          <div class="master-stat-sub">Kode Unik</div>
+        </div>
+        <div class="master-stat-item">
+          <div class="master-stat-label">Total QTY Order</div>
+          <div class="master-stat-value" id="masterTotalQty">0</div>
+          <div class="master-stat-sub">Dari Master</div>
+        </div>
+        <div class="master-stat-item">
+          <div class="master-stat-label">Rata-rata QTY/Order</div>
+          <div class="master-stat-value" id="masterAvgQty">0</div>
+          <div class="master-stat-sub">Per Kode Order</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Charts -->
+    <!-- KPI Section (REALISASI - Tabel B-V) - SAMA PERSIS DENGAN ASLI -->
+    <div class="grid kpis" id="kpiContainer">
+      <!-- Akan diisi oleh JavaScript (SAMA PERSIS DENGAN ASLI) -->
+    </div>
+
+    <!-- Charts (SAMA PERSIS DENGAN ASLI) -->
     <div class="grid main">
       <div class="card">
         <div class="hd">
@@ -626,7 +675,7 @@
       <div class="card">
         <div class="hd">
           <div class="t">Top 8 Kota Tujuan</div>
-          <div class="pill">Berdasarkan QTY</div>
+          <div class="pill">Berdasarkan QTY Realisasi</div>
         </div>
         <div class="bd">
           <canvas id="chartCity"></canvas>
@@ -636,7 +685,7 @@
       <div class="card">
         <div class="hd">
           <div class="t">Top 6 Pabrik</div>
-          <div class="pill">Berdasarkan QTY</div>
+          <div class="pill">Berdasarkan QTY Realisasi</div>
         </div>
         <div class="bd">
           <canvas id="chartFactory"></canvas>
@@ -644,7 +693,7 @@
       </div>
     </div>
 
-    <!-- Bottom Section -->
+    <!-- Bottom Section (SAMA PERSIS DENGAN ASLI) -->
     <div class="grid bottom">
       <div class="card">
         <div class="hd">
@@ -688,7 +737,7 @@
           <div class="note" style="margin-bottom:12px">
             <div>• Total Baris Data: <span id="totalRowsDetail">-</span></div>
             <div>• Total Order (Kode Unik): <span id="totalOrdersDetail">-</span></div>
-            <div>• Total Quantity: <span id="totalQtyDetail">-</span></div>
+            <div>• Total Quantity Realisasi: <span id="totalQtyDetail">-</span></div>
             <div>• Rata-rata QTY per Order: <span id="avgQtyDetail">-</span></div>
             <div>• Auto Refresh: <span id="refreshStatus">30s</span></div>
             <div>• Data Source: <span id="dataSource">Google Sheets</span></div>
@@ -700,21 +749,17 @@
       </div>
     </div>
 
-    <!-- ========== FOOTER SECTION ========== -->
+    <!-- Footer -->
     <footer class="footer">
       <div class="footer-logo">
         <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
-              </div>
+      </div>
       
-         
       <div class="footer-info">
-        <span>📊 Versi 1.0.0</span>
-        
+        <span>📊 Versi 2.0 - Master (AN-AS) + Realisasi (B-V)</span>
       </div>
       
-      <div class="copyright"> copyright © 2026 By RH </div>
-      
-      </div>
+      <div class="copyright">copyright © 2026 By RH</div>
     </footer>
   </div>
 
@@ -724,7 +769,6 @@
 
       // ================= KONFIGURASI =================
       const CONFIG = {
-        // GANTI URL INI DENGAN URL PUBLISH CSV ANDA!
         CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRAqs3OR5iSyutu1ozCM5Q4JFXNKOV4AhOB7u2d2SCUfbV2SasQ17VBH924VxdTxoN4aYq3W3qZu8X/pub?gid=166266133&single=true&output=csv",
         
         CHART_COLORS: {
@@ -739,23 +783,34 @@
         MAX_RETRIES: 1
       };
 
-      // Mapping kolom berdasarkan index (0-based)
+      // ================= MAPPING KOLOM YANG BENAR =================
       const COLUMN_MAP = {
-        orderCode: 2,      // Kolom C (index 2) - Kode unik
-        pabrik: 3,         // Kolom D (index 3)
-        kota: 5,           // Kolom F (index 5)
-        qty: 6,            // Kolom G (index 6) - Quantity
-        status: 15,        // Kolom p (index 15)
-        tglMuat: 14,        // Kolom O (index 14)
-        actualMuat: 17,    // Kolom R (index 17)
-        noPolisi: 12,      // Kolom J (index 9)
-        tglInput: 1        // Kolom B (index 1)
+        // UNTUK REALISASI (Tabel B-V) - SAMA PERSIS DENGAN ASLI
+        realisasi: {
+          orderCode: 2,      // Kolom C (index 2) - Kode unik
+          pabrik: 3,         // Kolom D (index 3)
+          kota: 5,           // Kolom F (index 5)
+          qty: 6,            // Kolom G (index 6) - Quantity Realisasi
+          status: 15,        // Kolom P (index 15)
+          tglMuat: 14,       // Kolom O (index 14)
+          actualMuat: 17,    // Kolom R (index 17)
+          noPolisi: 12,      // Kolom M (index 12)
+          tglInput: 1        // Kolom B (index 1)
+        },
+        
+        // UNTUK MASTER (Tabel AN-AS) - INI KHUSUS ORDER MASUK
+        master: {
+          orderCode: 40,     // Kolom AO (index 40) - Kode unik (sama dengan realisasi)
+          tglOrder: 39,      // Kolom AN (index 39) - Tanggal Order
+          qtyOrder: 44       // Kolom AS (index 44) - QTY Order
+        }
       };
 
       // ================= STATE =================
       const State = {
         data: null,
         filteredData: null,
+        masterData: null,     // Data khusus master untuk ringkasan order masuk
         charts: {},
         refreshTimer: null,
         countdownTimer: null,
@@ -826,7 +881,6 @@
               day: '2-digit', 
               month: '2-digit', 
               year: 'numeric',
-              
             }).format(date);
           }
           return '-';
@@ -917,25 +971,57 @@
         return 'PROGRESS';
       }
 
-      // ================= DATA PROCESSING =================
+      // ================= FUNGSI PROCESS ROW YANG DIPERBAIKI =================
       function processRow(row) {
         if (!Array.isArray(row)) return null;
         
+        // DATA REALISASI (dari kolom B-V) - INI UNTUK DASHBOARD UTAMA
+        const realisasiData = {
+          orderCode: row[COLUMN_MAP.realisasi.orderCode] || '',
+          pabrik: row[COLUMN_MAP.realisasi.pabrik] || 'Unknown',
+          kota: row[COLUMN_MAP.realisasi.kota] || 'Unknown',
+          qty: parseNumber(row[COLUMN_MAP.realisasi.qty]),
+          status: row[COLUMN_MAP.realisasi.status] || '',
+          statusCategory: getStatusCategory(row[COLUMN_MAP.realisasi.status]),
+          tglMuat: parseDate(row[COLUMN_MAP.realisasi.tglMuat]),
+          actualMuat: parseDate(row[COLUMN_MAP.realisasi.actualMuat]),
+          noPolisi: row[COLUMN_MAP.realisasi.noPolisi] || '-',
+          tglInput: parseDate(row[COLUMN_MAP.realisasi.tglInput])
+        };
+        
+        // DATA MASTER (dari kolom AN-AS) - UNTUK RINGKASAN ORDER MASUK
+        const masterData = {
+          orderCode: row[COLUMN_MAP.master.orderCode] || '',
+          tglOrder: parseDate(row[COLUMN_MAP.master.tglOrder]),
+          qtyOrder: parseNumber(row[COLUMN_MAP.master.qtyOrder])
+        };
+        
         return {
-          orderCode: row[COLUMN_MAP.orderCode] || '',
-          pabrik: row[COLUMN_MAP.pabrik] || 'Unknown',
-          kota: row[COLUMN_MAP.kota] || 'Unknown',
-          qty: parseNumber(row[COLUMN_MAP.qty]),
-          status: row[COLUMN_MAP.status] || '',
-          statusCategory: getStatusCategory(row[COLUMN_MAP.status]),
-          tglMuat: parseDate(row[COLUMN_MAP.tglMuat]),
-          actualMuat: parseDate(row[COLUMN_MAP.actualMuat]),
-          noPolisi: row[COLUMN_MAP.noPolisi] || '-',
-          tglInput: parseDate(row[COLUMN_MAP.tglInput])
+          // Data untuk dashboard utama (SAMA PERSIS DENGAN ASLI)
+          orderCode: realisasiData.orderCode || masterData.orderCode,
+          pabrik: realisasiData.pabrik,
+          kota: realisasiData.kota,
+          qty: realisasiData.qty,  // QTY REALISASI (dari tabel B-V)
+          status: realisasiData.status,
+          statusCategory: realisasiData.statusCategory,
+          tglMuat: realisasiData.tglMuat,
+          actualMuat: realisasiData.actualMuat,
+          noPolisi: realisasiData.noPolisi,
+          tglInput: realisasiData.tglInput,
+          
+          // Data master terpisah (untuk ringkasan)
+          masterOrderCode: masterData.orderCode,
+          tglOrder: masterData.tglOrder,
+          qtyOrder: masterData.qtyOrder,
+          
+          // Flag untuk identifikasi
+          hasRealisasi: realisasiData.orderCode !== '',
+          hasMaster: masterData.orderCode !== '' && masterData.qtyOrder > 0
         };
       }
 
-      // ================= PERHITUNGAN UTAMA dengan STATUS PARTIAL =================
+      // ================= FUNGSI MENGHITUNG STATISTIK REALISASI =================
+      // INI SAMA PERSIS DENGAN FUNGSI ASLI
       function calculateStats(data) {
         if (!data || data.length === 0) {
           return {
@@ -1064,6 +1150,37 @@
         };
       }
 
+      // ================= FUNGSI MENGHITUNG STATISTIK MASTER =================
+      function calculateMasterStats(data) {
+        const masterOrders = new Map();
+        
+        data.forEach(item => {
+          if (item.hasMaster && item.masterOrderCode) {
+            const orderCode = item.masterOrderCode;
+            if (!masterOrders.has(orderCode)) {
+              masterOrders.set(orderCode, {
+                orderCode: orderCode,
+                tglOrder: item.tglOrder,
+                qtyOrder: item.qtyOrder
+              });
+            }
+          }
+        });
+        
+        const orders = Array.from(masterOrders.values());
+        const totalOrders = orders.length;
+        const totalQty = orders.reduce((sum, order) => sum + (order.qtyOrder || 0), 0);
+        const avgQty = totalOrders ? totalQty / totalOrders : 0;
+        
+        return {
+          totalOrders,
+          totalQty,
+          avgQty,
+          orders
+        };
+      }
+
+      // ================= FUNGSI GROUP AND SUM (SAMA PERSIS DENGAN ASLI) =================
       function groupAndSum(data, keyFn, limit = 10) {
         const map = new Map();
         for (const item of data) {
@@ -1076,6 +1193,7 @@
           .slice(0, limit);
       }
 
+      // ================= FILTER DATA BY DATE (BERDASARKAN TANGGAL REALISASI) =================
       function filterDataByDate(data, fromDate, toDate) {
         if (!fromDate && !toDate) return data;
         
@@ -1099,7 +1217,14 @@
         });
       }
 
-      // ================= RENDERING =================
+      // ================= RENDER MASTER SUMMARY =================
+      function renderMasterSummary(masterStats) {
+        $('masterTotalOrders').textContent = formatNumber(masterStats.totalOrders);
+        $('masterTotalQty').textContent = formatNumber(masterStats.totalQty);
+        $('masterAvgQty').textContent = formatNumberDecimal(masterStats.avgQty, 1);
+      }
+
+      // ================= RENDER KPI (SAMA PERSIS DENGAN ASLI) =================
       function renderKPI(stats) {
         if (!stats) return;
         
@@ -1113,7 +1238,7 @@
               <div class="icon">📊</div>
             </div>
             <div class="main-value">${formatNumber(stats.totalOrders)}</div>
-            <div class="qty-value">${formatNumber(stats.totalQty)} Qty</div>
+            <div class="qty-value">${formatNumber(stats.totalQty)} Qty Realisasi</div>
             <div class="sub-info">${stats.totalOrders} kode unik • Total baris: ${State.filteredData?.length || 0}</div>
           </div>
 
@@ -1169,6 +1294,7 @@
         `;
       }
 
+      // ================= RENDER PARTIAL DETAILS (SAMA PERSIS DENGAN ASLI) =================
       function renderPartialDetails(stats) {
         const partialContainer = $('partialContainer');
         const partialPill = $('partialPill');
@@ -1186,7 +1312,7 @@
         let html = `<div class="partial-detail">`;
         html += `<p style="margin-bottom:8px; font-weight:700;">⚡ ${stats.partial.count} Order dengan Status Campuran:</p>`;
         
-        stats.partial.details.forEach(detail => {
+        stats.partial.details.slice(0, 5).forEach(detail => {
           html += `<div style="margin-top:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:6px;">`;
           html += `<div style="font-weight:700; margin-bottom:6px;">📋 ${detail.orderCode}</div>`;
           html += `<div class="partial-breakdown">`;
@@ -1209,10 +1335,15 @@
           html += `</div></div>`;
         });
         
+        if (stats.partial.details.length > 5) {
+          html += `<p class="note" style="margin-top:8px;">... dan ${stats.partial.details.length - 5} order lainnya</p>`;
+        }
+        
         html += `</div>`;
         partialContainer.innerHTML = html;
       }
 
+      // ================= RENDER CHARTS (SAMA PERSIS DENGAN ASLI) =================
       function renderCharts(data, stats) {
         if (!data || !stats) return;
         
@@ -1275,7 +1406,7 @@
         const statusNote = $('statusNote');
         if (statusNote) {
           statusNote.innerHTML = `
-            Total ${stats.totalOrders} order • Total QTY: ${formatNumber(stats.totalQty)}<br>
+            Total ${stats.totalOrders} order • Total QTY Realisasi: ${formatNumber(stats.totalQty)}<br>
             <span style="color: #2ecc71">✅ Delivered: ${formatNumber(stats.delivered.qty)} QTY</span> • 
             <span style="color: #3498db">🚚 On Delivery: ${formatNumber(stats.onDelivery.qty)} QTY</span> • 
             <span style="color: #f1c40f">⏳ Progress: ${formatNumber(stats.progress.qty)} QTY</span> • 
@@ -1292,7 +1423,7 @@
             data: {
               labels: cityData.map(d => d[0]),
               datasets: [{
-                label: 'QTY',
+                label: 'QTY Realisasi',
                 data: cityData.map(d => Math.round(d[1])),
                 backgroundColor: 'rgba(52, 152, 219, 0.7)',
                 borderRadius: 6
@@ -1318,7 +1449,7 @@
             data: {
               labels: factoryData.map(d => d[0]),
               datasets: [{
-                label: 'QTY',
+                label: 'QTY Realisasi',
                 data: factoryData.map(d => Math.round(d[1])),
                 backgroundColor: 'rgba(255, 176, 0, 0.7)',
                 borderRadius: 6
@@ -1337,6 +1468,7 @@
         }
       }
 
+      // ================= RENDER REAL TIME TABLE (SAMA PERSIS DENGAN ASLI) =================
       function renderRealTimeTable(data) {
         if (!data) return;
         
@@ -1377,6 +1509,21 @@
         });
       }
 
+      // ================= UPDATE RINGKASAN DATA =================
+      function updateRingkasanData(stats, masterStats) {
+        $('totalRowsDetail').textContent = `${State.filteredData?.length || 0} baris`;
+        $('totalOrdersDetail').textContent = `${stats.totalOrders} order (kode unik)`;
+        $('totalQtyDetail').textContent = formatNumber(stats.totalQty);
+        $('avgQtyDetail').textContent = formatNumberDecimal(stats.avgQtyPerOrder, 1);
+        
+        // Tambahkan info master
+        const refreshStatus = $('refreshStatus');
+        if (refreshStatus) {
+          refreshStatus.textContent = $('refreshSec')?.value === '0' ? 'Off' : `${$('refreshSec')?.value || 30}s`;
+        }
+      }
+
+      // ================= UPDATE LAST UPDATE TIME =================
       function updateLastUpdateTime() {
         const lastUpdateElem = $('lastUpdate');
         const lastUpdateTimeElem = $('lastUpdateTime');
@@ -1384,11 +1531,11 @@
         if (State.lastFetch) {
           const timeStr = formatTimeOnly(State.lastFetch);
           if (lastUpdateElem) lastUpdateElem.textContent = timeStr;
-          if (lastUpdateTimeElem) lastUpdateTimeElem.textContent = formatDate(State.lastFetch);
+          if (lastUpdateTimeElem) lastUpdateTimeElem.textContent = formatDate(State.lastFetch) + ' ' + formatTimeOnly(State.lastFetch);
         }
       }
 
-      // ================= AUTO-REFRESH COUNTDOWN =================
+      // ================= START COUNTDOWN =================
       function startCountdown(seconds) {
         if (State.countdownTimer) {
           clearInterval(State.countdownTimer);
@@ -1415,6 +1562,34 @@
             }
           }
         }, 100);
+      }
+
+      // ================= SETUP AUTO REFRESH =================
+      function setupAutoRefresh() {
+        if (State.refreshTimer) {
+          clearInterval(State.refreshTimer);
+          State.refreshTimer = null;
+        }
+        
+        const select = $('refreshSec');
+        if (!select) return;
+        
+        const seconds = Number(select.value || 0);
+        
+        if (seconds > 0) {
+          State.refreshTimer = setInterval(() => {
+            refresh(true);
+          }, seconds * 1000);
+          
+          $('refreshStatus').textContent = `${seconds}s`;
+          startCountdown(seconds);
+        } else {
+          $('refreshStatus').textContent = 'Off';
+          if (State.countdownTimer) {
+            clearInterval(State.countdownTimer);
+            $('nextUpdateText').textContent = 'Auto-refresh off';
+          }
+        }
       }
 
       // ================= FETCH DATA =================
@@ -1464,7 +1639,7 @@
           let processedData = [];
           for (let i = 0; i < dataRows.length; i++) {
             const item = processRow(dataRows[i]);
-            if (item && item.orderCode) {
+            if (item && (item.hasRealisasi || item.hasMaster)) {
               processedData.push(item);
             }
           }
@@ -1515,6 +1690,11 @@
         try {
           const data = await fetchData(forceRefresh);
           
+          if (data.length === 0) {
+            showMessage('error', 'Tidak ada data');
+            return;
+          }
+          
           State.cache = {
             data: data,
             timestamp: Date.now()
@@ -1523,61 +1703,35 @@
           const fromDate = $('fromDate')?.value;
           const toDate = $('toDate')?.value;
           
+          // Filter data untuk realisasi (berdasarkan tanggal realisasi)
           const filteredData = filterDataByDate(data, fromDate, toDate);
           State.filteredData = filteredData;
           
+          // Hitung statistik REALISASI (untuk dashboard utama)
           const stats = calculateStats(filteredData);
           
+          // Hitung statistik MASTER (untuk ringkasan order masuk)
+          const masterStats = calculateMasterStats(data);
+          
+          // Render semua komponen
+          renderMasterSummary(masterStats);
           renderKPI(stats);
           renderPartialDetails(stats);
           renderCharts(filteredData, stats);
           renderRealTimeTable(filteredData);
-          
+          updateRingkasanData(stats, masterStats);
           updateLastUpdateTime();
-          
-          $('totalRowsDetail').textContent = `${filteredData.length} baris`;
-          $('totalOrdersDetail').textContent = `${stats.totalOrders} order (kode unik)`;
-          $('totalQtyDetail').textContent = formatNumber(stats.totalQty);
-          $('avgQtyDetail').textContent = formatNumberDecimal(stats.avgQtyPerOrder, 1);
           
           $('liveStatus').innerHTML = '🟢 Live';
           
           const refreshSec = Number($('refreshSec')?.value || 30);
           startCountdown(refreshSec);
           
-          showMessage('success', `Update: ${filteredData.length} baris data, ${stats.totalOrders} kode unik`, 1500);
+          showMessage('success', `Update: ${filteredData.length} baris realisasi, ${masterStats.totalOrders} order master`, 1500);
           
         } catch (error) {
           showMessage('error', error.message);
           $('liveStatus').innerHTML = '🔴 Error';
-        }
-      }
-
-      // ================= AUTO REFRESH SETUP =================
-      function setupAutoRefresh() {
-        if (State.refreshTimer) {
-          clearInterval(State.refreshTimer);
-          State.refreshTimer = null;
-        }
-        
-        const select = $('refreshSec');
-        if (!select) return;
-        
-        const seconds = Number(select.value || 0);
-        
-        if (seconds > 0) {
-          State.refreshTimer = setInterval(() => {
-            refresh(true);
-          }, seconds * 1000);
-          
-          $('refreshStatus').textContent = `${seconds}s`;
-          startCountdown(seconds);
-        } else {
-          $('refreshStatus').textContent = 'Off';
-          if (State.countdownTimer) {
-            clearInterval(State.countdownTimer);
-            $('nextUpdateText').textContent = 'Auto-refresh off';
-          }
         }
       }
 
@@ -1614,6 +1768,8 @@
       // ================= INIT =================
       function init() {
         console.log('=== DASHBOARD DISTRIBUSI MINYAK ===');
+        console.log('✅ Tabel Realisasi: Kolom B-V (untuk dashboard)');
+        console.log('✅ Tabel Master: Kolom AN-AS (untuk ringkasan order masuk)');
         
         const today = new Date();
         const thirtyDaysAgo = new Date();
