@@ -4,37 +4,28 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dashboard Distribusi Minyak - BGR Logistik</title>
-  
-  <!-- META TAGS -->
   <meta name="description" content="Dashboard distribusi minyak" />
   <meta name="theme-color" content="#071424" />
 
-  <!-- GOOGLE FONTS -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- THIRD PARTY LIBRARIES -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 
 <body>
-  <!-- ========== CONTAINER 1: REFRESH INDICATOR ========== -->
   <div id="refreshIndicator" class="refresh-indicator">
     <div class="dot"></div>
     <span>Mengupdate data...</span>
   </div>
 
   <div class="wrap">
-    <!-- ========== CONTAINER 2: HEADER & CONTROLS ========== -->
-    <header id="headerContainer" class="header">
-      <!-- Brand section -->
+    <header class="header">
       <div class="brand-container">
         <div class="brand-logo">
-          <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" 
-               srcset="https://www.bgrlogistik.id/bgr/img/logo_bli.png 2x" 
-               alt="PT BGR Logistik Indonesia">
+          <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="PT BGR Logistik Indonesia">
         </div>
         <div class="title">
           <h1>Dashboard Distribusi Minyak</h1>
@@ -46,7 +37,6 @@
         </div>
       </div>
 
-      <!-- Controls section -->
       <div class="controls">
         <div class="control-group">
           <div class="ctrl">
@@ -62,14 +52,14 @@
             <label>Auto Refresh</label>
             <select id="refreshSec">
               <option value="0">Off</option>
-              <option value="5">5 dtk (Real-time)</option>
+              <option value="5">5 dtk</option>
               <option value="10">10 dtk</option>
               <option value="30">30 dtk</option>
               <option value="60">60 dtk</option>
               <option value="300" selected>5 menit</option>
             </select>
           </div>
-          <div class="auto-refresh-status" id="autoRefreshStatus">
+          <div class="auto-refresh-status">
             <span class="live-dot"></span>
             <span id="nextUpdateText">Update dalam 30s</span>
           </div>
@@ -82,22 +72,21 @@
       </div>
     </header>
 
-    <!-- ========== CONTAINER 3: MASTER ORDER SUMMARY ========== -->
-    <div id="masterSummaryContainer" class="card master-card">
+    <div class="card master-card">
       <div class="hd">
-        <div class="t">📋 RINGKASAN MASTER ORDER (Tabel AN-AS)</div>
-        <div class="pill" id="masterPeriode">Semua Periode</div>
+        <div class="t">📋 RINGKASAN MASTER ORDER</div>
+        <div class="pill" id="masterPeriode">Memuat...</div>
       </div>
       <div class="master-stats">
         <div class="master-stat-item">
           <div class="master-stat-label">Total Order Masuk</div>
           <div class="master-stat-value" id="masterTotalOrders">0</div>
-          <div class="master-stat-sub">Kode Unik (sesuai filter)</div>
+          <div class="master-stat-sub">Kode Unik (Master)</div>
         </div>
         <div class="master-stat-item">
           <div class="master-stat-label">Total QTY Order</div>
           <div class="master-stat-value" id="masterTotalQty">0</div>
-          <div class="master-stat-sub">Dari Master</div>
+          <div class="master-stat-sub">Dari Master Order</div>
         </div>
         <div class="master-stat-item">
           <div class="master-stat-label">Rata-rata QTY/Order</div>
@@ -107,11 +96,10 @@
       </div>
     </div>
 
-    <!-- ========== CONTAINER 4: KPI CARDS ========== -->
+    <!-- 5 Container Status dengan Icon -->
     <div id="kpiContainer" class="grid kpis"></div>
 
-    <!-- ========== CONTAINER 5: CHARTS SECTION ========== -->
-    <div id="chartsContainer" class="grid main">
+    <div class="grid main">
       <div class="card">
         <div class="hd">
           <div class="t">Status Distribusi</div>
@@ -144,9 +132,7 @@
       </div>
     </div>
 
-    <!-- ========== CONTAINER 6: BOTTOM SECTION ========== -->
-    <div id="bottomContainer" class="grid bottom">
-      <!-- Partial Orders Card -->
+    <div class="grid bottom">
       <div class="card">
         <div class="hd">
           <div class="t">Order PARTIAL</div>
@@ -157,7 +143,6 @@
         </div>
       </div>
 
-      <!-- Real Time Delivery Card -->
       <div class="card">
         <div class="hd">
           <div class="t">Real Time Delivery</div>
@@ -181,7 +166,6 @@
         </div>
       </div>
 
-      <!-- Ringkasan Data Card -->
       <div class="card">
         <div class="hd">
           <div class="t">Ringkasan Data</div>
@@ -189,13 +173,13 @@
         </div>
         <div class="bd">
           <div class="note" style="margin-bottom:12px">
-            <div>• Total Baris Data: <span id="totalRowsDetail">-</span></div>
+            <div>• Total Baris Realisasi: <span id="totalRowsDetail">-</span></div>
             <div>• Total Order (Realisasi): <span id="totalOrdersDetail">-</span></div>
             <div>• Total Order Masuk (Master): <span id="masterInfoDetail">-</span></div>
             <div>• Total Quantity Realisasi: <span id="totalQtyDetail">-</span></div>
             <div>• Rata-rata QTY per Order: <span id="avgQtyDetail">-</span></div>
             <div>• Auto Refresh: <span id="refreshStatus">30s</span></div>
-            <div>• Data Source: <span id="dataSource">Google Sheets</span></div>
+            <div>• Status Data: <span id="dataStatus">Menyiapkan...</span></div>
             <div>• Last Update: <span id="lastUpdateTime">-</span></div>
           </div>
           <div id="messageContainer"></div>
@@ -204,647 +188,342 @@
       </div>
     </div>
 
-    <!-- ========== CONTAINER 7: FOOTER ========== -->
-    <footer id="footerContainer" class="footer">
+    <footer class="footer">
       <div class="footer-logo">
         <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
       </div>
       <div class="footer-info">
-        <span>📊 Versi 2.0 - Master (AN-AS) + Realisasi (B-V) dengan Filter Tanggal</span>
+        <span>📊 Versi Final - 5 Status Container dengan Icon</span>
       </div>
       <div class="copyright">copyright © 2026 By RH</div>
     </footer>
   </div>
 
   <style>
-    /* ========== STYLE CONTAINER 1: VARIABLES & GLOBAL ========== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root{
+      --bg-primary:#071424; --bg-secondary:#0c1f35; --bg-tertiary:#0f2a47;
+      --text-primary:#e9f1fb; --text-secondary:#a7b6c8;
+      --accent-primary:#ffb000; --accent-secondary:#449cff;
+      --success:#2ecc71; --warning:#f1c40f; --danger:#e74c3c; --info:#3498db; --partial:#9b59b6;
+      --line:rgba(255,255,255,.08); --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius-sm:10px; --radius-md:14px; --radius-lg:18px;
     }
-
-    :root {
-      --bg-primary: #071424;
-      --bg-secondary: #0c1f35;
-      --bg-tertiary: #0f2a47;
-      --text-primary: #e9f1fb;
-      --text-secondary: #a7b6c8;
-      --accent-primary: #ffb000;
-      --accent-secondary: #449cff;
-      --success: #2ecc71;
-      --warning: #f1c40f;
-      --danger: #e74c3c;
-      --info: #3498db;
-      --partial: #9b59b6;
-      --line: rgba(255, 255, 255, 0.08);
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-      --radius-sm: 10px;
-      --radius-md: 14px;
-      --radius-lg: 18px;
-      --transition: all 0.2s ease;
+    body{
+      font-family:'Inter',sans-serif; color:var(--text-primary);
+      background:radial-gradient(1200px 600px at 10% 10%, rgba(68,156,255,.18), transparent 60%),
+                 radial-gradient(900px 500px at 90% 15%, rgba(255,176,0,.12), transparent 60%),
+                 var(--bg-primary);
+      min-height:100vh; line-height:1.5;
     }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      color: var(--text-primary);
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(68, 156, 255, 0.18), transparent 60%),
-                  radial-gradient(900px 500px at 90% 15%, rgba(255, 176, 0, 0.12), transparent 60%),
-                  var(--bg-primary);
-      min-height: 100vh;
-      line-height: 1.5;
-      display: flex;
-      flex-direction: column;
+    .wrap{ max-width:1400px; margin:0 auto; padding:20px 16px; width:100%; }
+    .header{
+      display:flex; gap:16px; align-items:center; justify-content:space-between;
+      padding:12px 20px; border:1px solid var(--line); background:rgba(12,31,53,.55);
+      border-radius:var(--radius-lg); backdrop-filter:blur(10px); margin-bottom:20px; flex-wrap:wrap;
     }
-
-    .wrap {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px 16px;
-      flex: 1;
-      width: 100%;
+    .brand-container{ display:flex; align-items:center; gap:16px; }
+    .brand-logo img{ height:50px; width:auto; filter:brightness(0) invert(1); }
+    .title{ border-left:1px solid var(--line); padding-left:16px; }
+    h1{ font-size:clamp(18px,4vw,24px); font-weight:800; }
+    .sub{ color:var(--text-secondary); font-size:12px; display:flex; gap:8px; }
+    .controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .ctrl{
+      display:flex; gap:8px; align-items:center; padding:8px 12px;
+      border-radius:var(--radius-md); background:rgba(15,42,71,.55); border:1px solid var(--line);
     }
-
-    /* ========== STYLE CONTAINER 2: HEADER & CONTROLS ========== */
-    .header {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 20px;
-      border: 1px solid var(--line);
-      background: rgba(12, 31, 53, 0.55);
-      border-radius: var(--radius-lg);
-      backdrop-filter: blur(10px);
-      margin-bottom: 20px;
-      flex-wrap: wrap;
+    .ctrl label{ font-size:12px; color:var(--text-secondary); font-weight:600; white-space:nowrap; }
+    input,select,button{
+      font-family:inherit; color:var(--text-primary);
+      background:rgba(0,0,0,.25); border:1px solid var(--line);
+      border-radius:var(--radius-sm); padding:8px 12px; font-size:12px; outline:none;
     }
-
-    .brand-container {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    button{
+      background:linear-gradient(135deg, rgba(255,176,0,.9), rgba(255,176,0,.55));
+      color:#08121f; border:none; font-weight:800; cursor:pointer; min-width:80px;
     }
-
-    .brand-logo img {
-      height: 50px;
-      width: auto;
-      max-width: 180px;
-      object-fit: contain;
-      filter: brightness(0) invert(1);
+    button:hover{ transform:translateY(-1px); box-shadow:0 4px 12px rgba(255,176,0,.3); }
+    button.secondary{ background:rgba(15,42,71,.65); color:var(--text-primary); }
+    .auto-refresh-status{
+      display:flex; align-items:center; gap:8px; background:rgba(0,0,0,.3);
+      padding:4px 12px; border-radius:20px; font-size:11px; min-width:140px; justify-content:center;
     }
-
-    .title {
-      display: flex;
-      flex-direction: column;
-      border-left: 1px solid var(--line);
-      padding-left: 16px;
+    .live-dot{
+      width:8px; height:8px; background:#2ecc71; border-radius:50%;
+      animation:livePulse 1.5s ease-in-out infinite;
     }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(18px, 4vw, 24px);
-      font-weight: 800;
+    @keyframes livePulse{
+      0%{opacity:1;transform:scale(1)}
+      50%{opacity:.5;transform:scale(1.2);background:#f1c40f}
+      100%{opacity:1;transform:scale(1);background:#2ecc71}
     }
-
-    .sub {
-      color: var(--text-secondary);
-      font-size: 12px;
-      margin-top: 4px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .master-card{
+      background:linear-gradient(135deg, rgba(255,176,0,.15), rgba(255,176,0,.05));
+      border:1px solid rgba(255,176,0,.3); margin-bottom:20px;
     }
-
-    .controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .control-group {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .ctrl {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      padding: 8px 12px;
-      border-radius: var(--radius-md);
-      background: rgba(15, 42, 71, 0.55);
-      border: 1px solid var(--line);
-    }
-
-    .ctrl label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    input, select, button {
-      font-family: inherit;
-      color: var(--text-primary);
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-sm);
-      padding: 8px 12px;
-      font-size: 12px;
-      outline: none;
-    }
-
-    button {
-      background: linear-gradient(135deg, rgba(255, 176, 0, 0.9), rgba(255, 176, 0, 0.55));
-      color: #08121f;
-      border: none;
-      font-weight: 800;
-      cursor: pointer;
-      min-width: 80px;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(255, 176, 0, 0.3);
-    }
-
-    button.secondary {
-      background: rgba(15, 42, 71, 0.65);
-      color: var(--text-primary);
-    }
-
-    .auto-refresh-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0,0,0,0.3);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      min-width: 140px;
-      justify-content: center;
-      white-space: nowrap;
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background: #2ecc71;
-      border-radius: 50%;
-      animation: livePulse 1.5s ease-in-out infinite;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      min-width: fit-content;
-    }
-
-    @keyframes livePulse {
-      0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); background: #f1c40f; }
-      100% { opacity: 1; transform: scale(1); background: #2ecc71; }
-    }
-
-    /* ========== STYLE CONTAINER 3: MASTER SUMMARY ========== */
-    .master-card {
-      background: linear-gradient(135deg, rgba(255, 176, 0, 0.15), rgba(255, 176, 0, 0.05));
-      border: 1px solid rgba(255, 176, 0, 0.3);
-      margin-bottom: 20px;
-    }
-
-    .master-stats {
+    .master-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding:16px; }
+    .master-stat-item{ text-align:center; }
+    .master-stat-label{ font-size:12px; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px; }
+    .master-stat-value{ font-size:28px; font-weight:800; color:var(--accent-primary); }
+    .master-stat-sub{ font-size:11px; color:var(--text-secondary); }
+    .grid{ display:grid; gap:16px; margin-bottom:16px; }
+    
+    /* 5 Kolom untuk Status KPI */
+    .kpis{ 
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      padding: 16px;
-    }
-
-    .master-stat-item {
-      text-align: center;
-    }
-
-    .master-stat-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .master-stat-value {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--accent-primary);
-    }
-
-    .master-stat-sub {
-      font-size: 11px;
-      color: var(--text-secondary);
-    }
-
-    /* ========== STYLE CONTAINER 4: KPI CARDS ========== */
-    .grid {
-      display: grid;
+      grid-template-columns: repeat(5, 1fr);
       gap: 16px;
       margin-bottom: 16px;
     }
-
-    .kpis {
-      grid-template-columns: repeat(6, 1fr);
-    }
-
+    
     @media (max-width: 1200px) {
       .kpis { grid-template-columns: repeat(3, 1fr); }
     }
-
-    .kpi {
+    
+    @media (max-width: 768px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 480px) {
+      .kpis { grid-template-columns: 1fr; }
+    }
+    
+    .main{ grid-template-columns:1.2fr 1.6fr 1.6fr; }
+    .bottom{ grid-template-columns:1.2fr 1.8fr 1.6fr; }
+    
+    @media (max-width:1200px){ 
+      .main,.bottom{ grid-template-columns:1fr; } 
+    }
+    
+    .card{
+      border:1px solid var(--line); background:rgba(12,31,53,.55);
+      border-radius:var(--radius-lg); backdrop-filter:blur(10px); overflow:hidden;
+    }
+    .card .hd{
+      padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid var(--line); background:rgba(15,42,71,.45);
+    }
+    .card .hd .t{ font-weight:800; font-size:14px; }
+    .card .bd{ padding:16px; }
+    
+    /* KPI Status Cards dengan Icon */
+    .kpi{
       padding: 16px;
       border-radius: var(--radius-lg);
-      background: rgba(15, 42, 71, 0.55);
+      background: rgba(15,42,71,.55);
       border: 1px solid var(--line);
+      border-top: 4px solid transparent;
+      transition: transform 0.2s;
     }
-
+    .kpi:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    
+    /* Header dalam KPI untuk icon dan label */
     .kpi .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 8px;
     }
-
-    .kpi .lbl {
-      font-size: 12px;
-      color: var(--text-secondary);
+    
+    /* Icon status */
+    .status-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    
+    /* Label status */
+    .status-label {
+      font-size: 14px;
       font-weight: 700;
-      text-transform: uppercase;
+      color: var(--text-secondary);
+      letter-spacing: 0.5px;
     }
-
-    .kpi .icon {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--radius-md);
-      display: grid;
-      place-items: center;
-      background: rgba(0, 0, 0, 0.22);
-      font-size: 18px;
-    }
-
+    
     .kpi .main-value {
       font-size: clamp(28px, 4vw, 36px);
       font-weight: 900;
       line-height: 1.2;
-      margin-bottom: 4px;
+      color: var(--text-primary);
     }
-
     .kpi .qty-value {
       font-size: 16px;
       font-weight: 700;
       color: var(--accent-primary);
-      margin-bottom: 4px;
+      margin-bottom: 8px;
     }
-
-    .kpi .sub-info {
-      font-size: 11px;
+    .kpi .percentage {
+      font-size: 13px;
       color: var(--text-secondary);
       border-top: 1px solid var(--line);
-      padding-top: 8px;
+      padding-top: 10px;
       margin-top: 4px;
     }
-
-    /* ========== STYLE CONTAINER 5: CHARTS ========== */
-    .main {
-      grid-template-columns: 1.2fr 1.6fr 1.6fr;
+    
+    canvas{ max-height:260px; width:100%!important; height:auto!important; }
+    table{ width:100%; border-collapse:collapse; }
+    th{
+      text-align:left; padding:12px 10px; border-bottom:1px solid var(--line);
+      color:var(--text-secondary); font-weight:700; font-size:11px; text-transform:uppercase;
     }
-
-    @media (max-width: 1200px) {
-      .main { grid-template-columns: 1fr; }
+    td{ padding:10px; border-bottom:1px solid var(--line); font-size:12px; }
+    .status-delivered{ color:var(--success); }
+    .status-ondelivery{ color:var(--info); }
+    .status-progress{ color:var(--warning); }
+    .status-cancel{ color:var(--danger); }
+    .status-partial{ color:var(--partial); }
+    .pill{
+      padding:4px 10px; border-radius:999px; font-size:11px;
+      border:1px solid var(--line); background:rgba(0,0,0,.25);
     }
-
-    .card {
-      border: 1px solid var(--line);
-      background: rgba(12, 31, 53, 0.55);
-      border-radius: var(--radius-lg);
-      backdrop-filter: blur(10px);
-      overflow: hidden;
+    .footer{
+      margin-top:40px; padding:20px 0; border-top:1px solid var(--line);
+      display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+      gap:20px; font-size:12px; color:var(--text-secondary);
     }
-
-    .card .hd {
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--line);
-      background: rgba(15, 42, 71, 0.45);
+    .footer-logo img{ height:30px; width:auto; opacity:.7; filter:brightness(0) invert(1); }
+    .copyright{
+      width:100%; text-align:center; margin-top:20px; padding-top:20px;
+      border-top:1px solid var(--line); font-size:11px; opacity:.7;
     }
-
-    .card .hd .t {
-      font-weight: 800;
-      font-size: 14px;
+    .note{ color:var(--text-secondary); font-size:12px; }
+    .refresh-indicator{
+      position:fixed; top:20px; right:20px;
+      background:rgba(12,31,53,.9); backdrop-filter:blur(10px);
+      border:1px solid var(--line); border-radius:999px;
+      padding:6px 12px; font-size:11px; display:none;
+      align-items:center; gap:6px; z-index:1000;
     }
-
-    .card .bd {
-      padding: 16px;
+    .refresh-indicator.show{ display:flex; }
+    .refresh-indicator .dot{
+      width:8px; height:8px; background:var(--accent-primary);
+      border-radius:50%; animation:pulse 1s ease-in-out infinite;
     }
-
-    canvas {
-      max-height: 260px;
-      width: 100% !important;
-      height: auto !important;
+    @keyframes pulse{
+      0%,100%{opacity:1; transform:scale(1)}
+      50%{opacity:.5; transform:scale(.8)}
     }
-
-    /* ========== STYLE CONTAINER 6: BOTTOM SECTION ========== */
-    .bottom {
-      grid-template-columns: 1.2fr 1.8fr 1.6fr;
+    .partial-detail{
+      background:rgba(155,89,182,.1);
+      border-left:3px solid var(--partial);
+      padding:12px; border-radius:var(--radius-sm);
     }
-
-    @media (max-width: 1200px) {
-      .bottom { grid-template-columns: 1fr; }
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th {
-      text-align: left;
-      padding: 12px 10px;
-      border-bottom: 1px solid var(--line);
-      color: var(--text-secondary);
-      font-weight: 700;
-      font-size: 11px;
-      text-transform: uppercase;
-    }
-
-    td {
-      padding: 10px;
-      border-bottom: 1px solid var(--line);
-      font-size: 12px;
-    }
-
-    .status-delivered { color: var(--success); }
-    .status-ondelivery { color: var(--info); }
-    .status-progress { color: var(--warning); }
-    .status-cancel { color: var(--danger); }
-    .status-partial { color: var(--partial); }
-
-    .pill {
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      border: 1px solid var(--line);
-      background: rgba(0, 0, 0, 0.25);
-    }
-
-    .partial-detail {
-      background: rgba(155, 89, 182, 0.1);
-      border-left: 3px solid var(--partial);
-      padding: 12px;
-      margin-top: 12px;
-      border-radius: var(--radius-sm);
-    }
-
-    .partial-breakdown {
-      display: flex;
-      gap: 16px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-
-    .breakdown-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-    }
-
-    .badge {
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 700;
-    }
-
-    .badge-delivered { background: rgba(46, 204, 113, 0.2); color: var(--success); }
-    .badge-progress { background: rgba(241, 196, 15, 0.2); color: var(--warning); }
-    .badge-cancel { background: rgba(231, 76, 60, 0.2); color: var(--danger); }
-    .badge-ondelivery { background: rgba(52, 152, 219, 0.2); color: var(--info); }
-
-    /* ========== STYLE CONTAINER 7: FOOTER ========== */
-    .footer {
-      margin-top: 40px;
-      padding: 20px 0;
-      border-top: 1px solid var(--line);
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 20px;
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-
-    .footer-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .footer-logo img {
-      height: 30px;
-      width: auto;
-      opacity: 0.7;
-      filter: brightness(0) invert(1);
-    }
-
-    .footer-info {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .copyright {
-      width: 100%;
-      text-align: center;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid var(--line);
-      font-size: 11px;
-      opacity: 0.7;
-    }
-
-    /* ========== UTILITY STYLES ========== */
-    .note {
-      color: var(--text-secondary);
-      font-size: 12px;
-    }
-
-    .refresh-indicator {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(12, 31, 53, 0.9);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 11px;
-      color: var(--text-secondary);
-      display: none;
-      align-items: center;
-      gap: 6px;
-      z-index: 1000;
-    }
-
-    .refresh-indicator.show {
-      display: flex;
-    }
-
-    .refresh-indicator .dot {
-      width: 8px;
-      height: 8px;
-      background: var(--accent-primary);
-      border-radius: 50%;
-      animation: pulse 1s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
+    .badge{ padding:2px 8px; border-radius:12px; font-size:10px; font-weight:700; }
+    .badge-delivered{ background:rgba(46,204,113,.2); color:var(--success); }
+    .badge-progress{ background:rgba(241,196,15,.2); color:var(--warning); }
+    .badge-cancel{ background:rgba(231,76,60,.2); color:var(--danger); }
+    .badge-ondelivery{ background:rgba(52,152,219,.2); color:var(--info); }
+    .badge-partial{ background:rgba(155,89,182,.2); color:var(--partial); }
   </style>
 
   <script>
-    // ========== LOGIC CONTAINER 1: KONFIGURASI & CONSTANTS ==========
-    (function() {
+    (function () {
       'use strict';
 
+      // ========== KONFIGURASI ==========
       const CONFIG = {
-        CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRAqs3OR5iSyutu1ozCM5Q4JFXNKOV4AhOB7u2d2SCUfbV2SasQ17VBH924VxdTxoN4aYq3W3qZu8X/pub?gid=166266133&single=true&output=csv",
+        REALISASI_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRAqs3OR5iSyutu1ozCM5Q4JFXNKOV4AhOB7u2d2SCUfbV2SasQ17VBH924VxdTxoN4aYq3W3qZu8X/pub?gid=166266133&single=true&output=csv",
+        MASTER_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTwX1vBZcZKcG4oc4QEPtwNE2U-8zYKZGQJM8Xk5K1U7yaj6ojfYqYmidwwseBTugP-gmmzhDzO_GpF/pub?gid=166266133&single=true&output=csv",
         CHART_COLORS: {
           delivered: '#2ecc71',
           onDelivery: '#3498db',
           progress: '#f1c40f',
           cancel: '#e74c3c',
           partial: '#9b59b6'
-        },
-        CACHE_DURATION: 0,
-        RETRY_DELAY: 3000,
-        MAX_RETRIES: 1
-      };
-
-      const COLUMN_MAP = {
-        realisasi: {
-          orderCode: 2, pabrik: 3, kota: 5, qty: 6, status: 15,
-          tglMuat: 14, actualMuat: 17, noPolisi: 12, tglInput: 1
-        },
-        master: {
-          orderCode: 40, tglOrder: 39, qtyOrder: 44
         }
       };
 
-      // ========== LOGIC CONTAINER 2: STATE MANAGEMENT ==========
+      // Kolom Realisasi
+      const REALISASI_COLUMNS = {
+        orderCode: 2,    // C
+        pabrik: 3,       // D
+        kota: 5,         // F
+        qty: 6,          // G
+        status: 15,      // P
+        tglMuat: 14,     // O
+        actualMuat: 17,  // R
+        noPolisi: 12,    // M
+        tglInput: 1      // B
+      };
+
+      // ========== STATE ==========
       const State = {
-        data: null,
-        filteredData: null,
+        realisasiData: [],
+        masterData: [],
+        filteredRealisasi: [],
+        filteredMaster: [],
         charts: {},
         refreshTimer: null,
         countdownTimer: null,
         isRefreshing: false,
         lastFetch: null,
-        nextUpdateTime: null,
-        retryCount: 0,
-        fetchController: null
+        dataStatus: { realisasi: false, master: false }
       };
 
-      // ========== LOGIC CONTAINER 3: DOM HELPER FUNCTIONS ==========
+      // ========== DOM HELPERS ==========
       const DOM = {
         get: (id) => document.getElementById(id),
         showRefreshIndicator: (show) => {
-          const indicator = DOM.get('refreshIndicator');
-          if (indicator) {
-            show ? indicator.classList.add('show') : indicator.classList.remove('show');
-          }
+          const el = DOM.get('refreshIndicator');
+          if (el) show ? el.classList.add('show') : el.classList.remove('show');
         },
         showMessage: (type, message, duration = 2000) => {
           const container = DOM.get('messageContainer');
           const errorContainer = DOM.get('errorContainer');
-          
-          if (!container || !errorContainer) return;
-          
+          if (!container) return;
+
           if (type === 'error') {
-            errorContainer.style.display = 'block';
-            errorContainer.className = 'error-message';
-            errorContainer.textContent = message;
-            if (duration > 0) {
-              setTimeout(() => {
-                errorContainer.style.display = 'none';
-              }, duration);
+            if (errorContainer) {
+              errorContainer.style.display = 'block';
+              errorContainer.style.padding = '10px';
+              errorContainer.style.background = 'rgba(231,76,60,0.2)';
+              errorContainer.style.borderRadius = 'var(--radius-sm)';
+              errorContainer.style.color = 'var(--danger)';
+              errorContainer.textContent = `❌ ${message}`;
+              setTimeout(() => { errorContainer.style.display = 'none'; }, duration);
             }
           } else {
-            container.className = type === 'success' ? 'success-message' : 'info-message';
-            container.textContent = message;
-            if (duration > 0) {
-              setTimeout(() => {
-                container.textContent = '';
-              }, duration);
-            }
+            container.textContent = `✅ ${message}`;
+            setTimeout(() => { container.textContent = ''; }, duration);
           }
         },
-        updateElementText: (id, text) => {
+        updateText: (id, text) => {
           const el = DOM.get(id);
           if (el) el.textContent = text;
         }
       };
 
-      // ========== LOGIC CONTAINER 4: DATA PROCESSING ==========
+      // ========== DATA PROCESSING ==========
       const DataProcessor = {
         formatNumber: (num) => {
-          if (num === null || num === undefined || isNaN(num)) return '0';
+          if (isNaN(num) || num === null) return '0';
           return new Intl.NumberFormat('id-ID').format(Math.round(num));
         },
-        formatNumberDecimal: (num, decimals = 0) => {
-          if (num === null || num === undefined || isNaN(num)) return '0';
-          return new Intl.NumberFormat('id-ID', { 
-            minimumFractionDigits: decimals, 
-            maximumFractionDigits: decimals 
+        formatNumberDecimal: (num, decimals = 1) => {
+          if (isNaN(num) || num === null) return '0';
+          return new Intl.NumberFormat('id-ID', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
           }).format(num);
         },
         formatDate: (date) => {
-          if (!date) return '-';
-          try {
-            if (date instanceof Date && !isNaN(date)) {
-              return new Intl.DateTimeFormat('id-ID', {
-                day: '2-digit', month: '2-digit', year: 'numeric',
-              }).format(date);
-            }
-            return '-';
-          } catch {
-            return '-';
-          }
+          if (!date || !(date instanceof Date) || isNaN(date)) return '-';
+          return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
         },
-        formatTimeOnly: (date) => {
-          if (!date) return '-';
-          try {
-            return new Intl.DateTimeFormat('id-ID', {
-              hour: '2-digit', minute: '2-digit', second: '2-digit'
-            }).format(date);
-          } catch {
-            return '-';
-          }
+        formatTime: (date) => {
+          if (!date || !(date instanceof Date) || isNaN(date)) return '-';
+          return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(date);
         },
         parseNumber: (value) => {
-          if (!value) return 0;
+          if (value === null || value === undefined || value === '') return 0;
           try {
-            let cleaned = value.toString()
+            let str = value.toString()
               .replace(/\./g, '')
               .replace(',', '.')
               .replace(/[^\d.-]/g, '');
-            const num = Number(cleaned);
-            return Number.isFinite(num) ? num : 0;
+            return Number(str) || 0;
           } catch {
             return 0;
           }
@@ -853,383 +532,370 @@
           if (!value) return null;
           try {
             const str = value.toString().trim();
-            const dmyMatch = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
-            if (dmyMatch) {
-              const [_, day, month, year] = dmyMatch;
-              return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
+            // Excel serial number
+            const num = Number(str);
+            if (!isNaN(num) && num > 40000) {
+              return new Date((num - 25569) * 86400 * 1000);
             }
-            const ymdMatch = str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
-            if (ymdMatch) {
-              const [_, year, month, day] = ymdMatch;
-              return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-            }
-            return null;
+
+            // DD/MM/YYYY or DD-MM-YYYY
+            const dmy = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+            if (dmy) return new Date(dmy[3], dmy[2] - 1, dmy[1]);
+
+            // YYYY-MM-DD or YYYY/MM/DD
+            const ymd = str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
+            if (ymd) return new Date(ymd[1], ymd[2] - 1, ymd[3]);
+
+            const date = new Date(str);
+            return isNaN(date) ? null : date;
           } catch {
             return null;
           }
         },
         getStatusCategory: (status) => {
           if (!status) return 'PROGRESS';
-          const normalized = status.toString().toLowerCase().trim();
-          if (normalized.includes('delivered') || normalized.includes('selesai') || 
-              normalized.includes('terkirim') || normalized.includes('complete')) {
-            return 'DELIVERED';
-          }
-          if (normalized.includes('on delivery') || normalized.includes('delivery') || 
-              normalized.includes('dalam perjalanan') || normalized.includes('shipping')) {
-            return 'ON_DELIVERY';
-          }
-          if (normalized.includes('cancel') || normalized.includes('batal') || 
-              normalized.includes('cancelled') || normalized.includes('void')) {
-            return 'CANCEL';
-          }
+          const s = status.toString().toLowerCase();
+          if (s.includes('delivered') || s.includes('selesai') || s.includes('terkirim')) return 'DELIVERED';
+          if (s.includes('on delivery') || s.includes('dalam perjalanan')) return 'ON_DELIVERY';
+          if (s.includes('cancel') || s.includes('batal')) return 'CANCEL';
+          if (s.includes('partial') || s.includes('sebagian')) return 'PARTIAL';
           return 'PROGRESS';
         },
-        processRow: (row) => {
+
+        processRealisasiRow: (row) => {
           if (!Array.isArray(row)) return null;
-          
-          const realisasiData = {
-            orderCode: row[COLUMN_MAP.realisasi.orderCode] || '',
-            pabrik: row[COLUMN_MAP.realisasi.pabrik] || 'Unknown',
-            kota: row[COLUMN_MAP.realisasi.kota] || 'Unknown',
-            qty: DataProcessor.parseNumber(row[COLUMN_MAP.realisasi.qty]),
-            status: row[COLUMN_MAP.realisasi.status] || '',
-            statusCategory: DataProcessor.getStatusCategory(row[COLUMN_MAP.realisasi.status]),
-            tglMuat: DataProcessor.parseDate(row[COLUMN_MAP.realisasi.tglMuat]),
-            actualMuat: DataProcessor.parseDate(row[COLUMN_MAP.realisasi.actualMuat]),
-            noPolisi: row[COLUMN_MAP.realisasi.noPolisi] || '-',
-            tglInput: DataProcessor.parseDate(row[COLUMN_MAP.realisasi.tglInput])
-          };
-          
-          const masterData = {
-            orderCode: row[COLUMN_MAP.master.orderCode] || '',
-            tglOrder: DataProcessor.parseDate(row[COLUMN_MAP.master.tglOrder]),
-            qtyOrder: DataProcessor.parseNumber(row[COLUMN_MAP.master.qtyOrder])
-          };
-          
           return {
-            orderCode: realisasiData.orderCode || masterData.orderCode,
-            pabrik: realisasiData.pabrik,
-            kota: realisasiData.kota,
-            qty: realisasiData.qty,
-            status: realisasiData.status,
-            statusCategory: realisasiData.statusCategory,
-            tglMuat: realisasiData.tglMuat,
-            actualMuat: realisasiData.actualMuat,
-            noPolisi: realisasiData.noPolisi,
-            tglInput: realisasiData.tglInput,
-            masterOrderCode: masterData.orderCode,
-            tglOrder: masterData.tglOrder,
-            qtyOrder: masterData.qtyOrder,
-            hasRealisasi: realisasiData.orderCode !== '',
-            hasMaster: masterData.orderCode !== '' && masterData.qtyOrder > 0
+            orderCode: row[REALISASI_COLUMNS.orderCode] || '',
+            pabrik: row[REALISASI_COLUMNS.pabrik] || 'Unknown',
+            kota: row[REALISASI_COLUMNS.kota] || 'Unknown',
+            qty: DataProcessor.parseNumber(row[REALISASI_COLUMNS.qty]),
+            status: row[REALISASI_COLUMNS.status] || '',
+            statusCategory: DataProcessor.getStatusCategory(row[REALISASI_COLUMNS.status]),
+            tglMuat: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglMuat]),
+            actualMuat: DataProcessor.parseDate(row[REALISASI_COLUMNS.actualMuat]),
+            noPolisi: row[REALISASI_COLUMNS.noPolisi] || '-',
+            tglInput: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglInput])
           };
         },
-        filterDataByDate: (data, fromDate, toDate) => {
-          if (!fromDate && !toDate) return data;
-          return data.filter(item => {
-            const date = item.tglInput || item.tglMuat || item.actualMuat;
-            if (!date) return false;
-            if (fromDate) {
-              const from = new Date(fromDate);
-              from.setHours(0, 0, 0, 0);
-              if (date < from) return false;
-            }
-            if (toDate) {
-              const to = new Date(toDate);
-              to.setHours(23, 59, 59, 999);
-              if (date > to) return false;
-            }
-            return true;
-          });
+
+        // MAPPING MASTER YANG BENAR
+        processMasterRow: (row) => {
+          if (!Array.isArray(row)) return null;
+
+          const tglOrderRaw  = row[1]; // B
+          const orderCodeRaw = row[2]; // C
+          const pabrikRaw    = row[3]; // D
+          const penerimaRaw  = row[4]; // E
+          const tujuanRaw    = row[5]; // F
+          const qtyRaw       = row[6]; // G
+
+          if (!orderCodeRaw || orderCodeRaw.toString().trim() === '') return null;
+
+          const orderCode = orderCodeRaw.toString().trim();
+          const qtyOrder  = DataProcessor.parseNumber(qtyRaw);
+          const tglOrder  = DataProcessor.parseDate(tglOrderRaw);
+
+          if (!orderCode || qtyOrder <= 0) return null;
+
+          return {
+            tglOrder,
+            orderCode,
+            pabrik: (pabrikRaw || '').toString().trim() || 'Unknown',
+            penerima: (penerimaRaw || '').toString().trim() || 'Unknown',
+            tujuan: (tujuanRaw || '').toString().trim() || 'Unknown',
+            qtyOrder
+          };
         },
-        filterMasterByDate: (data, fromDate, toDate) => {
-          if (!fromDate && !toDate) return data;
-          return data.filter(item => {
-            if (!item.hasMaster || !item.tglOrder) return false;
-            const date = item.tglOrder;
-            if (fromDate) {
-              const from = new Date(fromDate);
-              from.setHours(0, 0, 0, 0);
-              if (date < from) return false;
-            }
-            if (toDate) {
-              const to = new Date(toDate);
-              to.setHours(23, 59, 59, 999);
-              if (date > to) return false;
-            }
-            return true;
-          });
-        },
-        calculateStats: (data) => {
+
+        calculateRealisasiStats: (data) => {
           if (!data || data.length === 0) {
             return {
-              totalOrders: 0, totalQty: 0,
-              delivered: { count: 0, qty: 0, percentage: 0 },
-              onDelivery: { count: 0, qty: 0, percentage: 0 },
+              totalOrders: 0, totalQty: 0, totalRows: 0,
               progress: { count: 0, qty: 0, percentage: 0 },
-              cancel: { count: 0, qty: 0, percentage: 0 },
+              onDelivery: { count: 0, qty: 0, percentage: 0 },
+              delivered: { count: 0, qty: 0, percentage: 0 },
               partial: { count: 0, qty: 0, percentage: 0, details: [] },
+              cancel: { count: 0, qty: 0, percentage: 0 },
               avgQtyPerOrder: 0
             };
           }
 
           const orderStatuses = new Map();
-          const orderQtyByStatus = new Map();
-          
+          const orderQtys = new Map();
+
           data.forEach(item => {
             if (!item.orderCode) return;
-            const orderCode = item.orderCode;
+            const code = item.orderCode;
             const status = item.statusCategory;
-            const qty = item.qty || 0;
-            
-            if (!orderStatuses.has(orderCode)) {
-              orderStatuses.set(orderCode, new Set());
-            }
-            orderStatuses.get(orderCode).add(status);
-            
-            const key = `${orderCode}-${status}`;
-            orderQtyByStatus.set(key, (orderQtyByStatus.get(key) || 0) + qty);
+
+            if (!orderStatuses.has(code)) orderStatuses.set(code, new Set());
+            orderStatuses.get(code).add(status);
+
+            const key = `${code}-${status}`;
+            orderQtys.set(key, (orderQtys.get(key) || 0) + (item.qty || 0));
           });
 
-          const orderFinalStatus = new Map();
-          const orderDetails = new Map();
-          
-          orderStatuses.forEach((statusSet, orderCode) => {
-            const uniqueStatuses = Array.from(statusSet);
-            const isPartial = uniqueStatuses.length > 1;
-            
-            let finalStatus;
-            if (isPartial) {
-              finalStatus = 'PARTIAL';
-            } else {
-              finalStatus = uniqueStatuses[0];
-            }
-            
-            orderFinalStatus.set(orderCode, finalStatus);
-            
-            if (isPartial) {
-              const details = [];
-              uniqueStatuses.forEach(status => {
-                const key = `${orderCode}-${status}`;
-                const qty = orderQtyByStatus.get(key) || 0;
-                details.push({ status, qty });
-              });
-              orderDetails.set(orderCode, details);
-            }
-          });
+          const progress = { count: 0, qty: 0, percentage: 0 };
+          const onDelivery = { count: 0, qty: 0, percentage: 0 };
+          const delivered = { count: 0, qty: 0, percentage: 0 };
+          const cancel = { count: 0, qty: 0, percentage: 0 };
+          const partial = { count: 0, qty: 0, percentage: 0, details: [] };
 
-          let delivered = { count: 0, qty: 0 };
-          let onDelivery = { count: 0, qty: 0 };
-          let progress = { count: 0, qty: 0 };
-          let cancel = { count: 0, qty: 0 };
-          let partial = { count: 0, qty: 0, details: [] };
+          orderStatuses.forEach((statuses, code) => {
+            const statusList = Array.from(statuses);
+            const isPartial = statusList.length > 1;
 
-          orderFinalStatus.forEach((finalStatus, orderCode) => {
-            let totalOrderQty = 0;
+            let totalQty = 0;
             data.forEach(item => {
-              if (item.orderCode === orderCode) {
-                totalOrderQty += item.qty || 0;
-              }
+              if (item.orderCode === code) totalQty += item.qty || 0;
             });
-            
-            switch(finalStatus) {
-              case 'DELIVERED':
-                delivered.count++; delivered.qty += totalOrderQty; break;
-              case 'ON_DELIVERY':
-                onDelivery.count++; onDelivery.qty += totalOrderQty; break;
-              case 'PROGRESS':
-                progress.count++; progress.qty += totalOrderQty; break;
-              case 'CANCEL':
-                cancel.count++; cancel.qty += totalOrderQty; break;
-              case 'PARTIAL':
-                partial.count++; partial.qty += totalOrderQty;
-                if (orderDetails.has(orderCode)) {
-                  partial.details.push({ orderCode, breakdown: orderDetails.get(orderCode) });
-                }
-                break;
+
+            if (isPartial) {
+              partial.count++;
+              partial.qty += totalQty;
+
+              const details = [];
+              statusList.forEach(s => {
+                const key = `${code}-${s}`;
+                details.push({ status: s, qty: orderQtys.get(key) || 0 });
+              });
+              partial.details.push({ orderCode: code, breakdown: details });
+            } else {
+              const finalStatus = statusList[0];
+              switch (finalStatus) {
+                case 'PROGRESS': progress.count++; progress.qty += totalQty; break;
+                case 'ON_DELIVERY': onDelivery.count++; onDelivery.qty += totalQty; break;
+                case 'DELIVERED': delivered.count++; delivered.qty += totalQty; break;
+                case 'CANCEL': cancel.count++; cancel.qty += totalQty; break;
+                case 'PARTIAL': partial.count++; partial.qty += totalQty; break;
+              }
             }
           });
 
-          const totalOrders = orderFinalStatus.size;
-          let totalQty = 0;
-          data.forEach(item => { totalQty += item.qty || 0; });
-          
-          delivered.percentage = totalOrders ? (delivered.count / totalOrders) * 100 : 0;
-          onDelivery.percentage = totalOrders ? (onDelivery.count / totalOrders) * 100 : 0;
-          progress.percentage = totalOrders ? (progress.count / totalOrders) * 100 : 0;
-          cancel.percentage = totalOrders ? (cancel.count / totalOrders) * 100 : 0;
-          partial.percentage = totalOrders ? (partial.count / totalOrders) * 100 : 0;
+          const totalOrders = orderStatuses.size;
+          const totalQty = data.reduce((sum, item) => sum + (item.qty || 0), 0);
+
+          if (totalOrders > 0) {
+            progress.percentage = (progress.count / totalOrders) * 100;
+            onDelivery.percentage = (onDelivery.count / totalOrders) * 100;
+            delivered.percentage = (delivered.count / totalOrders) * 100;
+            cancel.percentage = (cancel.count / totalOrders) * 100;
+            partial.percentage = (partial.count / totalOrders) * 100;
+          }
 
           return {
-            totalOrders, totalQty, delivered, onDelivery, progress, cancel, partial,
+            totalOrders, totalQty, totalRows: data.length,
+            progress, onDelivery, delivered, cancel, partial,
             avgQtyPerOrder: totalOrders ? totalQty / totalOrders : 0
           };
         },
+
         calculateMasterStats: (data) => {
-          const masterOrders = new Map();
-          
-          data.forEach(item => {
-            if (item.hasMaster && item.masterOrderCode) {
-              const orderCode = item.masterOrderCode;
-              if (!masterOrders.has(orderCode)) {
-                masterOrders.set(orderCode, {
-                  orderCode: orderCode,
-                  tglOrder: item.tglOrder,
-                  qtyOrder: item.qtyOrder
-                });
-              }
-            }
+          if (!data || data.length === 0) {
+            return { totalOrders: 0, totalQty: 0, avgQty: 0, periode: '-' };
+          }
+
+          const map = new Map();
+          data.forEach(o => {
+            if (!o || !o.orderCode) return;
+            if (!map.has(o.orderCode)) map.set(o.orderCode, o);
           });
-          
-          const orders = Array.from(masterOrders.values());
+
+          const orders = Array.from(map.values());
           const totalOrders = orders.length;
-          const totalQty = orders.reduce((sum, order) => sum + (order.qtyOrder || 0), 0);
+          const totalQty = orders.reduce((sum, o) => sum + (o.qtyOrder || 0), 0);
           const avgQty = totalOrders ? totalQty / totalOrders : 0;
-          
-          const sortedOrders = [...orders].sort((a, b) => (a.tglOrder || 0) - (b.tglOrder || 0));
-          const firstDate = sortedOrders[0]?.tglOrder;
-          const lastDate = sortedOrders[sortedOrders.length - 1]?.tglOrder;
-          
+
+          const dates = orders.map(o => o.tglOrder).filter(d => d && d instanceof Date && !isNaN(d));
+          let firstDate = null, lastDate = null;
+          if (dates.length > 0) {
+            firstDate = new Date(Math.min(...dates));
+            lastDate = new Date(Math.max(...dates));
+          }
+
           return {
-            totalOrders, totalQty, avgQty, orders,
-            firstDate, lastDate,
-            periode: firstDate && lastDate ? `${DataProcessor.formatDate(firstDate)} - ${DataProcessor.formatDate(lastDate)}` : '-'
+            totalOrders,
+            totalQty,
+            avgQty,
+            periode: firstDate && lastDate
+              ? `${DataProcessor.formatDate(firstDate)} - ${DataProcessor.formatDate(lastDate)}`
+              : '-'
           };
         },
+
         groupAndSum: (data, keyFn, limit = 10) => {
           const map = new Map();
-          for (const item of data) {
-            const key = (keyFn(item) || '').toString().trim();
-            if (!key || key === 'Unknown' || key === '-') continue;
-            map.set(key, (map.get(key) || 0) + (item.qty || 0));
-          }
+          data.forEach(item => {
+            const key = keyFn(item);
+            if (key && key !== 'Unknown' && key !== '-') {
+              map.set(key, (map.get(key) || 0) + (item.qty || 0));
+            }
+          });
           return Array.from(map.entries())
             .sort((a, b) => b[1] - a[1])
             .slice(0, limit);
+        },
+
+        filterByDate: (data, fromDate, toDate, dateField) => {
+          if (!fromDate && !toDate) return data;
+
+          return data.filter(item => {
+            const date = item[dateField];
+            if (!date) return true;
+
+            if (fromDate) {
+              const from = new Date(fromDate);
+              from.setHours(0, 0, 0, 0);
+              if (date < from) return false;
+            }
+            if (toDate) {
+              const to = new Date(toDate);
+              to.setHours(23, 59, 59, 999);
+              if (date > to) return false;
+            }
+            return true;
+          });
         }
       };
 
-      // ========== LOGIC CONTAINER 5: RENDERERS ==========
+      // ========== RENDERERS ==========
       const Renderer = {
         masterSummary: (stats) => {
-          DOM.updateElementText('masterTotalOrders', DataProcessor.formatNumber(stats.totalOrders));
-          DOM.updateElementText('masterTotalQty', DataProcessor.formatNumber(stats.totalQty));
-          DOM.updateElementText('masterAvgQty', DataProcessor.formatNumberDecimal(stats.avgQty, 1));
-          const periodeElem = DOM.get('masterPeriode');
-          if (periodeElem) periodeElem.textContent = stats.periode;
+          DOM.updateText('masterTotalOrders', DataProcessor.formatNumber(stats.totalOrders));
+          DOM.updateText('masterTotalQty', DataProcessor.formatNumber(stats.totalQty));
+          DOM.updateText('masterAvgQty', DataProcessor.formatNumberDecimal(stats.avgQty, 1));
+          DOM.updateText('masterPeriode', stats.periode);
         },
 
+        // 5 Container Status dengan Icon ⏳ 🚚 ✅ ⚡ ⛔
         kpi: (stats) => {
           const container = DOM.get('kpiContainer');
           if (!container) return;
-          
-          container.innerHTML = `
-            <div class="kpi">
-              <div class="header"><div class="lbl">Total Order</div><div class="icon">📊</div></div>
-              <div class="main-value">${DataProcessor.formatNumber(stats.totalOrders)}</div>
-              <div class="qty-value">${DataProcessor.formatNumber(stats.totalQty)} Qty Realisasi</div>
-              <div class="sub-info">${stats.totalOrders} kode unik • Total baris: ${State.filteredData?.length || 0}</div>
+
+          const statusList = [
+            { 
+              key: 'progress', 
+              label: 'PROGRESS', 
+              icon: '⏳',
+              color: '#f1c40f',
+              count: stats.progress.count,
+              qty: stats.progress.qty,
+              percentage: stats.progress.percentage
+            },
+            { 
+              key: 'onDelivery', 
+              label: 'ON DELIVERY', 
+              icon: '🚚',
+              color: '#3498db',
+              count: stats.onDelivery.count,
+              qty: stats.onDelivery.qty,
+              percentage: stats.onDelivery.percentage
+            },
+            { 
+              key: 'delivered', 
+              label: 'DELIVERED', 
+              icon: '✅',
+              color: '#2ecc71',
+              count: stats.delivered.count,
+              qty: stats.delivered.qty,
+              percentage: stats.delivered.percentage
+            },
+            { 
+              key: 'partial', 
+              label: 'PARSIAL', 
+              icon: '⚡',
+              color: '#9b59b6',
+              count: stats.partial.count,
+              qty: stats.partial.qty,
+              percentage: stats.partial.percentage
+            },
+            { 
+              key: 'cancel', 
+              label: 'CANCEL', 
+              icon: '⛔',
+              color: '#e74c3c',
+              count: stats.cancel.count,
+              qty: stats.cancel.qty,
+              percentage: stats.cancel.percentage
+            }
+          ];
+
+          container.innerHTML = statusList.map(status => `
+            <div class="kpi" style="border-top: 4px solid ${status.color}">
+              <div class="header">
+                <span class="status-label">${status.label}</span>
+                <span class="status-icon">${status.icon}</span>
+              </div>
+              <div class="main-value">${DataProcessor.formatNumber(status.count)}</div>
+              <div class="qty-value">${DataProcessor.formatNumber(status.qty)} Qty</div>
+              <div class="percentage">
+                ${DataProcessor.formatNumberDecimal(status.percentage, 1)}% dari total order
+              </div>
             </div>
-            <div class="kpi">
-              <div class="header"><div class="lbl">Delivered</div><div class="icon">✅</div></div>
-              <div class="main-value">${DataProcessor.formatNumber(stats.delivered.count)}</div>
-              <div class="qty-value">${DataProcessor.formatNumber(stats.delivered.qty)} Qty</div>
-              <div class="sub-info">${DataProcessor.formatNumberDecimal(stats.delivered.percentage, 1)}% dari total order</div>
-            </div>
-            <div class="kpi">
-              <div class="header"><div class="lbl">On Delivery</div><div class="icon">🚚</div></div>
-              <div class="main-value">${DataProcessor.formatNumber(stats.onDelivery.count)}</div>
-              <div class="qty-value">${DataProcessor.formatNumber(stats.onDelivery.qty)} Qty</div>
-              <div class="sub-info">${DataProcessor.formatNumberDecimal(stats.onDelivery.percentage, 1)}% dari total order</div>
-            </div>
-            <div class="kpi">
-              <div class="header"><div class="lbl">Progress</div><div class="icon">⏳</div></div>
-              <div class="main-value">${DataProcessor.formatNumber(stats.progress.count)}</div>
-              <div class="qty-value">${DataProcessor.formatNumber(stats.progress.qty)} Qty</div>
-              <div class="sub-info">${DataProcessor.formatNumberDecimal(stats.progress.percentage, 1)}% dari total order</div>
-            </div>
-            <div class="kpi">
-              <div class="header"><div class="lbl">Cancel</div><div class="icon">⛔</div></div>
-              <div class="main-value">${DataProcessor.formatNumber(stats.cancel.count)}</div>
-              <div class="qty-value">${DataProcessor.formatNumber(stats.cancel.qty)} Qty</div>
-              <div class="sub-info">${DataProcessor.formatNumberDecimal(stats.cancel.percentage, 1)}% dari total order</div>
-            </div>
-            <div class="kpi">
-              <div class="header"><div class="lbl">Partial</div><div class="icon">⚡</div></div>
-              <div class="main-value">${DataProcessor.formatNumber(stats.partial.count)}</div>
-              <div class="qty-value">${DataProcessor.formatNumber(stats.partial.qty)} Qty</div>
-              <div class="sub-info">${DataProcessor.formatNumberDecimal(stats.partial.percentage, 1)}% dari total order</div>
-            </div>
-          `;
+          `).join('');
         },
 
         partialDetails: (stats) => {
           const container = DOM.get('partialContainer');
           const pill = DOM.get('partialPill');
-          
           if (!container || !pill) return;
-          
+
           if (stats.partial.count === 0) {
             pill.textContent = 'Tidak ada';
-            container.innerHTML = '<p class="note">✨ Semua order memiliki status murni (100% sama)</p>';
+            container.innerHTML = '<p class="note">✨ Semua order memiliki status murni</p>';
             return;
           }
-          
+
           pill.textContent = `${stats.partial.count} order`;
-          
-          let html = `<div class="partial-detail">`;
-          html += `<p style="margin-bottom:8px; font-weight:700;">⚡ ${stats.partial.count} Order dengan Status Campuran:</p>`;
-          
+          let html = '<div class="partial-detail">';
+          html += `<p style="margin-bottom:8px;font-weight:700;">⚡ ${stats.partial.count} Order dengan Status Campuran:</p>`;
+
           stats.partial.details.slice(0, 5).forEach(detail => {
-            html += `<div style="margin-top:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:6px;">`;
-            html += `<div style="font-weight:700; margin-bottom:6px;">📋 ${detail.orderCode}</div>`;
-            html += `<div class="partial-breakdown">`;
-            
+            html += `<div style="margin-top:12px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;">`;
+            html += `<div style="font-weight:700;margin-bottom:6px;">📋 ${detail.orderCode}</div>`;
+            html += `<div style="display:flex;gap:16px;flex-wrap:wrap;">`;
+
             detail.breakdown.forEach(b => {
-              let badgeClass = '';
-              switch(b.status) {
-                case 'DELIVERED': badgeClass = 'badge-delivered'; break;
-                case 'ON_DELIVERY': badgeClass = 'badge-ondelivery'; break;
-                case 'PROGRESS': badgeClass = 'badge-progress'; break;
-                case 'CANCEL': badgeClass = 'badge-cancel'; break;
-              }
-              html += `<div class="breakdown-item">`;
-              html += `<span class="badge ${badgeClass}">${b.status}</span>`;
-              html += `<span>${DataProcessor.formatNumber(b.qty)} Qty</span>`;
-              html += `</div>`;
+              const badgeClass = {
+                'DELIVERED': 'badge-delivered',
+                'ON_DELIVERY': 'badge-ondelivery',
+                'PROGRESS': 'badge-progress',
+                'CANCEL': 'badge-cancel',
+                'PARTIAL': 'badge-partial'
+              }[b.status] || '';
+
+              html += `<div><span class="badge ${badgeClass}">${b.status}</span> ${DataProcessor.formatNumber(b.qty)} Qty</div>`;
             });
-            
+
             html += `</div></div>`;
           });
-          
+
           if (stats.partial.details.length > 5) {
             html += `<p class="note" style="margin-top:8px;">... dan ${stats.partial.details.length - 5} order lainnya</p>`;
           }
-          
-          html += `</div>`;
+          html += '</div>';
           container.innerHTML = html;
         },
 
         charts: (data, stats) => {
-          if (!data || !stats) return;
-          
-          Object.values(State.charts).forEach(chart => {
-            if (chart) chart.destroy();
-          });
+          Object.values(State.charts).forEach(c => { if (c) c.destroy(); });
 
           const ctxStatus = DOM.get('chartStatus')?.getContext('2d');
           if (ctxStatus && stats.totalOrders > 0) {
             State.charts.status = new Chart(ctxStatus, {
               type: 'doughnut',
               data: {
-                labels: ['Delivered', 'On Delivery', 'Progress', 'Cancel', 'Partial'],
+                labels: ['Progress', 'On Delivery', 'Delivered', 'Cancel', 'Parsial'],
                 datasets: [{
-                  data: [stats.delivered.count, stats.onDelivery.count, stats.progress.count, stats.cancel.count, stats.partial.count],
+                  data: [
+                    stats.progress.count, stats.onDelivery.count,
+                    stats.delivered.count, stats.cancel.count, stats.partial.count
+                  ],
                   backgroundColor: [
-                    CONFIG.CHART_COLORS.delivered,
-                    CONFIG.CHART_COLORS.onDelivery,
                     CONFIG.CHART_COLORS.progress,
+                    CONFIG.CHART_COLORS.onDelivery,
+                    CONFIG.CHART_COLORS.delivered,
                     CONFIG.CHART_COLORS.cancel,
                     CONFIG.CHART_COLORS.partial
                   ],
@@ -1240,18 +906,7 @@
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
-                  legend: { position: 'right', labels: { color: '#e9f1fb', font: { size: 11 } } },
-                  tooltip: {
-                    callbacks: {
-                      label: (context) => {
-                        const label = context.label || '';
-                        const value = context.raw || 0;
-                        const total = stats.totalOrders;
-                        const percentage = total ? ((value / total) * 100).toFixed(1) : 0;
-                        return `${label}: ${value} order (${percentage}%)`;
-                      }
-                    }
-                  }
+                  legend: { position: 'right', labels: { color: '#e9f1fb', font: { size: 11 } } }
                 },
                 cutout: '70%'
               }
@@ -1261,26 +916,26 @@
           const statusNote = DOM.get('statusNote');
           if (statusNote) {
             statusNote.innerHTML = `
-              Total ${stats.totalOrders} order • Total QTY Realisasi: ${DataProcessor.formatNumber(stats.totalQty)}<br>
-              <span style="color: #2ecc71">✅ Delivered: ${DataProcessor.formatNumber(stats.delivered.qty)} QTY</span> • 
-              <span style="color: #3498db">🚚 On Delivery: ${DataProcessor.formatNumber(stats.onDelivery.qty)} QTY</span> • 
-              <span style="color: #f1c40f">⏳ Progress: ${DataProcessor.formatNumber(stats.progress.qty)} QTY</span> • 
-              <span style="color: #e74c3c">⛔ Cancel: ${DataProcessor.formatNumber(stats.cancel.qty)} QTY</span><br>
-              <span style="color: #9b59b6">⚡ Partial: ${stats.partial.count} order dengan status campuran</span>
+              Total ${stats.totalOrders} order • Total QTY: ${DataProcessor.formatNumber(stats.totalQty)}<br>
+              <span style="color: #f1c40f">⏳ Progress: ${DataProcessor.formatNumber(stats.progress.qty)} Qty</span> • 
+              <span style="color: #3498db">🚚 On Delivery: ${DataProcessor.formatNumber(stats.onDelivery.qty)} Qty</span> • 
+              <span style="color: #2ecc71">✅ Delivered: ${DataProcessor.formatNumber(stats.delivered.qty)} Qty</span> • 
+              <span style="color: #9b59b6">⚡ Parsial: ${DataProcessor.formatNumber(stats.partial.qty)} Qty</span> • 
+              <span style="color: #e74c3c">⛔ Cancel: ${DataProcessor.formatNumber(stats.cancel.qty)} Qty</span>
             `;
           }
 
-          const cityData = DataProcessor.groupAndSum(data, item => item.kota, 8);
+          const cityData = DataProcessor.groupAndSum(data, i => i.kota, 8);
           const ctxCity = DOM.get('chartCity')?.getContext('2d');
-          if (ctxCity && cityData.length > 0) {
+          if (ctxCity && cityData.length) {
             State.charts.city = new Chart(ctxCity, {
               type: 'bar',
               data: {
                 labels: cityData.map(d => d[0]),
                 datasets: [{
-                  label: 'QTY Realisasi',
+                  label: 'QTY',
                   data: cityData.map(d => Math.round(d[1])),
-                  backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                  backgroundColor: 'rgba(52,152,219,0.7)',
                   borderRadius: 6
                 }]
               },
@@ -1296,17 +951,17 @@
             });
           }
 
-          const factoryData = DataProcessor.groupAndSum(data, item => item.pabrik, 6);
+          const factoryData = DataProcessor.groupAndSum(data, i => i.pabrik, 6);
           const ctxFactory = DOM.get('chartFactory')?.getContext('2d');
-          if (ctxFactory && factoryData.length > 0) {
+          if (ctxFactory && factoryData.length) {
             State.charts.factory = new Chart(ctxFactory, {
               type: 'bar',
               data: {
                 labels: factoryData.map(d => d[0]),
                 datasets: [{
-                  label: 'QTY Realisasi',
+                  label: 'QTY',
                   data: factoryData.map(d => Math.round(d[1])),
-                  backgroundColor: 'rgba(255, 176, 0, 0.7)',
+                  backgroundColor: 'rgba(255,176,0,0.7)',
                   borderRadius: 6
                 }]
               },
@@ -1324,28 +979,21 @@
         },
 
         realTimeTable: (data) => {
-          if (!data) return;
-          
+          const tbody = DOM.get('rtBody');
+          if (!tbody) return;
+
           const sorted = [...data]
             .sort((a, b) => {
-              const dateA = a.actualMuat || a.tglMuat || a.tglInput || new Date(0);
-              const dateB = b.actualMuat || b.tglMuat || b.tglInput || new Date(0);
-              return dateB - dateA;
+              const da = a.actualMuat || a.tglMuat || a.tglInput || 0;
+              const db = b.actualMuat || b.tglMuat || b.tglInput || 0;
+              return db - da;
             })
             .slice(0, 10);
 
-          const tbody = DOM.get('rtBody');
-          if (!tbody) return;
-          
           tbody.innerHTML = '';
 
           if (sorted.length === 0) {
-            const row = tbody.insertRow();
-            const cell = row.insertCell();
-            cell.colSpan = 5;
-            cell.textContent = 'Tidak ada data';
-            cell.style.textAlign = 'center';
-            cell.style.padding = '20px';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Tidak ada data</td></tr>';
             return;
           }
 
@@ -1353,361 +1001,206 @@
             const row = tbody.insertRow();
             row.insertCell().textContent = item.noPolisi || '-';
             row.insertCell().textContent = item.kota || '-';
-            
+
             const statusCell = row.insertCell();
             statusCell.textContent = item.status || '-';
-            statusCell.className = `status-${item.statusCategory.toLowerCase()}`;
-            
+            statusCell.className = `status-${item.statusCategory.toLowerCase().replace('_', '')}`;
+
             row.insertCell().textContent = DataProcessor.formatNumber(item.qty);
             row.insertCell().textContent = item.actualMuat ? DataProcessor.formatDate(item.actualMuat) : '-';
           });
         },
 
-        ringkasanData: (stats, masterStats) => {
-          DOM.updateElementText('totalRowsDetail', `${State.filteredData?.length || 0} baris`);
-          DOM.updateElementText('totalOrdersDetail', `${stats.totalOrders} order (realisasi)`);
-          DOM.updateElementText('totalQtyDetail', DataProcessor.formatNumber(stats.totalQty));
-          DOM.updateElementText('avgQtyDetail', DataProcessor.formatNumberDecimal(stats.avgQtyPerOrder, 1));
-          
-          const masterInfoElem = DOM.get('masterInfoDetail');
-          if (masterInfoElem) {
-            masterInfoElem.textContent = `${DataProcessor.formatNumber(masterStats.totalOrders)} order (${DataProcessor.formatNumber(masterStats.totalQty)} QTY)`;
-          }
-          
-          const refreshStatus = DOM.get('refreshStatus');
-          if (refreshStatus) {
-            refreshStatus.textContent = DOM.get('refreshSec')?.value === '0' ? 'Off' : `${DOM.get('refreshSec')?.value || 30}s`;
-          }
+        ringkasanData: (realStats, masterStats) => {
+          DOM.updateText('totalRowsDetail', `${realStats.totalRows} baris`);
+          DOM.updateText('totalOrdersDetail', `${realStats.totalOrders} order`);
+          DOM.updateText('totalQtyDetail', DataProcessor.formatNumber(realStats.totalQty));
+          DOM.updateText('avgQtyDetail', DataProcessor.formatNumberDecimal(realStats.avgQtyPerOrder, 1));
+          DOM.updateText(
+            'masterInfoDetail',
+            `${DataProcessor.formatNumber(masterStats.totalOrders)} order (${DataProcessor.formatNumber(masterStats.totalQty)} QTY)`
+          );
 
-          const lastUpdateElem = DOM.get('lastUpdate');
-          const lastUpdateTimeElem = DOM.get('lastUpdateTime');
-          
+          const refreshSec = DOM.get('refreshSec')?.value;
+          DOM.updateText('refreshStatus', refreshSec === '0' ? 'Off' : `${refreshSec || 30}s`);
+
+          const status = [];
+          status.push(State.dataStatus.realisasi ? '✅ Realisasi' : '❌ Realisasi');
+          status.push(State.dataStatus.master ? '✅ Master' : '❌ Master');
+          DOM.updateText('dataStatus', status.join(' • '));
+
           if (State.lastFetch) {
-            const timeStr = DataProcessor.formatTimeOnly(State.lastFetch);
-            if (lastUpdateElem) lastUpdateElem.textContent = timeStr;
-            if (lastUpdateTimeElem) lastUpdateTimeElem.textContent = DataProcessor.formatDate(State.lastFetch) + ' ' + DataProcessor.formatTimeOnly(State.lastFetch);
+            DOM.updateText('lastUpdate', DataProcessor.formatTime(State.lastFetch));
+            DOM.updateText('lastUpdateTime', `${DataProcessor.formatDate(State.lastFetch)} ${DataProcessor.formatTime(State.lastFetch)}`);
           }
 
-          DOM.updateElementText('liveStatus', '🟢 Live');
-        },
-
-        emptyState: () => {
-          const kpiContainer = DOM.get('kpiContainer');
-          if (kpiContainer) {
-            kpiContainer.innerHTML = '<div class="kpi" style="grid-column:1/-1; text-align:center; padding:40px;">📭 Belum ada data tersedia</div>';
-          }
-          DOM.updateElementText('masterTotalOrders', '0');
-          DOM.updateElementText('masterTotalQty', '0');
-          DOM.updateElementText('masterAvgQty', '0');
-          
-          const tbody = DOM.get('rtBody');
-          if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada data</td></tr>';
-          }
+          DOM.updateText('liveStatus', '🟢 Live');
         }
       };
 
-      // ========== LOGIC CONTAINER 6: DATA FETCHING ==========
+      // ========== DATA FETCHING ==========
       const DataFetcher = {
-        fetchData: async function(forceRefresh = true) {
-          if (State.fetchController) {
-            State.fetchController.abort();
-          }
-          
-          State.fetchController = new AbortController();
+        fetchCSV: (url, type) => {
+          return new Promise((resolve, reject) => {
+            Papa.parse(url, {
+              download: true,
+              header: false,
+              skipEmptyLines: true,
+              complete: (result) => {
+                if (result.data && result.data.length > 0) resolve(result.data);
+                else reject(new Error(`Data ${type} kosong`));
+              },
+              error: reject
+            });
+          });
+        },
+
+        fetchAllData: async function () {
+          if (State.isRefreshing) return;
+
           DOM.showRefreshIndicator(true);
           State.isRefreshing = true;
-          
-          const cacheBuster = forceRefresh ? `&_t=${Date.now()}` : '';
-          const urlWithCacheBuster = CONFIG.CSV_URL + cacheBuster;
-          
-          const timeoutId = setTimeout(() => {
-            State.fetchController.abort();
-          }, 10000);
-          
+
           try {
-            console.log('Fetching data from:', urlWithCacheBuster);
-            
-            const result = await new Promise((resolve, reject) => {
-              Papa.parse(urlWithCacheBuster, {
-                download: true,
-                header: false,
-                skipEmptyLines: true,
-                complete: resolve,
-                error: reject,
-                fastMode: true,
-                downloadRequestHeaders: {
-                  'Cache-Control': 'no-cache',
-                  'Pragma': 'no-cache'
-                }
-              });
-            });
+            const [realisasiResult, masterResult] = await Promise.allSettled([
+              this.fetchCSV(CONFIG.REALISASI_URL, 'realisasi'),
+              this.fetchCSV(CONFIG.MASTER_URL, 'master')
+            ]);
 
-            clearTimeout(timeoutId);
-
-            if (!result.data || result.data.length < 2) {
-              throw new Error('Data tidak ditemukan');
-            }
-
-            const dataRows = result.data.slice(1);
-            
-            let processedData = [];
-            for (let i = 0; i < dataRows.length; i++) {
-              const item = DataProcessor.processRow(dataRows[i]);
-              if (item && (item.hasRealisasi || item.hasMaster)) {
-                processedData.push(item);
+            let realisasiData = [];
+            if (realisasiResult.status === 'fulfilled') {
+              const rows = realisasiResult.value;
+              for (let i = 1; i < rows.length; i++) {
+                const item = DataProcessor.processRealisasiRow(rows[i]);
+                if (item && item.orderCode) realisasiData.push(item);
               }
+              State.dataStatus.realisasi = realisasiData.length > 0;
+            } else {
+              console.error('Realisasi gagal:', realisasiResult.reason);
             }
-            
-            console.log(`✅ Loaded ${processedData.length} rows data at ${new Date().toLocaleTimeString()}`);
-            
-            State.retryCount = 0;
+
+            let masterData = [];
+            if (masterResult.status === 'fulfilled') {
+              const rows = masterResult.value;
+              for (let i = 1; i < rows.length; i++) {
+                const item = DataProcessor.processMasterRow(rows[i]);
+                if (item) masterData.push(item);
+              }
+              State.dataStatus.master = masterData.length > 0;
+            } else {
+              console.error('Master gagal:', masterResult.reason);
+            }
+
+            State.realisasiData = realisasiData;
+            State.masterData = masterData;
             State.lastFetch = new Date();
-            
-            return processedData;
-            
+
+            return { realisasiData, masterData };
+
           } catch (error) {
-            clearTimeout(timeoutId);
-            
-            if (error.name === 'AbortError') {
-              console.log('Fetch aborted (timeout or cancelled)');
-              return State.cache?.data || [];
-            }
-            
             console.error('Fetch error:', error);
-            
-            if (State.retryCount < CONFIG.MAX_RETRIES) {
-              State.retryCount++;
-              console.log(`Retry ${State.retryCount}/${CONFIG.MAX_RETRIES} in ${CONFIG.RETRY_DELAY}ms...`);
-              
-              DOM.showMessage('warning', `Koneksi error, mencoba lagi (${State.retryCount}/${CONFIG.MAX_RETRIES})...`, 3000);
-              
-              await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY));
-              return DataFetcher.fetchData(forceRefresh);
-            }
-            
-            DOM.showMessage('error', `Gagal load data: ${error.message}. Menggunakan data terakhir.`);
-            
-            return State.cache?.data || [];
-            
+            DOM.showMessage('error', 'Gagal mengambil data');
+            return { realisasiData: State.realisasiData || [], masterData: State.masterData || [] };
           } finally {
             DOM.showRefreshIndicator(false);
             State.isRefreshing = false;
-            State.fetchController = null;
-          }
-        },
-
-        checkForChanges: async function() {
-          if (State.isRefreshing) return;
-          
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
-            
-            const response = await fetch(CONFIG.CSV_URL, {
-              method: 'HEAD',
-              cache: 'no-cache',
-              signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-            
-            const lastModified = response.headers.get('last-modified');
-            
-            if (lastModified && State.lastModified && lastModified !== State.lastModified) {
-              console.log('Spreadsheet changed! Refreshing...');
-              State.lastModified = lastModified;
-              await App.refresh(true);
-            } else if (!State.lastModified) {
-              State.lastModified = lastModified;
-            }
-          } catch (error) {
-            // Silent fail
           }
         }
       };
 
-      // ========== LOGIC CONTAINER 7: AUTO REFRESH ==========
+      // ========== AUTO REFRESH ==========
       const AutoRefresh = {
-        startCountdown: function(seconds) {
-          if (State.countdownTimer) {
-            clearInterval(State.countdownTimer);
-          }
-          
+        startCountdown: (seconds) => {
+          if (State.countdownTimer) clearInterval(State.countdownTimer);
           if (seconds <= 0) {
-            DOM.updateElementText('nextUpdateText', 'Auto-refresh off');
+            DOM.updateText('nextUpdateText', 'Off');
             return;
           }
-          
-          let timeLeft = seconds;
-          State.nextUpdateTime = Date.now() + (seconds * 1000);
-          
+
+          State.nextUpdateTime = Date.now() + seconds * 1000;
+
           State.countdownTimer = setInterval(() => {
             const now = Date.now();
             const remaining = Math.max(0, Math.round((State.nextUpdateTime - now) / 1000));
-            
-            const nextText = DOM.get('nextUpdateText');
-            if (nextText) {
-              if (remaining <= 0) {
-                nextText.textContent = 'Updating...';
-              } else {
-                nextText.textContent = `Update dalam ${remaining}s`;
-              }
-            }
+            DOM.updateText('nextUpdateText', remaining ? `Update dalam ${remaining}s` : 'Updating...');
           }, 100);
         },
 
-        setup: function() {
-          if (State.refreshTimer) {
-            clearInterval(State.refreshTimer);
-            State.refreshTimer = null;
-          }
-          
-          const select = DOM.get('refreshSec');
-          if (!select) return;
-          
-          const seconds = Number(select.value || 0);
-          
+        setup: () => {
+          if (State.refreshTimer) clearInterval(State.refreshTimer);
+
+          const seconds = Number(DOM.get('refreshSec')?.value || 0);
           if (seconds > 0) {
-            State.refreshTimer = setInterval(() => {
-              App.refresh(true);
-            }, seconds * 1000);
-            
-            DOM.updateElementText('refreshStatus', `${seconds}s`);
+            State.refreshTimer = setInterval(() => App.refresh(), seconds * 1000);
             AutoRefresh.startCountdown(seconds);
           } else {
-            DOM.updateElementText('refreshStatus', 'Off');
-            if (State.countdownTimer) {
-              clearInterval(State.countdownTimer);
-              DOM.updateElementText('nextUpdateText', 'Auto-refresh off');
-            }
+            DOM.updateText('nextUpdateText', 'Off');
           }
         }
       };
 
-      // ========== LOGIC CONTAINER 8: APP CONTROLLER ==========
+      // ========== APP ==========
       const App = {
-        refresh: async function(forceRefresh = true) {
+        refresh: async function () {
           if (State.isRefreshing) return;
 
-          try {
-            const data = await DataFetcher.fetchData(forceRefresh);
-            
-            if (!data || data.length === 0) {
-              DOM.showMessage('warning', 'Data kosong. Menunggu data tersedia...');
-              Renderer.emptyState();
-              return;
-            }
-            
-            State.cache = {
-              data: data,
-              timestamp: Date.now()
-            };
-            
-            const fromDate = DOM.get('fromDate')?.value;
-            const toDate = DOM.get('toDate')?.value;
-            
-            const filteredData = DataProcessor.filterDataByDate(data, fromDate, toDate);
-            State.filteredData = filteredData;
-            
-            const filteredMasterData = DataProcessor.filterMasterByDate(data, fromDate, toDate);
-            
-            const stats = DataProcessor.calculateStats(filteredData);
-            const masterStats = DataProcessor.calculateMasterStats(filteredMasterData);
-            
-            Renderer.masterSummary(masterStats);
-            Renderer.kpi(stats);
-            Renderer.partialDetails(stats);
-            Renderer.charts(filteredData, stats);
-            Renderer.realTimeTable(filteredData);
-            Renderer.ringkasanData(stats, masterStats);
-            
-            const refreshSec = Number(DOM.get('refreshSec')?.value || 30);
-            AutoRefresh.startCountdown(refreshSec);
-            
-            DOM.showMessage('success', 
-              `Update: ${filteredData.length} baris realisasi, ` +
-              `${masterStats.totalOrders} order master (${masterStats.periode})`, 
-              1500);
-            
-          } catch (error) {
-            DOM.showMessage('error', error.message);
-            DOM.updateElementText('liveStatus', '🔴 Error');
-          }
+          const { realisasiData, masterData } = await DataFetcher.fetchAllData();
+
+          const fromDate = DOM.get('fromDate')?.value;
+          const toDate = DOM.get('toDate')?.value;
+
+          State.filteredRealisasi = DataProcessor.filterByDate(realisasiData, fromDate, toDate, 'tglInput');
+          State.filteredMaster = DataProcessor.filterByDate(masterData, fromDate, toDate, 'tglOrder');
+
+          const realStats = DataProcessor.calculateRealisasiStats(State.filteredRealisasi);
+          const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
+
+          Renderer.masterSummary(masterStats);
+          Renderer.kpi(realStats);
+          Renderer.partialDetails(realStats);
+          Renderer.charts(State.filteredRealisasi, realStats);
+          Renderer.realTimeTable(State.filteredRealisasi);
+          Renderer.ringkasanData(realStats, masterStats);
+
+          AutoRefresh.startCountdown(Number(DOM.get('refreshSec')?.value || 30));
+          DOM.showMessage('success', `Update: ${State.filteredRealisasi.length} realisasi, ${masterStats.totalOrders} master`);
         },
 
-        init: function() {
-          console.log('=== DASHBOARD DISTRIBUSI MINYAK ===');
-          console.log('✅ Tabel Realisasi: Kolom B-V (untuk dashboard)');
-          console.log('✅ Tabel Master: Kolom AN-AS (untuk ringkasan order masuk)');
-          
+        init: function () {
           const today = new Date();
           const thirtyDaysAgo = new Date();
           thirtyDaysAgo.setDate(today.getDate() - 30);
-          
+
           const fromInput = DOM.get('fromDate');
           const toInput = DOM.get('toDate');
-          
-          if (fromInput) {
-            fromInput.value = thirtyDaysAgo.toISOString().split('T')[0];
-          }
-          if (toInput) {
-            toInput.value = today.toISOString().split('T')[0];
-          }
+          if (fromInput) fromInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+          if (toInput) toInput.value = today.toISOString().split('T')[0];
 
-          DOM.get('btnRefresh')?.addEventListener('click', () => {
-            App.refresh(true);
-            const seconds = Number(DOM.get('refreshSec')?.value || 30);
-            AutoRefresh.startCountdown(seconds);
-          });
-          
+          DOM.get('btnRefresh')?.addEventListener('click', () => App.refresh());
           DOM.get('btnReset')?.addEventListener('click', () => {
             if (fromInput) fromInput.value = thirtyDaysAgo.toISOString().split('T')[0];
             if (toInput) toInput.value = today.toISOString().split('T')[0];
-            App.refresh(true);
+            App.refresh();
           });
-          
+
           DOM.get('refreshSec')?.addEventListener('change', () => {
             AutoRefresh.setup();
-            App.refresh(true);
+            App.refresh();
           });
-          
-          DOM.get('fromDate')?.addEventListener('change', () => App.refresh(true));
-          DOM.get('toDate')?.addEventListener('change', () => App.refresh(true));
 
-          App.refresh(true);
+          DOM.get('fromDate')?.addEventListener('change', () => App.refresh());
+          DOM.get('toDate')?.addEventListener('change', () => App.refresh());
+
+          App.refresh();
           AutoRefresh.setup();
-
-          setInterval(() => {
-            DataFetcher.checkForChanges();
-          }, 10000);
-
-          document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-              if (State.refreshTimer) {
-                clearInterval(State.refreshTimer);
-                State.refreshTimer = null;
-              }
-            } else {
-              AutoRefresh.setup();
-              App.refresh(true);
-            }
-          });
-
-          window.addEventListener('online', () => {
-            console.log('Back online, refreshing...');
-            App.refresh(true);
-          });
         }
       };
 
-      // Start the application
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', App.init);
       } else {
         App.init();
       }
-
     })();
   </script>
 </body>
