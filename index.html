@@ -435,7 +435,10 @@
         }
       };
 
-      // Kolom Realisasi
+      // ========== PERBAIKAN UTAMA: KOLOM NOMOR POLISI ==========
+      // Berdasarkan struktur file:
+      // Kolom A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7, I=8, J=9, K=10, ...
+      // Nomor Polisi ada di kolom J (index 9)
       const REALISASI_COLUMNS = {
         orderCode: 2,    // C
         pabrik: 3,       // D
@@ -444,7 +447,7 @@
         status: 15,      // P
         tglMuat: 14,     // O
         actualMuat: 17,  // R
-        noPolisi: 9,    // j
+        noPolisi: 9,     // J (index 9) - INI YANG DIPERBAIKI
         tglInput: 1      // B
       };
 
@@ -565,6 +568,19 @@
 
         processRealisasiRow: (row) => {
           if (!Array.isArray(row)) return null;
+          
+          // Ambil nomor polisi dari kolom J (index 9)
+          let noPolisi = row[REALISASI_COLUMNS.noPolisi] || '';
+          
+          // Bersihkan nomor polisi (hapus spasi berlebih, uppercase)
+          if (noPolisi) {
+            noPolisi = noPolisi.toString().trim().toUpperCase();
+            // Jika kosong setelah trim, set ke '-'
+            if (noPolisi === '') noPolisi = '-';
+          } else {
+            noPolisi = '-';
+          }
+
           return {
             orderCode: row[REALISASI_COLUMNS.orderCode] || '',
             pabrik: row[REALISASI_COLUMNS.pabrik] || 'Unknown',
@@ -574,12 +590,11 @@
             statusCategory: DataProcessor.getStatusCategory(row[REALISASI_COLUMNS.status]),
             tglMuat: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglMuat]),
             actualMuat: DataProcessor.parseDate(row[REALISASI_COLUMNS.actualMuat]),
-            noPolisi: row[REALISASI_COLUMNS.noPolisi] || '-',
+            noPolisi: noPolisi, // Nomor polisi sudah dibersihkan
             tglInput: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglInput])
           };
         },
 
-        // MAPPING MASTER YANG BENAR
         processMasterRow: (row) => {
           if (!Array.isArray(row)) return null;
 
@@ -999,7 +1014,22 @@
 
           sorted.forEach(item => {
             const row = tbody.insertRow();
-            row.insertCell().textContent = item.noPolisi || '-';
+            
+            // Nomor Polisi - dengan validasi dan styling
+            const noPolisiCell = row.insertCell();
+            const noPolisi = item.noPolisi || '-';
+            
+            // Beri warna khusus jika nomor polisi valid (bukan '-' dan bukan 'Unknown')
+            if (noPolisi !== '-' && noPolisi !== 'UNKNOWN' && noPolisi.length > 2) {
+              noPolisiCell.style.fontWeight = '700';
+              noPolisiCell.style.color = '#ffb000'; // Warna gold untuk nomor polisi valid
+              noPolisiCell.textContent = noPolisi;
+            } else {
+              noPolisiCell.style.color = '#a7b6c8'; // Warna abu untuk data tidak valid
+              noPolisiCell.style.fontStyle = 'italic';
+              noPolisiCell.textContent = noPolisi;
+            }
+            
             row.insertCell().textContent = item.kota || '-';
 
             const statusCell = row.insertCell();
@@ -1075,6 +1105,14 @@
                 if (item && item.orderCode) realisasiData.push(item);
               }
               State.dataStatus.realisasi = realisasiData.length > 0;
+              
+              // Log untuk debugging nomor polisi (10 data pertama)
+              console.log('Contoh data nomor polisi (10 pertama):', 
+                realisasiData.slice(0, 10).map(d => ({
+                  orderCode: d.orderCode,
+                  noPolisi: d.noPolisi
+                }))
+              );
             } else {
               console.error('Realisasi gagal:', realisasiResult.reason);
             }
