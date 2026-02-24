@@ -20,7 +20,6 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
-    /* [SAME STYLES AS BEFORE] */
     * {
       margin: 0;
       padding: 0;
@@ -629,17 +628,17 @@
       </div>
     </header>
 
-    <!-- MASTER ORDER SUMMARY CARD (Tabel AN-AS) -->
+    <!-- MASTER ORDER SUMMARY CARD (Tabel AN-AS) - DENGAN FILTER TANGGAL -->
     <div class="card master-card">
       <div class="hd">
         <div class="t">📋 RINGKASAN MASTER ORDER (Tabel AN-AS)</div>
-        <div class="pill">Sumber Order Masuk</div>
+        <div class="pill" id="masterPeriode">Semua Periode</div>
       </div>
       <div class="master-stats">
         <div class="master-stat-item">
           <div class="master-stat-label">Total Order Masuk</div>
           <div class="master-stat-value" id="masterTotalOrders">0</div>
-          <div class="master-stat-sub">Kode Unik</div>
+          <div class="master-stat-sub">Kode Unik (sesuai filter)</div>
         </div>
         <div class="master-stat-item">
           <div class="master-stat-label">Total QTY Order</div>
@@ -656,7 +655,7 @@
 
     <!-- KPI Section (REALISASI - Tabel B-V) - SAMA PERSIS DENGAN ASLI -->
     <div class="grid kpis" id="kpiContainer">
-      <!-- Akan diisi oleh JavaScript (SAMA PERSIS DENGAN ASLI) -->
+      <!-- Akan diisi oleh JavaScript -->
     </div>
 
     <!-- Charts (SAMA PERSIS DENGAN ASLI) -->
@@ -736,7 +735,8 @@
         <div class="bd">
           <div class="note" style="margin-bottom:12px">
             <div>• Total Baris Data: <span id="totalRowsDetail">-</span></div>
-            <div>• Total Order (Kode Unik): <span id="totalOrdersDetail">-</span></div>
+            <div>• Total Order (Realisasi): <span id="totalOrdersDetail">-</span></div>
+            <div>• Total Order Masuk (Master): <span id="masterInfoDetail">-</span></div>
             <div>• Total Quantity Realisasi: <span id="totalQtyDetail">-</span></div>
             <div>• Rata-rata QTY per Order: <span id="avgQtyDetail">-</span></div>
             <div>• Auto Refresh: <span id="refreshStatus">30s</span></div>
@@ -756,7 +756,7 @@
       </div>
       
       <div class="footer-info">
-        <span>📊 Versi 2.0 - Master (AN-AS) + Realisasi (B-V)</span>
+        <span>📊 Versi 2.0 - Master (AN-AS) + Realisasi (B-V) dengan Filter Tanggal</span>
       </div>
       
       <div class="copyright">copyright © 2026 By RH</div>
@@ -810,7 +810,6 @@
       const State = {
         data: null,
         filteredData: null,
-        masterData: null,     // Data khusus master untuk ringkasan order masuk
         charts: {},
         refreshTimer: null,
         countdownTimer: null,
@@ -971,11 +970,11 @@
         return 'PROGRESS';
       }
 
-      // ================= FUNGSI PROCESS ROW YANG DIPERBAIKI =================
+      // ================= FUNGSI PROCESS ROW =================
       function processRow(row) {
         if (!Array.isArray(row)) return null;
         
-        // DATA REALISASI (dari kolom B-V) - INI UNTUK DASHBOARD UTAMA
+        // DATA REALISASI (dari kolom B-V) - UNTUK DASHBOARD UTAMA
         const realisasiData = {
           orderCode: row[COLUMN_MAP.realisasi.orderCode] || '',
           pabrik: row[COLUMN_MAP.realisasi.pabrik] || 'Unknown',
@@ -1150,8 +1149,9 @@
         };
       }
 
-      // ================= FUNGSI MENGHITUNG STATISTIK MASTER =================
+      // ================= FUNGSI MENGHITUNG STATISTIK MASTER (DENGAN FILTER) =================
       function calculateMasterStats(data) {
+        // Gunakan Map untuk memastikan kode unik
         const masterOrders = new Map();
         
         data.forEach(item => {
@@ -1172,11 +1172,19 @@
         const totalQty = orders.reduce((sum, order) => sum + (order.qtyOrder || 0), 0);
         const avgQty = totalOrders ? totalQty / totalOrders : 0;
         
+        // Urutkan berdasarkan tanggal untuk informasi periode
+        const sortedOrders = [...orders].sort((a, b) => (a.tglOrder || 0) - (b.tglOrder || 0));
+        const firstDate = sortedOrders[0]?.tglOrder;
+        const lastDate = sortedOrders[sortedOrders.length - 1]?.tglOrder;
+        
         return {
           totalOrders,
           totalQty,
           avgQty,
-          orders
+          orders,
+          firstDate,
+          lastDate,
+          periode: firstDate && lastDate ? `${formatDate(firstDate)} - ${formatDate(lastDate)}` : '-'
         };
       }
 
@@ -1193,7 +1201,7 @@
           .slice(0, limit);
       }
 
-      // ================= FILTER DATA BY DATE (BERDASARKAN TANGGAL REALISASI) =================
+      // ================= FILTER DATA REALISASI (BERDASARKAN TANGGAL REALISASI) =================
       function filterDataByDate(data, fromDate, toDate) {
         if (!fromDate && !toDate) return data;
         
@@ -1217,11 +1225,41 @@
         });
       }
 
+      // ================= FILTER DATA MASTER (BERDASARKAN TANGGAL ORDER) =================
+      function filterMasterByDate(data, fromDate, toDate) {
+        if (!fromDate && !toDate) return data;
+        
+        return data.filter(item => {
+          if (!item.hasMaster || !item.tglOrder) return false;
+          
+          const date = item.tglOrder;
+          
+          if (fromDate) {
+            const from = new Date(fromDate);
+            from.setHours(0, 0, 0, 0);
+            if (date < from) return false;
+          }
+          
+          if (toDate) {
+            const to = new Date(toDate);
+            to.setHours(23, 59, 59, 999);
+            if (date > to) return false;
+          }
+          
+          return true;
+        });
+      }
+
       // ================= RENDER MASTER SUMMARY =================
       function renderMasterSummary(masterStats) {
         $('masterTotalOrders').textContent = formatNumber(masterStats.totalOrders);
         $('masterTotalQty').textContent = formatNumber(masterStats.totalQty);
         $('masterAvgQty').textContent = formatNumberDecimal(masterStats.avgQty, 1);
+        
+        const periodeElem = $('masterPeriode');
+        if (periodeElem) {
+          periodeElem.textContent = masterStats.periode;
+        }
       }
 
       // ================= RENDER KPI (SAMA PERSIS DENGAN ASLI) =================
@@ -1512,11 +1550,16 @@
       // ================= UPDATE RINGKASAN DATA =================
       function updateRingkasanData(stats, masterStats) {
         $('totalRowsDetail').textContent = `${State.filteredData?.length || 0} baris`;
-        $('totalOrdersDetail').textContent = `${stats.totalOrders} order (kode unik)`;
+        $('totalOrdersDetail').textContent = `${stats.totalOrders} order (realisasi)`;
         $('totalQtyDetail').textContent = formatNumber(stats.totalQty);
         $('avgQtyDetail').textContent = formatNumberDecimal(stats.avgQtyPerOrder, 1);
         
-        // Tambahkan info master
+        // Tampilkan info master
+        const masterInfoElem = $('masterInfoDetail');
+        if (masterInfoElem) {
+          masterInfoElem.textContent = `${formatNumber(masterStats.totalOrders)} order (${formatNumber(masterStats.totalQty)} QTY)`;
+        }
+        
         const refreshStatus = $('refreshStatus');
         if (refreshStatus) {
           refreshStatus.textContent = $('refreshSec')?.value === '0' ? 'Off' : `${$('refreshSec')?.value || 30}s`;
@@ -1683,7 +1726,7 @@
         }
       }
 
-      // ================= REFRESH =================
+      // ================= REFRESH (DIPERBAIKI - MASTER MENGIKUTI FILTER) =================
       async function refresh(forceRefresh = true) {
         if (State.isRefreshing) return;
 
@@ -1703,15 +1746,18 @@
           const fromDate = $('fromDate')?.value;
           const toDate = $('toDate')?.value;
           
-          // Filter data untuk realisasi (berdasarkan tanggal realisasi)
+          // Filter data untuk REALISASI (berdasarkan tanggal realisasi)
           const filteredData = filterDataByDate(data, fromDate, toDate);
           State.filteredData = filteredData;
+          
+          // Filter data untuk MASTER (berdasarkan tanggal order - kolom AN)
+          const filteredMasterData = filterMasterByDate(data, fromDate, toDate);
           
           // Hitung statistik REALISASI (untuk dashboard utama)
           const stats = calculateStats(filteredData);
           
-          // Hitung statistik MASTER (untuk ringkasan order masuk)
-          const masterStats = calculateMasterStats(data);
+          // Hitung statistik MASTER dengan data yang sudah difilter
+          const masterStats = calculateMasterStats(filteredMasterData);
           
           // Render semua komponen
           renderMasterSummary(masterStats);
@@ -1727,7 +1773,10 @@
           const refreshSec = Number($('refreshSec')?.value || 30);
           startCountdown(refreshSec);
           
-          showMessage('success', `Update: ${filteredData.length} baris realisasi, ${masterStats.totalOrders} order master`, 1500);
+          showMessage('success', 
+            `Update: ${filteredData.length} baris realisasi, ` +
+            `${masterStats.totalOrders} order master (${masterStats.periode})`, 
+            1500);
           
         } catch (error) {
           showMessage('error', error.message);
@@ -1770,6 +1819,7 @@
         console.log('=== DASHBOARD DISTRIBUSI MINYAK ===');
         console.log('✅ Tabel Realisasi: Kolom B-V (untuk dashboard)');
         console.log('✅ Tabel Master: Kolom AN-AS (untuk ringkasan order masuk)');
+        console.log('✅ Filter tanggal: Realisasi (tgl realisasi) dan Master (tgl order)');
         
         const today = new Date();
         const thirtyDaysAgo = new Date();
