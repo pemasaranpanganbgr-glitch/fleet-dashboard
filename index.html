@@ -74,7 +74,7 @@
           <button id="btnReset" class="secondary">✕ Reset</button>
         </div>
 
-        <!-- Tombol Display dan Kembali untuk layar TV (awalnya tersembunyi) -->
+        <!-- Tombol Display dan Kembali untuk layar TV - SEKARANG SELALU TAMPAK -->
         <div class="tv-controls">
           <button id="btnDisplay" class="tv-btn">📺 Display Mode</button>
           <button id="btnBack" class="tv-btn secondary">↩ Kembali</button>
@@ -236,6 +236,7 @@
       min-height:100vh; 
       line-height:1.5;
       font-size: var(--base-font-size);
+      transition: all 0.3s ease;
     }
     
     /* Mode tampilan untuk TV (display mode) */
@@ -423,9 +424,9 @@
       color:var(--text-primary); 
     }
     
-    /* Tombol untuk TV */
+    /* Tombol untuk TV - SEKARANG SELALU TAMPAK */
     .tv-controls {
-      display: none; /* Sembunyikan secara default */
+      display: flex;
       gap: 8px;
       align-items: center;
     }
@@ -434,18 +435,16 @@
       background: linear-gradient(135deg, rgba(68,156,255,.9), rgba(68,156,255,.55));
       color: #fff;
       min-width: 120px;
+      font-weight: 700;
+    }
+    
+    .tv-btn:hover {
+      box-shadow: 0 4px 12px rgba(68,156,255,.3);
     }
     
     .tv-btn.secondary {
       background: rgba(15,42,71,.8);
       color: var(--text-primary);
-    }
-    
-    /* Tampilkan tombol TV hanya di layar besar (min-width: 1920px) */
-    @media (min-width: 1920px) {
-      .tv-controls {
-        display: flex;
-      }
     }
     
     .auto-refresh-status{
@@ -550,6 +549,15 @@
       .button-group button {
         flex: 1;
       }
+      
+      .tv-controls {
+        width: 100%;
+        justify-content: stretch;
+      }
+      
+      .tv-controls button {
+        flex: 1;
+      }
     }
     
     @media (max-width: 480px) {
@@ -573,6 +581,10 @@
       
       .ctrl input, .ctrl select {
         width: 100%;
+      }
+      
+      .tv-controls {
+        flex-direction: column;
       }
     }
     
@@ -791,6 +803,13 @@
           State.tvMode = true;
           DOM.showMessage('success', 'Mode TV diaktifkan - Tampilan diperbesar');
           
+          // Update tombol display
+          const btnDisplay = DOM.get('btnDisplay');
+          if (btnDisplay) {
+            btnDisplay.textContent = '📺 TV Mode Aktif';
+            btnDisplay.style.background = 'linear-gradient(135deg, rgba(46,204,113,.9), rgba(46,204,113,.55))';
+          }
+          
           // Refresh charts untuk menyesuaikan ukuran
           setTimeout(() => {
             Object.values(State.charts).forEach(chart => {
@@ -803,6 +822,13 @@
           document.body.classList.remove('tv-mode');
           State.tvMode = false;
           DOM.showMessage('success', 'Kembali ke mode normal');
+          
+          // Update tombol display
+          const btnDisplay = DOM.get('btnDisplay');
+          if (btnDisplay) {
+            btnDisplay.textContent = '📺 Display Mode';
+            btnDisplay.style.background = 'linear-gradient(135deg, rgba(68,156,255,.9), rgba(68,156,255,.55))';
+          }
           
           // Refresh charts
           setTimeout(() => {
@@ -831,6 +857,8 @@
           if (btnBack) {
             btnBack.addEventListener('click', TVMode.disable);
           }
+          
+          console.log('TV Mode buttons initialized'); // Untuk debugging
         }
       };
 
