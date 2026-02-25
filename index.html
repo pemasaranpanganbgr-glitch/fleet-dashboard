@@ -37,6 +37,7 @@
         </div>
       </div>
 
+      <!-- Kontrol dipindahkan ke sini, sejajar dengan brand-container di kanan -->
       <div class="controls">
         <div class="control-group">
           <div class="ctrl">
@@ -220,20 +221,58 @@
       min-height:100vh; line-height:1.5;
     }
     .wrap{ max-width:1400px; margin:0 auto; padding:20px 16px; width:100%; }
+    
+    /* Header dengan flexbox untuk menempatkan brand-container dan controls sejajar */
     .header{
-      display:flex; gap:16px; align-items:center; justify-content:space-between;
-      padding:12px 20px; border:1px solid var(--line); background:rgba(12,31,53,.55);
-      border-radius:var(--radius-lg); backdrop-filter:blur(10px); margin-bottom:20px; flex-wrap:wrap;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:12px 20px;
+      border:1px solid var(--line);
+      background:rgba(12,31,53,.55);
+      border-radius:var(--radius-lg);
+      backdrop-filter:blur(10px);
+      margin-bottom:20px;
+      flex-wrap:wrap;
     }
-    .brand-container{ display:flex; align-items:center; gap:16px; }
+    
+    .brand-container{ 
+      display:flex; 
+      align-items:center; 
+      gap:16px;
+      flex-shrink:0; /* Mencegah brand-container mengecil */
+    }
+    
     .brand-logo img{ height:50px; width:auto; filter:brightness(0) invert(1); }
     .title{ border-left:1px solid var(--line); padding-left:16px; }
     h1{ font-size:clamp(18px,4vw,24px); font-weight:800; }
     .sub{ color:var(--text-secondary); font-size:12px; display:flex; gap:8px; }
-    .controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    
+    /* Controls sekarang di kanan */
+    .controls{ 
+      display:flex; 
+      gap:10px; 
+      flex-wrap:wrap; 
+      align-items:center;
+      justify-content:flex-end;
+      flex:1; /* Membiarkan controls mengambil sisa ruang */
+    }
+    
+    .control-group{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    
     .ctrl{
-      display:flex; gap:8px; align-items:center; padding:8px 12px;
-      border-radius:var(--radius-md); background:rgba(15,42,71,.55); border:1px solid var(--line);
+      display:flex; 
+      gap:8px; 
+      align-items:center; 
+      padding:8px 12px;
+      border-radius:var(--radius-md); 
+      background:rgba(15,42,71,.55); 
+      border:1px solid var(--line);
     }
     .ctrl label{ font-size:12px; color:var(--text-secondary); font-weight:600; white-space:nowrap; }
     input,select,button{
@@ -247,9 +286,17 @@
     }
     button:hover{ transform:translateY(-1px); box-shadow:0 4px 12px rgba(255,176,0,.3); }
     button.secondary{ background:rgba(15,42,71,.65); color:var(--text-primary); }
+    
     .auto-refresh-status{
-      display:flex; align-items:center; gap:8px; background:rgba(0,0,0,.3);
-      padding:4px 12px; border-radius:20px; font-size:11px; min-width:140px; justify-content:center;
+      display:flex; 
+      align-items:center; 
+      gap:8px; 
+      background:rgba(0,0,0,.3);
+      padding:4px 12px; 
+      border-radius:20px; 
+      font-size:11px; 
+      min-width:140px; 
+      justify-content:center;
     }
     .live-dot{
       width:8px; height:8px; background:#2ecc71; border-radius:50%;
@@ -260,6 +307,12 @@
       50%{opacity:.5;transform:scale(1.2);background:#f1c40f}
       100%{opacity:1;transform:scale(1);background:#2ecc71}
     }
+    
+    .button-group{
+      display:flex;
+      gap:8px;
+    }
+    
     .master-card{
       background:linear-gradient(135deg, rgba(255,176,0,.15), rgba(255,176,0,.05));
       border:1px solid rgba(255,176,0,.3); margin-bottom:20px;
