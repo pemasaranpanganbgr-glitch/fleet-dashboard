@@ -114,7 +114,7 @@
 
     <div class="grid main">
       <div class="card">
-        <div class="hd">
+        <div class="hd" style="padding: 20px 16px;">
           <div class="t">Status Distribusi</div>
           <div class="pill" id="lastUpdate">Loading...</div>
         </div>
@@ -125,7 +125,7 @@
       </div>
 
       <div class="card">
-        <div class="hd">
+        <div class="hd" style="padding: 20px 16px;">
           <div class="t">Top 8 Kota Tujuan</div>
           <div class="pill">Berdasarkan QTY Realisasi</div>
         </div>
@@ -135,7 +135,7 @@
       </div>
 
       <div class="card">
-        <div class="hd">
+        <div class="hd" style="padding: 20px 16px;">
           <div class="t">Top 6 Pabrik</div>
           <div class="pill">Berdasarkan QTY Realisasi</div>
         </div>
@@ -147,7 +147,7 @@
 
     <div class="grid bottom">
       <div class="card">
-        <div class="hd">
+        <div class="hd" style="padding: 20px 16px;">
           <div class="t">Order PARTIAL</div>
           <div class="pill" id="partialPill">-</div>
         </div>
@@ -157,7 +157,7 @@
       </div>
 
       <div class="card">
-        <div class="hd">
+        <div class="hd" style="padding: 20px 16px;">
           <div class="t">Real Time Delivery</div>
           <div class="pill">10 Data Terbaru</div>
         </div>
@@ -180,7 +180,7 @@
       </div>
 
       <div class="card">
-        <div class="hd">
+        <div class="hd" style="padding: 20px 16px;">
           <div class="t">Ringkasan Data</div>
           <div class="pill">Info Detail</div>
         </div>
@@ -309,7 +309,7 @@
     .wrap{ 
       max-width:1400px; 
       margin:0 auto; 
-      padding:5px 8px; 
+      padding:20px 16px; 
       width:100%;
       transition: all 0.3s ease;
     }
@@ -599,12 +599,25 @@
       border:1px solid var(--line); background:rgba(12,31,53,.55);
       border-radius:var(--radius-lg); backdrop-filter:blur(10px); overflow:hidden;
     }
+    
+    /* Header card dengan padding baru: 20px 16px */
     .card .hd{
-      padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
-      border-bottom:1px solid var(--line); background:rgba(15,42,71,.45);
+      padding: 20px 16px;
+      display:flex; 
+      align-items:center; 
+      justify-content:space-between;
+      border-bottom:1px solid var(--line); 
+      background:rgba(15,42,71,.45);
     }
-    .card .hd .t{ font-weight:800; font-size:14px; }
-    .card .bd{ padding:16px; }
+    
+    .card .hd .t{ 
+      font-weight:800; 
+      font-size:14px; 
+    }
+    
+    .card .bd{ 
+      padding:16px; 
+    }
     
     /* Animasi border yang menyala dan meredup - menggunakan variable untuk warna */
     @keyframes glowPulse {
@@ -624,7 +637,7 @@
     
     /* KPI Status Cards dengan Icon - SEMUA TULISAN DI TENGAH */
     .kpi{
-      padding: 5px 17px;
+      padding: 20px 16px;
       border-radius: var(--radius-lg);
       background: rgba(15,42,71,.55);
       border: 1px solid var(--line);
