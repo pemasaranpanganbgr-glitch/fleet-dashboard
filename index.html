@@ -37,23 +37,32 @@
         </div>
       </div>
 
-      <!-- Kontrol dipindahkan ke sini, sejajar dengan brand-container di kanan -->
-      <div class="controls">
-        <!-- Group Periode -->
-        <div class="control-group">
-          <div class="ctrl">
-            <label>Periode</label>
-            <input type="date" id="fromDate" />
-            <span class="note">s/d</span>
-            <input type="date" id="toDate" />
-          </div>
+      <!-- Semua kontrol dalam 1 container dengan grid layout -->
+      <div class="controls-container">
+        <!-- Baris 1: Label Periode dan Auto Refresh -->
+        <div class="controls-row labels">
+          <div class="label-item">Periode</div>
+          <div class="label-item">Auto Refresh</div>
+          <div class="label-item"></div> <!-- Spacer untuk tombol -->
         </div>
+        
+        <!-- Baris 2: Input Periode, Dropdown Refresh, dan Tombol -->
+        <div class="controls-row inputs">
+          <!-- Group Periode -->
+          <div class="periode-group">
+            <div class="date-inputs">
+              <input type="date" id="fromDate" class="date-input" />
+              <span class="date-sep">s/d</span>
+              <input type="date" id="toDate" class="date-input" />
+            </div>
+            <div class="periode-display">
+              <span id="fromDateDisplay">26/01/2026</span> s/d <span id="toDateDisplay">25/02/2026</span>
+            </div>
+          </div>
 
-        <!-- Group Auto Refresh - HANYA DROPDOWN (tanpa status) -->
-        <div class="control-group">
-          <div class="ctrl">
-            <label>Auto Refresh</label>
-            <select id="refreshSec">
+          <!-- Group Auto Refresh dengan status -->
+          <div class="refresh-group">
+            <select id="refreshSec" class="refresh-select">
               <option value="0">Off</option>
               <option value="5">5 dtk</option>
               <option value="10">10 dtk</option>
@@ -61,17 +70,17 @@
               <option value="60">60 dtk</option>
               <option value="300" selected>5 menit</option>
             </select>
+            <div class="auto-refresh-status">
+              <span class="live-dot"></span>
+              <span id="nextUpdateText">Update dalam 103s</span>
+            </div>
           </div>
-        </div>
 
-        <!-- Group Tombol - HANYA REFRESH (Reset dihapus) -->
-        <div class="button-group">
-          <button id="btnRefresh">↻ Refresh Now</button>
-        </div>
-
-        <!-- Tombol Display Mode (toggle) -->
-        <div class="tv-controls">
-          <button id="btnDisplay" class="tv-btn">📺 Display Mode</button>
+          <!-- Tombol Aksi -->
+          <div class="action-buttons">
+            <button id="btnRefresh" class="btn-refresh">↻ Refresh Now</button>
+            <button id="btnDisplay" class="btn-display">📺 Display Mode</button>
+          </div>
         </div>
       </div>
     </header>
@@ -259,15 +268,7 @@
       font-size: 16px;
     }
     
-    body.tv-mode .ctrl label,
-    body.tv-mode .ctrl input,
-    body.tv-mode .ctrl select,
-    body.tv-mode .ctrl button,
-    body.tv-mode .pill,
-    body.tv-mode .note,
-    body.tv-mode th,
-    body.tv-mode td,
-    body.tv-mode .footer {
+    body.tv-mode .controls-container {
       font-size: calc(var(--base-font-size) * 0.9);
     }
     
@@ -312,7 +313,7 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
+      gap:20px;
       padding:12px 20px;
       border:1px solid var(--line);
       background:rgba(12,31,53,.55);
@@ -327,7 +328,7 @@
       display:flex; 
       align-items:center; 
       gap:16px;
-      flex-shrink:0; /* Mencegah brand-container mengecil */
+      flex-shrink:0;
     }
     
     .brand-logo img{ 
@@ -340,99 +341,233 @@
     h1{ font-size:clamp(18px,4vw,24px); font-weight:800; transition: font-size 0.3s ease; }
     .sub{ color:var(--text-secondary); font-size:12px; display:flex; gap:8px; }
     
-    /* Controls sekarang di kanan */
-    .controls{ 
-      display:flex; 
-      gap:16px; 
-      flex-wrap:wrap; 
-      align-items:center;
-      justify-content:flex-end;
-      flex:1;
+    /* ========== CONTROLS DALAM 1 CONTAINER ========== */
+    .controls-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(15,42,71,.4);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      border: 1px solid var(--line);
+      min-width: 600px;
     }
     
-    .control-group{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-width:180px;
+    /* Baris label */
+    .controls-row.labels {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr 0.8fr;
+      gap: 16px;
+      padding: 0 4px;
     }
     
-    .ctrl{
-      display:flex; 
-      gap:8px; 
-      align-items:center; 
-      padding:8px 12px;
-      border-radius:var(--radius-md); 
-      background:rgba(15,42,71,.55); 
-      border:1px solid var(--line);
-      width:100%;
+    .label-item {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
-    .ctrl label{ 
-      font-size:12px; 
-      color:var(--text-secondary); 
-      font-weight:600; 
-      white-space:nowrap; 
+    /* Baris input */
+    .controls-row.inputs {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr 0.8fr;
+      gap: 16px;
+      align-items: start;
     }
     
-    input, select, button{
-      font-family:inherit; 
-      color:var(--text-primary);
-      background:rgba(0,0,0,.25); 
-      border:1px solid var(--line);
-      border-radius:var(--radius-sm); 
-      padding:8px 12px; 
-      font-size:12px; 
-      outline:none;
-      transition: all 0.3s ease;
+    /* Group Periode */
+    .periode-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
     
-    select {
-      flex:1;
+    .date-inputs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 4px 8px;
     }
     
-    button{
-      background:linear-gradient(135deg, rgba(255,176,0,.9), rgba(255,176,0,.55));
-      color:#08121f; 
-      border:none; 
-      font-weight:800; 
-      cursor:pointer; 
-      min-width:80px;
+    .date-input {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 12px;
+      padding: 4px;
+      width: 110px;
     }
     
-    button:hover{ 
-      transform:translateY(-1px); 
-      box-shadow:0 4px 12px rgba(255,176,0,.3); 
+    .date-input::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.5;
+      cursor: pointer;
     }
     
-    /* Tombol untuk TV - Toggle Mode */
-    .tv-controls {
+    .date-sep {
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+    
+    .periode-display {
+      font-size: 11px;
+      color: var(--accent-primary);
+      background: rgba(255,176,0,.1);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255,176,0,.2);
+      text-align: center;
+    }
+    
+    .periode-display span {
+      font-weight: 600;
+    }
+    
+    /* Group Refresh */
+    .refresh-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .refresh-select {
+      background: rgba(0,0,0,.25);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 8px 10px;
+      font-size: 12px;
+      width: 100%;
+      cursor: pointer;
+    }
+    
+    .refresh-select option {
+      background: var(--bg-secondary);
+    }
+    
+    .auto-refresh-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,.2);
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      border: 1px solid var(--line);
+      justify-content: center;
+    }
+    
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #2ecc71;
+      border-radius: 50%;
+      animation: livePulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes livePulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); background: #f1c40f; }
+      100% { opacity: 1; transform: scale(1); background: #2ecc71; }
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
       display: flex;
       gap: 8px;
       align-items: center;
     }
     
-    .tv-btn {
-      background: linear-gradient(135deg, rgba(68,156,255,.9), rgba(68,156,255,.55));
-      color: #fff;
-      min-width: 120px;
+    .btn-refresh {
+      background: linear-gradient(135deg, rgba(255,176,0,.9), rgba(255,176,0,.55));
+      color: #08121f;
+      border: none;
       font-weight: 700;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+      flex: 1;
+      min-width: 120px;
     }
     
-    .tv-btn:hover {
+    .btn-refresh:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255,176,0,.3);
+    }
+    
+    .btn-display {
+      background: linear-gradient(135deg, rgba(68,156,255,.9), rgba(68,156,255,.55));
+      color: white;
+      border: none;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    .btn-display:hover {
       box-shadow: 0 4px 12px rgba(68,156,255,.3);
     }
     
-    .tv-btn.active {
+    .btn-display.active {
       background: linear-gradient(135deg, rgba(46,204,113,.9), rgba(46,204,113,.55));
     }
     
-    .button-group{
-      display:flex;
-      gap:8px;
-      align-items:center;
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .controls-container {
+        min-width: 500px;
+      }
+      
+      .controls-row.inputs {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      .controls-row.labels {
+        display: none;
+      }
+      
+      .action-buttons {
+        flex-direction: row;
+      }
     }
     
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .brand-container {
+        justify-content: center;
+      }
+      
+      .controls-container {
+        min-width: auto;
+        width: 100%;
+      }
+      
+      .date-inputs {
+        flex-wrap: wrap;
+      }
+      
+      .date-input {
+        width: calc(50% - 20px);
+        flex: 1;
+      }
+    }
+    
+    /* ========== KPI CARDS ========== */
     .master-card{
       background:linear-gradient(135deg, rgba(255,176,0,.15), rgba(255,176,0,.05));
       border:1px solid rgba(255,176,0,.3); margin-bottom:20px;
@@ -460,56 +595,9 @@
       margin-bottom: 16px;
     }
     
-    /* Responsive untuk ponsel */
     @media (max-width: 768px) {
       .kpis-top, .kpis-bottom { 
         grid-template-columns: repeat(2, 1fr);
-      }
-      
-      .header {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      .brand-container {
-        justify-content: center;
-      }
-      
-      .controls {
-        flex-direction: column;
-        width: 100%;
-      }
-      
-      .control-group {
-        width: 100%;
-        min-width: unset;
-      }
-      
-      .ctrl {
-        flex-wrap: wrap;
-      }
-      
-      .ctrl input, .ctrl select {
-        flex: 1;
-        min-width: 120px;
-      }
-      
-      .button-group {
-        width: 100%;
-        justify-content: stretch;
-      }
-      
-      .button-group button {
-        flex: 1;
-      }
-      
-      .tv-controls {
-        width: 100%;
-        justify-content: stretch;
-      }
-      
-      .tv-controls button {
-        flex: 1;
       }
     }
     
@@ -521,23 +609,6 @@
       .master-stats {
         grid-template-columns: 1fr;
         gap: 20px;
-      }
-      
-      .ctrl {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      .ctrl label {
-        margin-bottom: 4px;
-      }
-      
-      .ctrl input, .ctrl select {
-        width: 100%;
-      }
-      
-      .tv-controls {
-        flex-direction: column;
       }
     }
     
@@ -553,7 +624,6 @@
       border-radius:var(--radius-lg); backdrop-filter:blur(10px); overflow:hidden;
     }
     
-    /* Header card dengan padding baru: 20px 16px */
     .card .hd{
       padding: 20px 16px;
       display:flex; 
@@ -572,7 +642,7 @@
       padding:16px; 
     }
     
-    /* Animasi border yang menyala dan meredup - menggunakan variable untuk warna */
+    /* Animasi border yang menyala */
     @keyframes glowPulse {
       0% {
         box-shadow: 0 0 5px var(--glow-color), 0 0 10px var(--glow-color);
@@ -588,13 +658,12 @@
       }
     }
     
-    /* KPI Status Cards dengan Icon - SEMUA TULISAN DI TENGAH */
     .kpi{
       padding: 20px 16px;
       border-radius: var(--radius-lg);
       background: rgba(15,42,71,.55);
       border: 1px solid var(--line);
-      border-top: 4px solid transparent; /* Akan diisi oleh inline style */
+      border-top: 4px solid transparent;
       transition: transform 0.2s, border-top-color 0.3s, box-shadow 0.3s;
       display: flex;
       flex-direction: column;
@@ -602,12 +671,10 @@
       text-align: center;
     }
     
-    /* Kelas untuk border yang menyala - menggunakan CSS variable untuk warna */
     .kpi.glow-active {
       animation: glowPulse 2s ease-in-out infinite;
     }
     
-    /* Kelas untuk border mati (nilai 0) */
     .kpi.glow-inactive {
       border-top: 4px solid rgba(255, 255, 255, 0.1) !important;
       box-shadow: none !important;
@@ -619,11 +686,6 @@
       transform: translateY(-2px);
     }
     
-    .kpi.glow-active:hover {
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3), 0 0 25px var(--glow-color);
-    }
-    
-    /* Header dalam KPI untuk icon dan label */
     .kpi .header {
       display: flex;
       align-items: center;
@@ -632,13 +694,11 @@
       width: 100%;
     }
     
-    /* Icon status */
     .status-icon {
       font-size: 28px;
       line-height: 1;
     }
     
-    /* Label status */
     .status-label {
       font-size: 14px;
       font-weight: 700;
@@ -746,7 +806,7 @@
         }
       };
 
-      // ========== KOLOM NOMOR POLISI DI J (index 9) ==========
+      // ========== KOLOM NOMOR POLISI ==========
       const REALISASI_COLUMNS = {
         orderCode: 2,    // C
         pabrik: 3,       // D
@@ -755,7 +815,7 @@
         status: 15,      // P
         tglMuat: 14,     // O
         actualMuat: 17,  // R
-        noPolisi: 9,     // J (index 9) - KOLOM NOMOR POLISI
+        noPolisi: 9,     // J
         tglInput: 1      // B
       };
 
@@ -771,7 +831,7 @@
         isRefreshing: false,
         lastFetch: null,
         dataStatus: { realisasi: false, master: false },
-        tvMode: false // Untuk melacak mode TV
+        tvMode: false
       };
 
       // ========== DOM HELPERS ==========
@@ -807,38 +867,29 @@
         }
       };
 
-      // ========== TV MODE FUNCTIONS ==========
+      // ========== TV MODE TOGGLE ==========
       const TVMode = {
         toggle: () => {
           if (State.tvMode) {
-            // Nonaktifkan mode TV
             document.body.classList.remove('tv-mode');
             State.tvMode = false;
-            
-            // Update tombol display
             const btnDisplay = DOM.get('btnDisplay');
             if (btnDisplay) {
               btnDisplay.textContent = '📺 Display Mode';
               btnDisplay.classList.remove('active');
             }
-            
             DOM.showMessage('success', 'Mode TV dimatikan');
           } else {
-            // Aktifkan mode TV
             document.body.classList.add('tv-mode');
             State.tvMode = true;
-            
-            // Update tombol display
             const btnDisplay = DOM.get('btnDisplay');
             if (btnDisplay) {
               btnDisplay.textContent = '📺 TV Mode Aktif';
               btnDisplay.classList.add('active');
             }
-            
             DOM.showMessage('success', 'Mode TV diaktifkan - Tampilan diperbesar');
           }
           
-          // Refresh charts untuk menyesuaikan ukuran
           setTimeout(() => {
             Object.values(State.charts).forEach(chart => {
               if (chart) chart.resize();
@@ -848,12 +899,35 @@
         
         init: () => {
           const btnDisplay = DOM.get('btnDisplay');
-          
           if (btnDisplay) {
             btnDisplay.addEventListener('click', TVMode.toggle);
           }
-          
-          console.log('TV Mode toggle button initialized');
+        }
+      };
+
+      // ========== UPDATE DISPLAY TANGGAL ==========
+      const updateDateDisplay = () => {
+        const fromInput = DOM.get('fromDate');
+        const toInput = DOM.get('toDate');
+        const fromDisplay = DOM.get('fromDateDisplay');
+        const toDisplay = DOM.get('toDateDisplay');
+        
+        if (fromInput && fromDisplay) {
+          const date = new Date(fromInput.value);
+          fromDisplay.textContent = date.toLocaleDateString('id-ID', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+          }).replace(/\//g, '/');
+        }
+        
+        if (toInput && toDisplay) {
+          const date = new Date(toInput.value);
+          toDisplay.textContent = date.toLocaleDateString('id-ID', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+          }).replace(/\//g, '/');
         }
       };
 
@@ -894,21 +968,14 @@
           if (!value) return null;
           try {
             const str = value.toString().trim();
-
-            // Excel serial number
             const num = Number(str);
             if (!isNaN(num) && num > 40000) {
               return new Date((num - 25569) * 86400 * 1000);
             }
-
-            // DD/MM/YYYY or DD-MM-YYYY
             const dmy = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
             if (dmy) return new Date(dmy[3], dmy[2] - 1, dmy[1]);
-
-            // YYYY-MM-DD or YYYY/MM/DD
             const ymd = str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
             if (ymd) return new Date(ymd[1], ymd[2] - 1, ymd[3]);
-
             const date = new Date(str);
             return isNaN(date) ? null : date;
           } catch {
@@ -928,13 +995,10 @@
         processRealisasiRow: (row) => {
           if (!Array.isArray(row)) return null;
           
-          // Ambil nomor polisi dari kolom J (index 9)
           let noPolisi = row[REALISASI_COLUMNS.noPolisi] || '';
           
-          // Bersihkan nomor polisi (hapus spasi berlebih, uppercase)
           if (noPolisi) {
             noPolisi = noPolisi.toString().trim().toUpperCase();
-            // Jika kosong setelah trim, set ke '-'
             if (noPolisi === '') noPolisi = '-';
           } else {
             noPolisi = '-';
@@ -949,7 +1013,7 @@
             statusCategory: DataProcessor.getStatusCategory(row[REALISASI_COLUMNS.status]),
             tglMuat: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglMuat]),
             actualMuat: DataProcessor.parseDate(row[REALISASI_COLUMNS.actualMuat]),
-            noPolisi: noPolisi, // Nomor polisi sudah dibersihkan
+            noPolisi: noPolisi,
             tglInput: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglInput])
           };
         },
@@ -957,12 +1021,12 @@
         processMasterRow: (row) => {
           if (!Array.isArray(row)) return null;
 
-          const tglOrderRaw  = row[1]; // B
-          const orderCodeRaw = row[2]; // C
-          const pabrikRaw    = row[3]; // D
-          const penerimaRaw  = row[4]; // E
-          const tujuanRaw    = row[5]; // F
-          const qtyRaw       = row[6]; // G
+          const tglOrderRaw  = row[1];
+          const orderCodeRaw = row[2];
+          const pabrikRaw    = row[3];
+          const penerimaRaw  = row[4];
+          const tujuanRaw    = row[5];
+          const qtyRaw       = row[6];
 
           if (!orderCodeRaw || orderCodeRaw.toString().trim() === '') return null;
 
@@ -1142,19 +1206,17 @@
           DOM.updateText('masterPeriode', stats.periode);
         },
 
-        // Render KPI ke dua container terpisah dengan efek glow sesuai warna masing-masing
         kpi: (stats) => {
           const topContainer = DOM.get('kpiContainer');
           const bottomContainer = DOM.get('kpiBottomContainer');
           if (!topContainer || !bottomContainer) return;
 
-          // Status untuk container atas: PROGRESS, ON DELIVERY, PARSIAL
           const topStatusList = [
             { 
               key: 'progress', 
               label: 'PROGRESS', 
               icon: '⏳',
-              color: '#f1c40f', // Kuning
+              color: '#f1c40f',
               count: stats.progress.count,
               qty: stats.progress.qty,
               percentage: stats.progress.percentage
@@ -1163,7 +1225,7 @@
               key: 'onDelivery', 
               label: 'ON DELIVERY', 
               icon: '🚚',
-              color: '#3498db', // Biru
+              color: '#3498db',
               count: stats.onDelivery.count,
               qty: stats.onDelivery.qty,
               percentage: stats.onDelivery.percentage
@@ -1172,20 +1234,19 @@
               key: 'partial', 
               label: 'PARSIAL', 
               icon: '⚡',
-              color: '#9b59b6', // Ungu
+              color: '#9b59b6',
               count: stats.partial.count,
               qty: stats.partial.qty,
               percentage: stats.partial.percentage
             }
           ];
 
-          // Status untuk container bawah: DELIVERED dan CANCEL
           const bottomStatusList = [
             { 
               key: 'delivered', 
               label: 'DELIVERED', 
               icon: '✅',
-              color: '#2ecc71', // Hijau
+              color: '#2ecc71',
               count: stats.delivered.count,
               qty: stats.delivered.qty,
               percentage: stats.delivered.percentage
@@ -1194,22 +1255,19 @@
               key: 'cancel', 
               label: 'CANCEL', 
               icon: '⛔',
-              color: '#e74c3c', // Merah
+              color: '#e74c3c',
               count: stats.cancel.count,
               qty: stats.cancel.qty,
               percentage: stats.cancel.percentage
             }
           ];
 
-          // Fungsi untuk menentukan kelas glow berdasarkan nilai count
           const getGlowClass = (count) => {
             return count > 0 ? 'glow-active' : 'glow-inactive';
           };
 
-          // Render container atas (3 kolom) dengan efek glow sesuai warna
           topContainer.innerHTML = topStatusList.map(status => {
             const glowClass = getGlowClass(status.count);
-            // Set CSS variable untuk warna glow
             return `
               <div class="kpi ${glowClass}" style="border-top: 4px solid ${status.color}; --glow-color: ${status.color}80;">
                 <div class="header">
@@ -1225,7 +1283,6 @@
             `;
           }).join('');
 
-          // Render container bawah (2 kolom) dengan efek glow sesuai warna
           bottomContainer.innerHTML = bottomStatusList.map(status => {
             const glowClass = getGlowClass(status.count);
             return `
@@ -1408,17 +1465,15 @@
           sorted.forEach(item => {
             const row = tbody.insertRow();
             
-            // Nomor Polisi - dengan validasi dan styling
             const noPolisiCell = row.insertCell();
             const noPolisi = item.noPolisi || '-';
             
-            // Beri warna khusus jika nomor polisi valid (bukan '-' dan bukan 'Unknown')
             if (noPolisi !== '-' && noPolisi !== 'UNKNOWN' && noPolisi.length > 2) {
               noPolisiCell.style.fontWeight = '700';
-              noPolisiCell.style.color = '#ffb000'; // Warna gold untuk nomor polisi valid
+              noPolisiCell.style.color = '#ffb000';
               noPolisiCell.textContent = noPolisi;
             } else {
-              noPolisiCell.style.color = '#a7b6c8'; // Warna abu untuk data tidak valid
+              noPolisiCell.style.color = '#a7b6c8';
               noPolisiCell.style.fontStyle = 'italic';
               noPolisiCell.textContent = noPolisi;
             }
@@ -1461,6 +1516,106 @@
         }
       };
 
+      // ========== AUTO REFRESH & COUNTDOWN ==========
+      const AutoRefresh = {
+        startCountdown: (seconds) => {
+          if (State.countdownTimer) clearInterval(State.countdownTimer);
+          if (seconds <= 0) {
+            DOM.updateText('nextUpdateText', 'Off');
+            return;
+          }
+
+          State.nextUpdateTime = Date.now() + seconds * 1000;
+
+          State.countdownTimer = setInterval(() => {
+            const now = Date.now();
+            const remaining = Math.max(0, Math.round((State.nextUpdateTime - now) / 1000));
+            DOM.updateText('nextUpdateText', remaining ? `Update dalam ${remaining}s` : 'Updating...');
+          }, 100);
+        },
+
+        setup: () => {
+          if (State.refreshTimer) clearInterval(State.refreshTimer);
+
+          const seconds = Number(DOM.get('refreshSec')?.value || 0);
+          if (seconds > 0) {
+            State.refreshTimer = setInterval(() => App.refresh(), seconds * 1000);
+            AutoRefresh.startCountdown(seconds);
+          } else {
+            DOM.updateText('nextUpdateText', 'Off');
+          }
+        }
+      };
+
+      // ========== APP ==========
+      const App = {
+        refresh: async function () {
+          if (State.isRefreshing) return;
+
+          const { realisasiData, masterData } = await DataFetcher.fetchAllData();
+
+          const fromDate = DOM.get('fromDate')?.value;
+          const toDate = DOM.get('toDate')?.value;
+
+          State.filteredRealisasi = DataProcessor.filterByDate(realisasiData, fromDate, toDate, 'tglInput');
+          State.filteredMaster = DataProcessor.filterByDate(masterData, fromDate, toDate, 'tglOrder');
+
+          const realStats = DataProcessor.calculateRealisasiStats(State.filteredRealisasi);
+          const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
+
+          Renderer.masterSummary(masterStats);
+          Renderer.kpi(realStats);
+          Renderer.partialDetails(realStats);
+          Renderer.charts(State.filteredRealisasi, realStats);
+          Renderer.realTimeTable(State.filteredRealisasi);
+          Renderer.ringkasanData(realStats, masterStats);
+          
+          updateDateDisplay();
+
+          AutoRefresh.startCountdown(Number(DOM.get('refreshSec')?.value || 30));
+          DOM.showMessage('success', `Update: ${State.filteredRealisasi.length} realisasi, ${masterStats.totalOrders} master`);
+        },
+
+        init: function () {
+          const today = new Date();
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(today.getDate() - 30);
+
+          const fromInput = DOM.get('fromDate');
+          const toInput = DOM.get('toDate');
+          if (fromInput) {
+            fromInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+          }
+          if (toInput) {
+            toInput.value = today.toISOString().split('T')[0];
+          }
+          
+          updateDateDisplay();
+
+          DOM.get('btnRefresh')?.addEventListener('click', () => App.refresh());
+
+          DOM.get('refreshSec')?.addEventListener('change', () => {
+            AutoRefresh.setup();
+            App.refresh();
+          });
+
+          DOM.get('fromDate')?.addEventListener('change', () => {
+            updateDateDisplay();
+            App.refresh();
+          });
+          
+          DOM.get('toDate')?.addEventListener('change', () => {
+            updateDateDisplay();
+            App.refresh();
+          });
+
+          TVMode.init();
+
+          App.refresh();
+          AutoRefresh.setup();
+        }
+      };
+
       // ========== DATA FETCHING ==========
       const DataFetcher = {
         fetchCSV: (url, type) => {
@@ -1499,7 +1654,6 @@
               }
               State.dataStatus.realisasi = realisasiData.length > 0;
               
-              // Log untuk debugging nomor polisi (10 data pertama)
               console.log('Contoh data nomor polisi (10 pertama):', 
                 realisasiData.slice(0, 10).map(d => ({
                   orderCode: d.orderCode,
@@ -1536,87 +1690,6 @@
             DOM.showRefreshIndicator(false);
             State.isRefreshing = false;
           }
-        }
-      };
-
-      // ========== AUTO REFRESH ==========
-      const AutoRefresh = {
-        startCountdown: (seconds) => {
-          if (State.countdownTimer) clearInterval(State.countdownTimer);
-          if (seconds <= 0) {
-            return;
-          }
-
-          State.nextUpdateTime = Date.now() + seconds * 1000;
-
-          // Countdown tetap berjalan di background tapi tidak ditampilkan
-          State.countdownTimer = setInterval(() => {
-            // Hanya untuk internal, tidak perlu update UI
-          }, 1000);
-        },
-
-        setup: () => {
-          if (State.refreshTimer) clearInterval(State.refreshTimer);
-
-          const seconds = Number(DOM.get('refreshSec')?.value || 0);
-          if (seconds > 0) {
-            State.refreshTimer = setInterval(() => App.refresh(), seconds * 1000);
-            AutoRefresh.startCountdown(seconds);
-          }
-        }
-      };
-
-      // ========== APP ==========
-      const App = {
-        refresh: async function () {
-          if (State.isRefreshing) return;
-
-          const { realisasiData, masterData } = await DataFetcher.fetchAllData();
-
-          const fromDate = DOM.get('fromDate')?.value;
-          const toDate = DOM.get('toDate')?.value;
-
-          State.filteredRealisasi = DataProcessor.filterByDate(realisasiData, fromDate, toDate, 'tglInput');
-          State.filteredMaster = DataProcessor.filterByDate(masterData, fromDate, toDate, 'tglOrder');
-
-          const realStats = DataProcessor.calculateRealisasiStats(State.filteredRealisasi);
-          const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
-
-          Renderer.masterSummary(masterStats);
-          Renderer.kpi(realStats);
-          Renderer.partialDetails(realStats);
-          Renderer.charts(State.filteredRealisasi, realStats);
-          Renderer.realTimeTable(State.filteredRealisasi);
-          Renderer.ringkasanData(realStats, masterStats);
-
-          DOM.showMessage('success', `Update: ${State.filteredRealisasi.length} realisasi, ${masterStats.totalOrders} master`);
-        },
-
-        init: function () {
-          const today = new Date();
-          const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(today.getDate() - 30);
-
-          const fromInput = DOM.get('fromDate');
-          const toInput = DOM.get('toDate');
-          if (fromInput) fromInput.value = thirtyDaysAgo.toISOString().split('T')[0];
-          if (toInput) toInput.value = today.toISOString().split('T')[0];
-
-          DOM.get('btnRefresh')?.addEventListener('click', () => App.refresh());
-
-          DOM.get('refreshSec')?.addEventListener('change', () => {
-            AutoRefresh.setup();
-            App.refresh();
-          });
-
-          DOM.get('fromDate')?.addEventListener('change', () => App.refresh());
-          DOM.get('toDate')?.addEventListener('change', () => App.refresh());
-
-          // Inisialisasi mode TV (toggle)
-          TVMode.init();
-
-          App.refresh();
-          AutoRefresh.setup();
         }
       };
 
