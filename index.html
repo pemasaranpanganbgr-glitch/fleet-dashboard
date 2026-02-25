@@ -309,7 +309,7 @@
     .wrap{ 
       max-width:1400px; 
       margin:0 auto; 
-      padding:20px 16px; 
+      padding:5px 8px; 
       width:100%;
       transition: all 0.3s ease;
     }
@@ -606,19 +606,19 @@
     .card .hd .t{ font-weight:800; font-size:14px; }
     .card .bd{ padding:16px; }
     
-    /* Animasi border yang menyala dan meredup */
+    /* Animasi border yang menyala dan meredup - menggunakan variable untuk warna */
     @keyframes glowPulse {
       0% {
-        box-shadow: 0 0 5px rgba(255, 176, 0, 0.3), 0 0 10px rgba(255, 176, 0, 0.2);
-        border-top-color: rgba(255, 176, 0, 0.5);
+        box-shadow: 0 0 5px var(--glow-color), 0 0 10px var(--glow-color);
+        border-top-color: var(--glow-color);
       }
       50% {
-        box-shadow: 0 0 20px rgba(255, 176, 0, 0.8), 0 0 30px rgba(255, 176, 0, 0.5);
-        border-top-color: rgba(255, 176, 0, 1);
+        box-shadow: 0 0 20px var(--glow-color), 0 0 30px var(--glow-color);
+        border-top-color: var(--glow-color);
       }
       100% {
-        box-shadow: 0 0 5px rgba(255, 176, 0, 0.3), 0 0 10px rgba(255, 176, 0, 0.2);
-        border-top-color: rgba(255, 176, 0, 0.5);
+        box-shadow: 0 0 5px var(--glow-color), 0 0 10px var(--glow-color);
+        border-top-color: var(--glow-color);
       }
     }
     
@@ -628,22 +628,22 @@
       border-radius: var(--radius-lg);
       background: rgba(15,42,71,.55);
       border: 1px solid var(--line);
-      border-top: 4px solid transparent; /* Default transparan, akan diisi oleh JS */
+      border-top: 4px solid transparent; /* Akan diisi oleh inline style */
       transition: transform 0.2s, border-top-color 0.3s, box-shadow 0.3s;
       display: flex;
       flex-direction: column;
-      align-items: center;      /* Pusatkan secara horizontal */
-      text-align: center;       /* Rata tengah untuk semua teks */
+      align-items: center;
+      text-align: center;
     }
     
-    /* Kelas untuk border yang menyala */
+    /* Kelas untuk border yang menyala - menggunakan CSS variable untuk warna */
     .kpi.glow-active {
       animation: glowPulse 2s ease-in-out infinite;
     }
     
     /* Kelas untuk border mati (nilai 0) */
     .kpi.glow-inactive {
-      border-top: 4px solid rgba(255, 176, 0, 0.2) !important;
+      border-top: 4px solid rgba(255, 255, 255, 0.1) !important;
       box-shadow: none !important;
       animation: none !important;
       opacity: 0.7;
@@ -654,7 +654,7 @@
     }
     
     .kpi.glow-active:hover {
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3), 0 0 25px rgba(255, 176, 0, 0.4);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3), 0 0 25px var(--glow-color);
     }
     
     /* Header dalam KPI untuk icon dan label */
@@ -663,7 +663,7 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 12px;
-      width: 100%;              /* Lebar penuh agar space-between berfungsi */
+      width: 100%;
     }
     
     /* Icon status */
@@ -687,7 +687,7 @@
       line-height: 1.2;
       color: var(--text-primary);
       margin-bottom: 4px;
-      width: 100%;              /* Lebar penuh */
+      width: 100%;
     }
     
     .kpi .qty-value {
@@ -695,7 +695,7 @@
       font-weight: 700;
       color: var(--accent-primary);
       margin-bottom: 12px;
-      width: 100%;              /* Lebar penuh */
+      width: 100%;
     }
     
     .kpi .percentage {
@@ -704,7 +704,7 @@
       border-top: 1px solid var(--line);
       padding-top: 12px;
       margin-top: 4px;
-      width: 100%;              /* Lebar penuh */
+      width: 100%;
     }
     
     canvas{ max-height:260px; width:100%!important; height:auto!important; }
@@ -1192,7 +1192,7 @@
           DOM.updateText('masterPeriode', stats.periode);
         },
 
-        // Render KPI ke dua container terpisah dengan efek glow
+        // Render KPI ke dua container terpisah dengan efek glow sesuai warna masing-masing
         kpi: (stats) => {
           const topContainer = DOM.get('kpiContainer');
           const bottomContainer = DOM.get('kpiBottomContainer');
@@ -1204,7 +1204,7 @@
               key: 'progress', 
               label: 'PROGRESS', 
               icon: '⏳',
-              color: '#f1c40f',
+              color: '#f1c40f', // Kuning
               count: stats.progress.count,
               qty: stats.progress.qty,
               percentage: stats.progress.percentage
@@ -1213,7 +1213,7 @@
               key: 'onDelivery', 
               label: 'ON DELIVERY', 
               icon: '🚚',
-              color: '#3498db',
+              color: '#3498db', // Biru
               count: stats.onDelivery.count,
               qty: stats.onDelivery.qty,
               percentage: stats.onDelivery.percentage
@@ -1222,7 +1222,7 @@
               key: 'partial', 
               label: 'PARSIAL', 
               icon: '⚡',
-              color: '#9b59b6',
+              color: '#9b59b6', // Ungu
               count: stats.partial.count,
               qty: stats.partial.qty,
               percentage: stats.partial.percentage
@@ -1235,7 +1235,7 @@
               key: 'delivered', 
               label: 'DELIVERED', 
               icon: '✅',
-              color: '#2ecc71',
+              color: '#2ecc71', // Hijau
               count: stats.delivered.count,
               qty: stats.delivered.qty,
               percentage: stats.delivered.percentage
@@ -1244,7 +1244,7 @@
               key: 'cancel', 
               label: 'CANCEL', 
               icon: '⛔',
-              color: '#e74c3c',
+              color: '#e74c3c', // Merah
               count: stats.cancel.count,
               qty: stats.cancel.qty,
               percentage: stats.cancel.percentage
@@ -1256,11 +1256,12 @@
             return count > 0 ? 'glow-active' : 'glow-inactive';
           };
 
-          // Render container atas (3 kolom) dengan efek glow
+          // Render container atas (3 kolom) dengan efek glow sesuai warna
           topContainer.innerHTML = topStatusList.map(status => {
             const glowClass = getGlowClass(status.count);
+            // Set CSS variable untuk warna glow
             return `
-              <div class="kpi ${glowClass}" style="border-top: 4px solid ${status.color}">
+              <div class="kpi ${glowClass}" style="border-top: 4px solid ${status.color}; --glow-color: ${status.color}80;">
                 <div class="header">
                   <span class="status-label">${status.label}</span>
                   <span class="status-icon">${status.icon}</span>
@@ -1274,11 +1275,11 @@
             `;
           }).join('');
 
-          // Render container bawah (2 kolom) dengan efek glow
+          // Render container bawah (2 kolom) dengan efek glow sesuai warna
           bottomContainer.innerHTML = bottomStatusList.map(status => {
             const glowClass = getGlowClass(status.count);
             return `
-              <div class="kpi ${glowClass}" style="border-top: 4px solid ${status.color}">
+              <div class="kpi ${glowClass}" style="border-top: 4px solid ${status.color}; --glow-color: ${status.color}80;">
                 <div class="header">
                   <span class="status-label">${status.label}</span>
                   <span class="status-icon">${status.icon}</span>
@@ -1636,7 +1637,7 @@
           const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
 
           Renderer.masterSummary(masterStats);
-          Renderer.kpi(realStats); // Sekarang merender ke dua container dengan efek glow
+          Renderer.kpi(realStats); // Sekarang merender ke dua container dengan efek glow sesuai warna
           Renderer.partialDetails(realStats);
           Renderer.charts(State.filteredRealisasi, realStats);
           Renderer.realTimeTable(State.filteredRealisasi);
