@@ -73,6 +73,12 @@
           <button id="btnRefresh">↻ Refresh Now</button>
           <button id="btnReset" class="secondary">✕ Reset</button>
         </div>
+
+        <!-- Tombol Display dan Kembali untuk layar TV (awalnya tersembunyi) -->
+        <div class="tv-controls">
+          <button id="btnDisplay" class="tv-btn">📺 Display Mode</button>
+          <button id="btnBack" class="tv-btn secondary">↩ Kembali</button>
+        </div>
       </div>
     </header>
 
@@ -215,15 +221,97 @@
       --success:#2ecc71; --warning:#f1c40f; --danger:#e74c3c; --info:#3498db; --partial:#9b59b6;
       --line:rgba(255,255,255,.08); --shadow:0 10px 30px rgba(0,0,0,.35);
       --radius-sm:10px; --radius-md:14px; --radius-lg:18px;
+      
+      /* Ukuran font dasar */
+      --base-font-size: 14px;
+      --scale-factor: 1;
     }
+    
     body{
-      font-family:'Inter',sans-serif; color:var(--text-primary);
+      font-family:'Inter',sans-serif; 
+      color:var(--text-primary);
       background:radial-gradient(1200px 600px at 10% 10%, rgba(68,156,255,.18), transparent 60%),
                  radial-gradient(900px 500px at 90% 15%, rgba(255,176,0,.12), transparent 60%),
                  var(--bg-primary);
-      min-height:100vh; line-height:1.5;
+      min-height:100vh; 
+      line-height:1.5;
+      font-size: var(--base-font-size);
     }
-    .wrap{ max-width:1400px; margin:0 auto; padding:20px 16px; width:100%; }
+    
+    /* Mode tampilan untuk TV (display mode) */
+    body.tv-mode {
+      --base-font-size: 20px;
+      --scale-factor: 1.4;
+    }
+    
+    body.tv-mode .wrap {
+      max-width: 1800px;
+    }
+    
+    body.tv-mode .header {
+      padding: 20px 30px;
+    }
+    
+    body.tv-mode .brand-logo img {
+      height: 70px;
+    }
+    
+    body.tv-mode h1 {
+      font-size: 32px;
+    }
+    
+    body.tv-mode .sub {
+      font-size: 16px;
+    }
+    
+    body.tv-mode .ctrl label,
+    body.tv-mode .ctrl input,
+    body.tv-mode .ctrl select,
+    body.tv-mode .ctrl button,
+    body.tv-mode .auto-refresh-status,
+    body.tv-mode .pill,
+    body.tv-mode .note,
+    body.tv-mode th,
+    body.tv-mode td,
+    body.tv-mode .footer {
+      font-size: calc(var(--base-font-size) * 0.9);
+    }
+    
+    body.tv-mode .master-stat-value {
+      font-size: 42px;
+    }
+    
+    body.tv-mode .master-stat-label {
+      font-size: 18px;
+    }
+    
+    body.tv-mode .kpi .main-value {
+      font-size: 48px;
+    }
+    
+    body.tv-mode .kpi .qty-value {
+      font-size: 24px;
+    }
+    
+    body.tv-mode .kpi .percentage {
+      font-size: 18px;
+    }
+    
+    body.tv-mode .card .hd .t {
+      font-size: 20px;
+    }
+    
+    body.tv-mode canvas {
+      max-height: 350px;
+    }
+    
+    .wrap{ 
+      max-width:1400px; 
+      margin:0 auto; 
+      padding:20px 16px; 
+      width:100%;
+      transition: all 0.3s ease;
+    }
     
     /* Header dengan flexbox untuk menempatkan brand-container dan controls sejajar */
     .header{
@@ -238,6 +326,7 @@
       backdrop-filter:blur(10px);
       margin-bottom:20px;
       flex-wrap:wrap;
+      transition: all 0.3s ease;
     }
     
     .brand-container{ 
@@ -247,9 +336,14 @@
       flex-shrink:0; /* Mencegah brand-container mengecil */
     }
     
-    .brand-logo img{ height:50px; width:auto; filter:brightness(0) invert(1); }
+    .brand-logo img{ 
+      height:50px; 
+      width:auto; 
+      filter:brightness(0) invert(1);
+      transition: height 0.3s ease;
+    }
     .title{ border-left:1px solid var(--line); padding-left:16px; }
-    h1{ font-size:clamp(18px,4vw,24px); font-weight:800; }
+    h1{ font-size:clamp(18px,4vw,24px); font-weight:800; transition: font-size 0.3s ease; }
     .sub{ color:var(--text-secondary); font-size:12px; display:flex; gap:8px; }
     
     /* Controls sekarang di kanan */
@@ -257,9 +351,9 @@
       display:flex; 
       gap:16px; 
       flex-wrap:wrap; 
-      align-items:flex-start; /* Ubah ke flex-start agar status di bawah rata atas */
+      align-items:flex-start;
       justify-content:flex-end;
-      flex:1; /* Membiarkan controls mengambil sisa ruang */
+      flex:1;
     }
     
     .control-group{
@@ -303,6 +397,7 @@
       padding:8px 12px; 
       font-size:12px; 
       outline:none;
+      transition: all 0.3s ease;
     }
     
     select {
@@ -326,6 +421,31 @@
     button.secondary{ 
       background:rgba(15,42,71,.65); 
       color:var(--text-primary); 
+    }
+    
+    /* Tombol untuk TV */
+    .tv-controls {
+      display: none; /* Sembunyikan secara default */
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .tv-btn {
+      background: linear-gradient(135deg, rgba(68,156,255,.9), rgba(68,156,255,.55));
+      color: #fff;
+      min-width: 120px;
+    }
+    
+    .tv-btn.secondary {
+      background: rgba(15,42,71,.8);
+      color: var(--text-primary);
+    }
+    
+    /* Tampilkan tombol TV hanya di layar besar (min-width: 1920px) */
+    @media (min-width: 1920px) {
+      .tv-controls {
+        display: flex;
+      }
     }
     
     .auto-refresh-status{
@@ -368,7 +488,7 @@
     .master-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding:16px; }
     .master-stat-item{ text-align:center; }
     .master-stat-label{ font-size:12px; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px; }
-    .master-stat-value{ font-size:28px; font-weight:800; color:var(--accent-primary); }
+    .master-stat-value{ font-size:28px; font-weight:800; color:var(--accent-primary); transition: font-size 0.3s ease; }
     .master-stat-sub{ font-size:11px; color:var(--text-secondary); }
     .grid{ display:grid; gap:16px; margin-bottom:16px; }
     
@@ -388,16 +508,71 @@
       margin-bottom: 16px;
     }
     
-    /* Responsive untuk container */
+    /* Responsive untuk ponsel */
     @media (max-width: 768px) {
       .kpis-top, .kpis-bottom { 
         grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .brand-container {
+        justify-content: center;
+      }
+      
+      .controls {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .control-group {
+        width: 100%;
+        min-width: unset;
+      }
+      
+      .ctrl {
+        flex-wrap: wrap;
+      }
+      
+      .ctrl input, .ctrl select {
+        flex: 1;
+        min-width: 120px;
+      }
+      
+      .button-group {
+        width: 100%;
+        justify-content: stretch;
+      }
+      
+      .button-group button {
+        flex: 1;
       }
     }
     
     @media (max-width: 480px) {
       .kpis-top, .kpis-bottom { 
         grid-template-columns: 1fr;
+      }
+      
+      .master-stats {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .ctrl {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .ctrl label {
+        margin-bottom: 4px;
+      }
+      
+      .ctrl input, .ctrl select {
+        width: 100%;
       }
     }
     
@@ -572,7 +747,8 @@
         countdownTimer: null,
         isRefreshing: false,
         lastFetch: null,
-        dataStatus: { realisasi: false, master: false }
+        dataStatus: { realisasi: false, master: false },
+        tvMode: false // Untuk melacak mode TV
       };
 
       // ========== DOM HELPERS ==========
@@ -605,6 +781,56 @@
         updateText: (id, text) => {
           const el = DOM.get(id);
           if (el) el.textContent = text;
+        }
+      };
+
+      // ========== TV MODE FUNCTIONS ==========
+      const TVMode = {
+        enable: () => {
+          document.body.classList.add('tv-mode');
+          State.tvMode = true;
+          DOM.showMessage('success', 'Mode TV diaktifkan - Tampilan diperbesar');
+          
+          // Refresh charts untuk menyesuaikan ukuran
+          setTimeout(() => {
+            Object.values(State.charts).forEach(chart => {
+              if (chart) chart.resize();
+            });
+          }, 100);
+        },
+        
+        disable: () => {
+          document.body.classList.remove('tv-mode');
+          State.tvMode = false;
+          DOM.showMessage('success', 'Kembali ke mode normal');
+          
+          // Refresh charts
+          setTimeout(() => {
+            Object.values(State.charts).forEach(chart => {
+              if (chart) chart.resize();
+            });
+          }, 100);
+        },
+        
+        toggle: () => {
+          if (State.tvMode) {
+            TVMode.disable();
+          } else {
+            TVMode.enable();
+          }
+        },
+        
+        init: () => {
+          const btnDisplay = DOM.get('btnDisplay');
+          const btnBack = DOM.get('btnBack');
+          
+          if (btnDisplay) {
+            btnDisplay.addEventListener('click', TVMode.enable);
+          }
+          
+          if (btnBack) {
+            btnBack.addEventListener('click', TVMode.disable);
+          }
         }
       };
 
@@ -1360,6 +1586,9 @@
 
           DOM.get('fromDate')?.addEventListener('change', () => App.refresh());
           DOM.get('toDate')?.addEventListener('change', () => App.refresh());
+
+          // Inisialisasi mode TV
+          TVMode.init();
 
           App.refresh();
           AutoRefresh.setup();
