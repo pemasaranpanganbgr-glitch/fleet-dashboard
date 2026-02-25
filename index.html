@@ -49,9 +49,9 @@
           </div>
         </div>
 
-        <!-- Group Auto Refresh dengan status di dalam ctrl -->
+        <!-- Group Auto Refresh - HANYA DROPDOWN (tanpa status) -->
         <div class="control-group">
-          <div class="ctrl refresh-ctrl">
+          <div class="ctrl">
             <label>Auto Refresh</label>
             <select id="refreshSec">
               <option value="0">Off</option>
@@ -61,17 +61,16 @@
               <option value="60">60 dtk</option>
               <option value="300" selected>5 menit</option>
             </select>
-            <div class="auto-refresh-status">
-              <span class="live-dot"></span>
-              <span id="nextUpdateText">Update dalam 30s</span>
-            </div>
           </div>
         </div>
 
-        <!-- Group Tombol -->
+        <!-- Group Tombol - HANYA REFRESH (Reset dihapus) -->
         <div class="button-group">
           <button id="btnRefresh">↻ Refresh Now</button>
-          <!-- Tombol Display Mode toggle (aktif/nonaktif) -->
+        </div>
+
+        <!-- Tombol Display Mode (toggle) -->
+        <div class="tv-controls">
           <button id="btnDisplay" class="tv-btn">📺 Display Mode</button>
         </div>
       </div>
@@ -201,7 +200,7 @@
         <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
       </div>
       <div class="footer-info">
-        <span>📊 Versi Final - Display Mode Toggle</span>
+        <span>📊 Versi Final - 5 Status Container dengan Icon</span>
       </div>
       <div class="copyright">copyright © 2026 By RH</div>
     </footer>
@@ -264,7 +263,6 @@
     body.tv-mode .ctrl input,
     body.tv-mode .ctrl select,
     body.tv-mode .ctrl button,
-    body.tv-mode .auto-refresh-status,
     body.tv-mode .pill,
     body.tv-mode .note,
     body.tv-mode th,
@@ -347,7 +345,7 @@
       display:flex; 
       gap:16px; 
       flex-wrap:wrap; 
-      align-items:flex-start;
+      align-items:center;
       justify-content:flex-end;
       flex:1;
     }
@@ -368,11 +366,6 @@
       background:rgba(15,42,71,.55); 
       border:1px solid var(--line);
       width:100%;
-    }
-    
-    /* Khusus untuk refresh control dengan status di dalam */
-    .refresh-ctrl {
-      flex-wrap: wrap;
     }
     
     .ctrl label{ 
@@ -412,7 +405,13 @@
       box-shadow:0 4px 12px rgba(255,176,0,.3); 
     }
     
-    /* Tombol Display Mode */
+    /* Tombol untuk TV - Toggle Mode */
+    .tv-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
     .tv-btn {
       background: linear-gradient(135deg, rgba(68,156,255,.9), rgba(68,156,255,.55));
       color: #fff;
@@ -426,35 +425,6 @@
     
     .tv-btn.active {
       background: linear-gradient(135deg, rgba(46,204,113,.9), rgba(46,204,113,.55));
-      box-shadow: 0 0 15px rgba(46,204,113,.5);
-    }
-    
-    .auto-refresh-status{
-      display:flex; 
-      align-items:center; 
-      gap:8px; 
-      background:rgba(0,0,0,.3);
-      padding:4px 10px; 
-      border-radius:20px; 
-      font-size:11px; 
-      justify-content:center;
-      border:1px solid var(--line);
-      margin-left: auto;
-      white-space: nowrap;
-    }
-    
-    .live-dot{
-      width:8px; 
-      height:8px; 
-      background:#2ecc71; 
-      border-radius:50%;
-      animation:livePulse 1.5s ease-in-out infinite;
-    }
-    
-    @keyframes livePulse{
-      0%{opacity:1;transform:scale(1)}
-      50%{opacity:.5;transform:scale(1.2);background:#f1c40f}
-      100%{opacity:1;transform:scale(1);background:#2ecc71}
     }
     
     .button-group{
@@ -533,16 +503,13 @@
         flex: 1;
       }
       
-      .auto-refresh-status {
-        margin-left: 0;
+      .tv-controls {
         width: 100%;
-        justify-content: center;
-        margin-top: 4px;
+        justify-content: stretch;
       }
       
-      .refresh-ctrl {
-        flex-direction: column;
-        align-items: stretch;
+      .tv-controls button {
+        flex: 1;
       }
     }
     
@@ -567,6 +534,10 @@
       
       .ctrl input, .ctrl select {
         width: 100%;
+      }
+      
+      .tv-controls {
+        flex-direction: column;
       }
     }
     
@@ -836,35 +807,35 @@
         }
       };
 
-      // ========== TV MODE FUNCTIONS (TOGGLE) ==========
+      // ========== TV MODE FUNCTIONS ==========
       const TVMode = {
         toggle: () => {
           if (State.tvMode) {
             // Nonaktifkan mode TV
             document.body.classList.remove('tv-mode');
             State.tvMode = false;
-            DOM.showMessage('success', 'Mode TV dinonaktifkan');
             
             // Update tombol display
             const btnDisplay = DOM.get('btnDisplay');
             if (btnDisplay) {
               btnDisplay.textContent = '📺 Display Mode';
               btnDisplay.classList.remove('active');
-              btnDisplay.style.background = 'linear-gradient(135deg, rgba(68,156,255,.9), rgba(68,156,255,.55))';
             }
+            
+            DOM.showMessage('success', 'Mode TV dimatikan');
           } else {
             // Aktifkan mode TV
             document.body.classList.add('tv-mode');
             State.tvMode = true;
-            DOM.showMessage('success', 'Mode TV diaktifkan - Tampilan diperbesar');
             
             // Update tombol display
             const btnDisplay = DOM.get('btnDisplay');
             if (btnDisplay) {
               btnDisplay.textContent = '📺 TV Mode Aktif';
               btnDisplay.classList.add('active');
-              btnDisplay.style.background = 'linear-gradient(135deg, rgba(46,204,113,.9), rgba(46,204,113,.55))';
             }
+            
+            DOM.showMessage('success', 'Mode TV diaktifkan - Tampilan diperbesar');
           }
           
           // Refresh charts untuk menyesuaikan ukuran
@@ -882,7 +853,7 @@
             btnDisplay.addEventListener('click', TVMode.toggle);
           }
           
-          console.log('TV Mode toggle initialized'); // Untuk debugging
+          console.log('TV Mode toggle button initialized');
         }
       };
 
@@ -1573,17 +1544,15 @@
         startCountdown: (seconds) => {
           if (State.countdownTimer) clearInterval(State.countdownTimer);
           if (seconds <= 0) {
-            DOM.updateText('nextUpdateText', 'Off');
             return;
           }
 
           State.nextUpdateTime = Date.now() + seconds * 1000;
 
+          // Countdown tetap berjalan di background tapi tidak ditampilkan
           State.countdownTimer = setInterval(() => {
-            const now = Date.now();
-            const remaining = Math.max(0, Math.round((State.nextUpdateTime - now) / 1000));
-            DOM.updateText('nextUpdateText', remaining ? `Update dalam ${remaining}s` : 'Updating...');
-          }, 100);
+            // Hanya untuk internal, tidak perlu update UI
+          }, 1000);
         },
 
         setup: () => {
@@ -1593,8 +1562,6 @@
           if (seconds > 0) {
             State.refreshTimer = setInterval(() => App.refresh(), seconds * 1000);
             AutoRefresh.startCountdown(seconds);
-          } else {
-            DOM.updateText('nextUpdateText', 'Off');
           }
         }
       };
@@ -1616,13 +1583,12 @@
           const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
 
           Renderer.masterSummary(masterStats);
-          Renderer.kpi(realStats); // Sekarang merender ke dua container dengan efek glow sesuai warna
+          Renderer.kpi(realStats);
           Renderer.partialDetails(realStats);
           Renderer.charts(State.filteredRealisasi, realStats);
           Renderer.realTimeTable(State.filteredRealisasi);
           Renderer.ringkasanData(realStats, masterStats);
 
-          AutoRefresh.startCountdown(Number(DOM.get('refreshSec')?.value || 30));
           DOM.showMessage('success', `Update: ${State.filteredRealisasi.length} realisasi, ${masterStats.totalOrders} master`);
         },
 
