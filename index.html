@@ -606,22 +606,55 @@
     .card .hd .t{ font-weight:800; font-size:14px; }
     .card .bd{ padding:16px; }
     
+    /* Animasi border yang menyala dan meredup */
+    @keyframes glowPulse {
+      0% {
+        box-shadow: 0 0 5px rgba(255, 176, 0, 0.3), 0 0 10px rgba(255, 176, 0, 0.2);
+        border-top-color: rgba(255, 176, 0, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(255, 176, 0, 0.8), 0 0 30px rgba(255, 176, 0, 0.5);
+        border-top-color: rgba(255, 176, 0, 1);
+      }
+      100% {
+        box-shadow: 0 0 5px rgba(255, 176, 0, 0.3), 0 0 10px rgba(255, 176, 0, 0.2);
+        border-top-color: rgba(255, 176, 0, 0.5);
+      }
+    }
+    
     /* KPI Status Cards dengan Icon - SEMUA TULISAN DI TENGAH */
     .kpi{
       padding: 20px 16px;
       border-radius: var(--radius-lg);
       background: rgba(15,42,71,.55);
       border: 1px solid var(--line);
-      border-top: 4px solid transparent;
-      transition: transform 0.2s;
+      border-top: 4px solid transparent; /* Default transparan, akan diisi oleh JS */
+      transition: transform 0.2s, border-top-color 0.3s, box-shadow 0.3s;
       display: flex;
       flex-direction: column;
       align-items: center;      /* Pusatkan secara horizontal */
       text-align: center;       /* Rata tengah untuk semua teks */
     }
+    
+    /* Kelas untuk border yang menyala */
+    .kpi.glow-active {
+      animation: glowPulse 2s ease-in-out infinite;
+    }
+    
+    /* Kelas untuk border mati (nilai 0) */
+    .kpi.glow-inactive {
+      border-top: 4px solid rgba(255, 176, 0, 0.2) !important;
+      box-shadow: none !important;
+      animation: none !important;
+      opacity: 0.7;
+    }
+    
     .kpi:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    
+    .kpi.glow-active:hover {
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3), 0 0 25px rgba(255, 176, 0, 0.4);
     }
     
     /* Header dalam KPI untuk icon dan label */
@@ -1159,7 +1192,7 @@
           DOM.updateText('masterPeriode', stats.periode);
         },
 
-        // Render KPI ke dua container terpisah
+        // Render KPI ke dua container terpisah dengan efek glow
         kpi: (stats) => {
           const topContainer = DOM.get('kpiContainer');
           const bottomContainer = DOM.get('kpiBottomContainer');
@@ -1218,35 +1251,46 @@
             }
           ];
 
-          // Render container atas (3 kolom)
-          topContainer.innerHTML = topStatusList.map(status => `
-            <div class="kpi" style="border-top: 4px solid ${status.color}">
-              <div class="header">
-                <span class="status-label">${status.label}</span>
-                <span class="status-icon">${status.icon}</span>
-              </div>
-              <div class="main-value">${DataProcessor.formatNumber(status.count)}</div>
-              <div class="qty-value">${DataProcessor.formatNumber(status.qty)} Qty</div>
-              <div class="percentage">
-                ${DataProcessor.formatNumberDecimal(status.percentage, 1)}% dari total order
-              </div>
-            </div>
-          `).join('');
+          // Fungsi untuk menentukan kelas glow berdasarkan nilai count
+          const getGlowClass = (count) => {
+            return count > 0 ? 'glow-active' : 'glow-inactive';
+          };
 
-          // Render container bawah (2 kolom)
-          bottomContainer.innerHTML = bottomStatusList.map(status => `
-            <div class="kpi" style="border-top: 4px solid ${status.color}">
-              <div class="header">
-                <span class="status-label">${status.label}</span>
-                <span class="status-icon">${status.icon}</span>
+          // Render container atas (3 kolom) dengan efek glow
+          topContainer.innerHTML = topStatusList.map(status => {
+            const glowClass = getGlowClass(status.count);
+            return `
+              <div class="kpi ${glowClass}" style="border-top: 4px solid ${status.color}">
+                <div class="header">
+                  <span class="status-label">${status.label}</span>
+                  <span class="status-icon">${status.icon}</span>
+                </div>
+                <div class="main-value">${DataProcessor.formatNumber(status.count)}</div>
+                <div class="qty-value">${DataProcessor.formatNumber(status.qty)} Qty</div>
+                <div class="percentage">
+                  ${DataProcessor.formatNumberDecimal(status.percentage, 1)}% dari total order
+                </div>
               </div>
-              <div class="main-value">${DataProcessor.formatNumber(status.count)}</div>
-              <div class="qty-value">${DataProcessor.formatNumber(status.qty)} Qty</div>
-              <div class="percentage">
-                ${DataProcessor.formatNumberDecimal(status.percentage, 1)}% dari total order
+            `;
+          }).join('');
+
+          // Render container bawah (2 kolom) dengan efek glow
+          bottomContainer.innerHTML = bottomStatusList.map(status => {
+            const glowClass = getGlowClass(status.count);
+            return `
+              <div class="kpi ${glowClass}" style="border-top: 4px solid ${status.color}">
+                <div class="header">
+                  <span class="status-label">${status.label}</span>
+                  <span class="status-icon">${status.icon}</span>
+                </div>
+                <div class="main-value">${DataProcessor.formatNumber(status.count)}</div>
+                <div class="qty-value">${DataProcessor.formatNumber(status.qty)} Qty</div>
+                <div class="percentage">
+                  ${DataProcessor.formatNumberDecimal(status.percentage, 1)}% dari total order
+                </div>
               </div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
         },
 
         partialDetails: (stats) => {
@@ -1592,7 +1636,7 @@
           const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
 
           Renderer.masterSummary(masterStats);
-          Renderer.kpi(realStats); // Sekarang merender ke dua container
+          Renderer.kpi(realStats); // Sekarang merender ke dua container dengan efek glow
           Renderer.partialDetails(realStats);
           Renderer.charts(State.filteredRealisasi, realStats);
           Renderer.realTimeTable(State.filteredRealisasi);
