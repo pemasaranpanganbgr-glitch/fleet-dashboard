@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
@@ -98,6 +98,11 @@
 
     <!-- 5 Container Status dengan Icon -->
     <div id="kpiContainer" class="grid kpis"></div>
+
+    <!-- ===== CONTAINER BARU DENGAN 2 CLASS ===== -->
+    <div id="summaryContainer" class="grid summary-cards">
+      <!-- Konten akan diisi oleh JavaScript -->
+    </div>
 
     <div class="grid main">
       <div class="card">
@@ -276,16 +281,66 @@
       margin-bottom: 16px;
     }
     
+    /* Container baru dengan 2 class: grid summary-cards */
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    /* Style untuk card di container baru */
+    .summary-card {
+      background: linear-gradient(145deg, rgba(68,156,255,0.12), rgba(68,156,255,0.05));
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 20px 16px;
+      backdrop-filter: blur(5px);
+      transition: all 0.2s;
+    }
+    .summary-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,176,0,0.3);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .summary-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .summary-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent-primary);
+      line-height: 1.2;
+    }
+    .summary-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+    .summary-icon {
+      font-size: 24px;
+    }
+    
     @media (max-width: 1200px) {
       .kpis { grid-template-columns: repeat(3, 1fr); }
+      .summary-cards { grid-template-columns: repeat(2, 1fr); }
     }
     
     @media (max-width: 768px) {
       .kpis { grid-template-columns: repeat(2, 1fr); }
+      .summary-cards { grid-template-columns: repeat(2, 1fr); }
     }
     
     @media (max-width: 480px) {
       .kpis { grid-template-columns: 1fr; }
+      .summary-cards { grid-template-columns: 1fr; }
     }
     
     .main{ grid-template-columns:1.2fr 1.6fr 1.6fr; }
@@ -435,10 +490,7 @@
         }
       };
 
-      // ========== PERBAIKAN UTAMA: KOLOM NOMOR POLISI ==========
-      // Berdasarkan struktur file:
-      // Kolom A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7, I=8, J=9, K=10, ...
-      // Nomor Polisi ada di kolom J (index 9)
+      // ========== KOLOM NOMOR POLISI DI J (index 9) ==========
       const REALISASI_COLUMNS = {
         orderCode: 2,    // C
         pabrik: 3,       // D
@@ -447,7 +499,7 @@
         status: 15,      // P
         tglMuat: 14,     // O
         actualMuat: 17,  // R
-        noPolisi: 9,     // J (index 9) - INI YANG DIPERBAIKI
+        noPolisi: 9,     // J (index 9) - KOLOM NOMOR POLISI
         tglInput: 1      // B
       };
 
@@ -851,6 +903,54 @@
           `).join('');
         },
 
+        // ===== RENDER UNTUK CONTAINER BARU =====
+        summaryCards: (realStats, masterStats) => {
+          const container = DOM.get('summaryContainer');
+          if (!container) return;
+
+          // Hitung persentase realisasi dari master
+          let realisasiPercentage = 0;
+          if (masterStats.totalQty > 0) {
+            realisasiPercentage = (realStats.totalQty / masterStats.totalQty) * 100;
+          }
+
+          // Hitung rata-rata QTY per hari (estimasi berdasarkan jumlah hari dalam periode)
+          const fromDate = DOM.get('fromDate')?.value;
+          const toDate = DOM.get('toDate')?.value;
+          let days = 30; // default
+          if (fromDate && toDate) {
+            const start = new Date(fromDate);
+            const end = new Date(toDate);
+            const diffTime = Math.abs(end - start);
+            days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+          }
+          const avgPerDay = realStats.totalQty / days;
+
+          container.innerHTML = `
+            <div class="summary-card">
+              <div class="summary-label">
+                <span class="summary-icon">📊</span> REALISASI VS MASTER
+              </div>
+              <div class="summary-value">${DataProcessor.formatNumberDecimal(realisasiPercentage, 1)}%</div>
+              <div class="summary-sub">dari total master QTY (${DataProcessor.formatNumber(masterStats.totalQty)} Qty)</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">
+                <span class="summary-icon">🚛</span> RATA-RATA HARIAN
+              </div>
+              <div class="summary-value">${DataProcessor.formatNumberDecimal(avgPerDay, 0)}</div>
+              <div class="summary-sub">Qty per hari (${days} hari)</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">
+                <span class="summary-icon">📦</span> EFISIENSI ORDER
+              </div>
+              <div class="summary-value">${DataProcessor.formatNumberDecimal(realStats.avgQtyPerOrder, 1)}</div>
+              <div class="summary-sub">rata-rata Qty/order realisasi</div>
+            </div>
+          `;
+        },
+
         partialDetails: (stats) => {
           const container = DOM.get('partialContainer');
           const pill = DOM.get('partialPill');
@@ -1195,6 +1295,7 @@
 
           Renderer.masterSummary(masterStats);
           Renderer.kpi(realStats);
+          Renderer.summaryCards(realStats, masterStats); // Render container baru
           Renderer.partialDetails(realStats);
           Renderer.charts(State.filteredRealisasi, realStats);
           Renderer.realTimeTable(State.filteredRealisasi);
