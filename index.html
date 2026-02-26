@@ -982,18 +982,33 @@
             tglInput: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglInput])
           };
         },
-        processMasterRow: (row) => {
+       processMasterRow: (row) => {
           if (!Array.isArray(row)) return null;
-          const orderCodeRaw = row[2];
+
+          const tglOrderRaw  = row[1]; // B
+          const orderCodeRaw = row[2]; // C
+          const pabrikRaw    = row[3]; // D
+          const penerimaRaw  = row[4]; // E
+          const tujuanRaw    = row[5]; // F
+          const qtyRaw       = row[6]; // G
+
           if (!orderCodeRaw || orderCodeRaw.toString().trim() === '') return null;
+
+          const orderCode = orderCodeRaw.toString().trim();
+          const qtyOrder  = DataProcessor.parseNumber(qtyRaw);
+          const tglOrder  = DataProcessor.parseDate(tglOrderRaw);
+
+          if (!orderCode || qtyOrder <= 0) return null;
+
           return {
-            tglOrder: DataProcessor.parseDate(row[1]),
-            orderCode: orderCodeRaw.toString().trim(),
-            pabrik: (row[3] || '').toString().trim() || 'Unknown',
-            penerima: (row[4] || '').toString().trim() || 'Unknown',
-            tujuan: (row[5] || '').toString().trim() || 'Unknown',
-            qtyOrder: DataProcessor.parseNumber(row[6])
+            tglOrder,
+            orderCode,
+            pabrik: (pabrikRaw || '').toString().trim() || 'Unknown',
+            penerima: (penerimaRaw || '').toString().trim() || 'Unknown',
+            tujuan: (tujuanRaw || '').toString().trim() || 'Unknown',
+            qtyOrder
           };
+        
         },
         calculateRealisasiStats: (data) => {
           const orderStatuses = new Map();  // orderCode -> Set of status
