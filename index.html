@@ -105,19 +105,19 @@
       transition: all 0.3s ease;
     }
 
-    /* ----- HEADER dengan brand & kontrol ----- */
+    /* ----- HEADER dengan FLEX yang diubah: brand dan controls bisa turun di layar kecil ----- */
     .header {
       display: flex;
+      flex-wrap: wrap;          /* Izinkan item turun jika tidak muat */
       align-items: center;
       justify-content: space-between;
-      gap: 20px;
+      gap: 16px 20px;           /* Jarak vertikal & horizontal */
       padding: 12px 20px;
       border: 1px solid var(--line);
       background: rgba(12, 31, 53, 0.55);
       border-radius: var(--radius-lg);
       backdrop-filter: blur(10px);
       margin-bottom: 20px;
-      flex-wrap: wrap;
     }
 
     .brand-container {
@@ -150,8 +150,10 @@
       gap: 8px;
     }
 
-    /* Container semua kontrol (periode, refresh, tombol) */
+    /* Controls container akan mengambil sisa ruang, dan turun di bawah brand saat layar kecil */
     .controls-container {
+      flex: 1 1 auto;           /* Bisa tumbuh dan menyusut */
+      min-width: 380px;         /* Agar tidak terlalu kecil, jika ruang kurang dia akan turun */
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -159,7 +161,28 @@
       border-radius: var(--radius-md);
       padding: 10px 16px;
       border: 1px solid var(--line);
-      min-width: 600px;
+    }
+
+    /* Pada layar sangat lebar, controls-container tetap di samping brand-container */
+    @media (min-width: 1200px) {
+      .controls-container {
+        max-width: 700px;       /* batasi lebar agar proporsional */
+      }
+    }
+
+    /* Saat layar ≤ 992px, brand dan controls akan turun secara otomatis karena flex-wrap */
+    @media (max-width: 992px) {
+      .header {
+        flex-direction: column; /* Stack vertikal */
+        align-items: stretch;   /* Lebar penuh */
+      }
+      .brand-container {
+        justify-content: center;
+      }
+      .controls-container {
+        width: 100%;            /* Lebar penuh saat di bawah */
+        max-width: 100%;
+      }
     }
 
     /* Baris label (Periode / Auto Refresh / spaser) */
@@ -586,17 +609,8 @@
       50% { opacity: 0.5; transform: scale(0.8); }
     }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 1200px) {
-      .controls-container { min-width: 500px; }
-      .controls-row.inputs { grid-template-columns: 1fr; }
-      .controls-row.labels { display: none; }
-    }
-
+    /* ===== RESPONSIVE LANJUTAN ===== */
     @media (max-width: 768px) {
-      .header { flex-direction: column; align-items: stretch; }
-      .brand-container { justify-content: center; }
-      .controls-container { min-width: auto; width: 100%; }
       .kpis-top, .kpis-bottom { grid-template-columns: repeat(2, 1fr); }
     }
 
@@ -613,8 +627,9 @@
   </div>
 
   <div class="wrap">
-    <!-- HEADER dengan kontrol -->
+    <!-- HEADER dengan brand dan controls dalam satu flex container -->
     <header class="header">
+      <!-- Bagian kiri: logo & judul -->
       <div class="brand-container">
         <div class="brand-logo">
           <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="PT BGR Logistik Indonesia">
@@ -629,7 +644,7 @@
         </div>
       </div>
 
-      <!-- Kontrol: periode, auto refresh, tombol -->
+      <!-- Kontrol: periode, auto refresh, tombol - akan turun di layar kecil -->
       <div class="controls-container">
         <!-- baris label -->
         <div class="controls-row labels">
@@ -660,8 +675,8 @@
           </div>
 
           <div class="action-buttons">
-            <button id="btnRefresh" class="btn-refresh">↻ Refresh </button>
-            <button id="btnDisplay" class="btn-display">📺 Display</button>
+            <button id="btnRefresh" class="btn-refresh">↻ Refresh Now</button>
+            <button id="btnDisplay" class="btn-display">📺 Display Mode</button>
           </div>
         </div>
       </div>
