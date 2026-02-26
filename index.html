@@ -60,7 +60,7 @@
 
     /* ===== TV MODE (DISPLAY MODE) ===== */
     body.tv-mode {
-      --base-font-size: 20px;
+      --base-font-size: 10px;
       --scale-factor: 1.4;
     }
 
@@ -901,7 +901,7 @@
           document.body.classList.toggle('tv-mode', State.tvMode);
           const btn = DOM.get('btnDisplay');
           if (btn) {
-            btn.textContent = State.tvMode ? '📺 TV Mode Aktif' : '📺 Display Mode';
+            btn.textContent = State.tvMode ? '📺 TV Mode ' : '📺 Display';
             btn.classList.toggle('active', State.tvMode);
           }
           DOM.showMessage('success', State.tvMode ? 'Mode TV diaktifkan' : 'Mode TV dimatikan');
