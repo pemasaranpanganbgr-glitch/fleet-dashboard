@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dashboard Distribusi Minyak - BGR Logistik</title>
-  <meta name="description" content="Dashboard distribusi minyak dengan 5 status container + sub-kategori Progress" />
+  <meta name="description" content="Dashboard distribusi minyak dengan 5 status container (Progress, On Delivery, Delivered, Cancel, Parsial)" />
   <meta name="theme-color" content="#071424" />
 
   <!-- Font Inter -->
@@ -37,9 +37,6 @@
       --danger: #e74c3c;
       --info: #3498db;
       --partial: #9b59b6;
-      --progress-antrian: #f39c12;
-      --progress-proses: #f1c40f;
-      --progress-menunggu: #e67e22;
       --line: rgba(255, 255, 255, 0.08);
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
       --radius-sm: 10px;
@@ -61,7 +58,7 @@
       transition: all 0.3s ease;
     }
 
-    /* ===== TV MODE ===== */
+    /* ===== TV MODE (DISPLAY MODE) ===== */
     body.tv-mode {
       --base-font-size: 10px;
       --scale-factor: 1.4;
@@ -99,75 +96,6 @@
       max-height: 350px;
     }
 
-    /* ===== LOADING SKELETON ===== */
-    .loading-skeleton {
-      background: linear-gradient(90deg, 
-        rgba(255,255,255,0.05) 25%, 
-        rgba(255,255,255,0.1) 50%, 
-        rgba(255,255,255,0.05) 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-      border-radius: var(--radius-sm);
-      min-height: 20px;
-    }
-
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* ===== CONNECTION INDICATOR ===== */
-    .connection-indicator {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(231, 76, 60, 0.9);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--danger);
-      border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 1001;
-      color: white;
-    }
-
-    .connection-indicator .dot {
-      width: 10px;
-      height: 10px;
-      background: var(--danger);
-      border-radius: 50%;
-      animation: pulse 1s ease-in-out infinite;
-    }
-
-    /* ===== STATUS PROGRESS SUB-KATEGORI ===== */
-    .status-progress-antrian { color: var(--progress-antrian); }
-    .status-progress-proses { color: var(--progress-proses); }
-    .status-progress-menunggu { color: var(--progress-menunggu); }
-    .status-ondelivery { color: var(--info); }
-    .status-delivered { color: var(--success); }
-    .status-cancel { color: var(--danger); }
-    .status-partial { color: var(--partial); }
-
-    .badge-progress-antrian { 
-      background: rgba(243, 156, 18, 0.2); 
-      color: var(--progress-antrian); 
-    }
-    .badge-progress-proses { 
-      background: rgba(241, 196, 15, 0.2); 
-      color: var(--progress-proses); 
-    }
-    .badge-progress-menunggu { 
-      background: rgba(230, 126, 34, 0.2); 
-      color: var(--progress-menunggu); 
-    }
-    .badge-delivered { background: rgba(46, 204, 113, 0.2); color: var(--success); }
-    .badge-ondelivery { background: rgba(52, 152, 219, 0.2); color: var(--info); }
-    .badge-cancel { background: rgba(231, 76, 60, 0.2); color: var(--danger); }
-    .badge-partial { background: rgba(155, 89, 182, 0.2); color: var(--partial); }
-
     /* ===== LAYOUT UTAMA ===== */
     .wrap {
       max-width: 1400px;
@@ -177,7 +105,7 @@
       transition: all 0.3s ease;
     }
 
-    /* ----- HEADER ----- */
+    /* ----- HEADER dengan FLEX yang diubah: brand dan controls bisa turun di layar kecil ----- */
     .header {
       display: flex;
       flex-wrap: wrap;
@@ -375,18 +303,6 @@
       background: linear-gradient(135deg, rgba(46, 204, 113, 0.9), rgba(46, 204, 113, 0.55));
     }
 
-    .btn-export {
-      background: linear-gradient(135deg, rgba(155, 89, 182, 0.9), rgba(155, 89, 182, 0.55));
-      color: white;
-      border: none;
-      font-weight: 700;
-      padding: 10px 16px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: 12px;
-      min-width: 100px;
-    }
-
     /* ===== CARD MASTER ORDER ===== */
     .master-card {
       background: linear-gradient(135deg, rgba(255, 176, 0, 0.15), rgba(255, 176, 0, 0.05));
@@ -423,7 +339,7 @@
       color: var(--text-secondary);
     }
 
-    /* ===== KPI CARDS ===== */
+    /* ===== KPI CARDS (3 ATAS, 2 BAWAH) ===== */
     .kpis-top {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -592,6 +508,25 @@
       font-size: 12px;
     }
 
+    .status-delivered { color: var(--success); }
+    .status-ondelivery { color: var(--info); }
+    .status-progress { color: var(--warning); }
+    .status-cancel { color: var(--danger); }
+    .status-partial { color: var(--partial); }
+
+    /* ===== BADGE UNTUK PARSIAL ===== */
+    .badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .badge-delivered { background: rgba(46, 204, 113, 0.2); color: var(--success); }
+    .badge-progress { background: rgba(241, 196, 15, 0.2); color: var(--warning); }
+    .badge-cancel { background: rgba(231, 76, 60, 0.2); color: var(--danger); }
+    .badge-ondelivery { background: rgba(52, 152, 219, 0.2); color: var(--info); }
+    .badge-partial { background: rgba(155, 89, 182, 0.2); color: var(--partial); }
+
     /* ===== PARTIAL DETAIL ===== */
     .partial-detail {
       background: rgba(155, 89, 182, 0.1);
@@ -635,7 +570,7 @@
       font-size: 12px;
     }
 
-    /* ===== REFRESH INDICATOR ===== */
+    /* ===== REFRESH INDICATOR (animasi titik) ===== */
     .refresh-indicator {
       position: fixed;
       top: 20px;
@@ -669,17 +604,50 @@
       50% { opacity: 0.5; transform: scale(0.8); }
     }
 
-    /* ===== RESPONSIVE ===== */
+    /* ===== RESPONSIVE LANJUTAN ===== */
     @media (max-width: 768px) {
       .kpis-top, .kpis-bottom { grid-template-columns: repeat(2, 1fr); }
-      .controls-row.labels,
-      .controls-row.inputs {
-        grid-template-columns: 1fr;
-      }
     }
 
     @media (max-width: 480px) {
       .kpis-top, .kpis-bottom, .master-stats { grid-template-columns: 1fr; }
+    }
+
+    /* ===== DEBUG UTILITY ===== */
+    .debug-border {
+      border: 2px solid red !important;
+    }
+    
+    .container-info {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      text-align: right;
+      padding: 2px 5px;
+      border-top: 1px dotted rgba(255,255,255,0.1);
+      display: none; /* Sembunyikan secara default */
+    }
+    
+    .show-container-info .container-info {
+      display: block;
+    }
+    
+    /* Tooltip untuk debug */
+    [data-container-id] {
+      position: relative;
+    }
+    
+    [data-container-id]:hover::after {
+      content: "ID: " attr(data-container-id);
+      position: absolute;
+      top: -20px;
+      left: 10px;
+      background: rgba(0,0,0,0.8);
+      color: #ffb000;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      z-index: 1000;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -690,10 +658,10 @@
     <span>Mengupdate data...</span>
   </div>
 
-  <!-- Connection Indicator -->
-  <div id="connectionStatus" class="connection-indicator" style="display:none">
-    <div class="dot"></div>
-    <span>Koneksi terputus. Mencoba menyambung...</span>
+  <!-- Tombol Debug (hanya muncul di development) -->
+  <div style="position: fixed; bottom: 20px; left: 20px; z-index: 9999; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 20px; font-size: 11px;">
+    <button onclick="toggleContainerInfo()" style="background: #333; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer;">🔍 Tampilkan ID Container</button>
+    <button onclick="testAllContainers()" style="background: #ffb000; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">🧪 Test Container</button>
   </div>
 
   <div class="wrap">
@@ -715,7 +683,7 @@
 
       <div class="controls-container">
         <div class="controls-row labels">
-          <div class="label-item">Periode (Tgl Order)</div>
+          <div class="label-item">Periode</div>
           <div class="label-item">Auto Refresh</div>
           <div class="label-item"></div>
         </div>
@@ -743,14 +711,13 @@
           <div class="action-buttons">
             <button id="btnRefresh" class="btn-refresh">↻ Refresh Now</button>
             <button id="btnDisplay" class="btn-display">📺 Display Mode</button>
-            <button id="btnExport" class="btn-export">📥 Export CSV</button>
           </div>
         </div>
       </div>
     </header>
 
-    <!-- MASTER ORDER CARD -->
-    <div class="card master-card">
+    <!-- MASTER ORDER CARD - CONTAINER 1 -->
+    <div class="card master-card" id="containerMasterOrder" data-container-id="containerMasterOrder">
       <div class="hd">
         <div class="t">📋 RINGKASAN MASTER ORDER</div>
         <div class="pill" id="masterPeriode">Memuat...</div>
@@ -772,63 +739,73 @@
           <div class="master-stat-sub">Per Kode Order</div>
         </div>
       </div>
+      <div class="container-info">ID: containerMasterOrder</div>
     </div>
 
-    <!-- KPI 3 ATAS (Progress dengan sub-kategori, On Delivery, Parsial) -->
+    <!-- 5 KPI CARDS: 3 atas (Progress, On Delivery, Parsial) -->
     <div id="kpiContainer" class="kpis-top"></div>
 
-    <!-- KPI 2 BAWAH (Delivered, Cancel) -->
+    <!-- 5 KPI CARDS: 2 bawah (Delivered, Cancel) -->
     <div id="kpiBottomContainer" class="kpis-bottom"></div>
 
-    <!-- CHART & TOP CHARTS -->
+    <!-- CHART & TOP CHARTS - TIGA KONTAINER UTAMA DENGAN ID -->
     <div class="main">
-      <div class="card">
+      <!-- KONTAINER 2: Status Distribusi -->
+      <div class="card" id="containerStatusDistribusi" data-container-id="containerStatusDistribusi">
         <div class="hd">
-          <div class="t">Status Distribusi (by Order)</div>
+          <div class="t">📊 Status Distribusi</div>
           <div class="pill" id="lastUpdate">Loading...</div>
         </div>
         <div class="bd">
           <canvas id="chartStatus"></canvas>
           <div id="statusNote" class="note" style="margin-top:12px"></div>
         </div>
+        <div class="container-info">ID: containerStatusDistribusi</div>
       </div>
 
-      <div class="card">
+      <!-- KONTAINER 3: Top 8 Kota Tujuan -->
+      <div class="card" id="containerTopKota" data-container-id="containerTopKota">
         <div class="hd">
-          <div class="t">Top 8 Kota Tujuan</div>
+          <div class="t">🏙️ Top 8 Kota Tujuan</div>
           <div class="pill">Berdasarkan QTY Realisasi</div>
         </div>
         <div class="bd">
           <canvas id="chartCity"></canvas>
         </div>
+        <div class="container-info">ID: containerTopKota</div>
       </div>
 
-      <div class="card">
+      <!-- KONTAINER 4: Top 6 Pabrik -->
+      <div class="card" id="containerTopPabrik" data-container-id="containerTopPabrik">
         <div class="hd">
-          <div class="t">Top 6 Pabrik</div>
+          <div class="t">🏭 Top 6 Pabrik</div>
           <div class="pill">Berdasarkan QTY Realisasi</div>
         </div>
         <div class="bd">
           <canvas id="chartFactory"></canvas>
         </div>
+        <div class="container-info">ID: containerTopPabrik</div>
       </div>
     </div>
 
-    <!-- BAGIAN BAWAH -->
+    <!-- BAGIAN BAWAH - TIGA KONTAINER DENGAN ID -->
     <div class="bottom">
-      <div class="card">
+      <!-- KONTAINER 5: Order PARTIAL -->
+      <div class="card" id="containerPartial" data-container-id="containerPartial">
         <div class="hd">
-          <div class="t">Order PARTIAL</div>
+          <div class="t">⚡ Order PARTIAL</div>
           <div class="pill" id="partialPill">-</div>
         </div>
         <div class="bd" id="partialContainer">
           <p class="note">Tidak ada order PARTIAL</p>
         </div>
+        <div class="container-info">ID: containerPartial</div>
       </div>
 
-      <div class="card">
+      <!-- KONTAINER 6: Real Time Delivery -->
+      <div class="card" id="containerRealTime" data-container-id="containerRealTime">
         <div class="hd">
-          <div class="t">Real Time Delivery</div>
+          <div class="t">🚚 Real Time Delivery</div>
           <div class="pill">10 Data Terbaru</div>
         </div>
         <div class="bd" style="padding:0">
@@ -838,21 +815,22 @@
                 <tr>
                   <th>No Polisi</th>
                   <th>Tujuan</th>
-                  <th>Penerima</th>
                   <th>Status</th>
                   <th>QTY</th>
-                  <th>Tgl Muat</th>
+                  <th>Tanggal Muat</th>
                 </tr>
               </thead>
               <tbody id="rtBody"></tbody>
             </table>
           </div>
         </div>
+        <div class="container-info">ID: containerRealTime</div>
       </div>
 
-      <div class="card">
+      <!-- KONTAINER 7: Ringkasan Data -->
+      <div class="card" id="containerRingkasan" data-container-id="containerRingkasan">
         <div class="hd">
-          <div class="t">Ringkasan Data</div>
+          <div class="t">📋 Ringkasan Data</div>
           <div class="pill">Info Detail</div>
         </div>
         <div class="bd">
@@ -862,7 +840,6 @@
             <div>• Total Order Masuk (Master): <span id="masterInfoDetail">-</span></div>
             <div>• Total Quantity Realisasi: <span id="totalQtyDetail">-</span></div>
             <div>• Rata-rata QTY per Order: <span id="avgQtyDetail">-</span></div>
-            <div>• Rentang Data: <span id="dataRange">-</span></div>
             <div>• Auto Refresh: <span id="refreshStatus">30s</span></div>
             <div>• Status Data: <span id="dataStatus">Menyiapkan...</span></div>
             <div>• Last Update: <span id="lastUpdateTime">-</span></div>
@@ -870,6 +847,7 @@
           <div id="messageContainer"></div>
           <div id="errorContainer" style="display:none"></div>
         </div>
+        <div class="container-info">ID: containerRingkasan</div>
       </div>
     </div>
 
@@ -879,7 +857,7 @@
         <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
       </div>
       <div class="footer-info">
-        <span>📊 Dashboard Distribusi Minyak - Progress: 🚛 Antrian | ⚙️ Proses | ⏰ Menunggu</span>
+        <span>📊 Versi Final - 7 Container dengan ID Spesifik</span>
       </div>
       <div class="copyright">copyright © 2026 By RH</div>
     </footer>
@@ -896,9 +874,6 @@
         CHART_COLORS: {
           delivered: '#2ecc71',
           onDelivery: '#3498db',
-          progress_antrian: '#f39c12',
-          progress_proses: '#f1c40f',
-          progress_menunggu: '#e67e22',
           progress: '#f1c40f',
           cancel: '#e74c3c',
           partial: '#9b59b6'
@@ -907,16 +882,16 @@
 
       // ========== KOLOM REALISASI ==========
       const REALISASI_COLUMNS = {
-        tglOrder: 1,      // B
-        orderCode: 2,     // C
-        pabrik: 3,        // D
-        penerima: 4,      // E
-        kota: 5,          // F
-        qty: 6,           // G
-        noPolisi: 8,      // J
-        rencanaMuat: 13,  // O
-        status: 14,       // P
-        tglMuat: 16       // R
+        tglOrder: 1,    // B
+        orderCode: 2,   // C
+        pabrik: 3,      // D
+        penerima: 4,    // E
+        kota: 5,        // F
+        qty: 6,         // G
+        noPolisi: 9,    // J
+        rencanaMuat: 13, // O
+        status: 15,     // P
+        tglMuat: 17     // R
       };
 
       // ========== STATE GLOBAL ==========
@@ -937,6 +912,7 @@
       // ========== HELPER DOM ==========
       const DOM = {
         get: (id) => document.getElementById(id),
+        getAll: (selector) => document.querySelectorAll(selector),
         showRefreshIndicator: (show) => {
           const el = DOM.get('refreshIndicator');
           if (el) show ? el.classList.add('show') : el.classList.remove('show');
@@ -954,14 +930,6 @@
               errorContainer.style.borderRadius = 'var(--radius-sm)';
               errorContainer.style.color = 'var(--danger)';
               errorContainer.textContent = `❌ ${msg}`;
-              setTimeout(() => { errorContainer.style.display = 'none'; }, duration);
-            }
-          } else if (type === 'warning') {
-            if (errorContainer) {
-              errorContainer.style.display = 'block';
-              errorContainer.style.background = 'rgba(241,196,15,0.2)';
-              errorContainer.style.color = 'var(--warning)';
-              errorContainer.textContent = `⚠️ ${msg}`;
               setTimeout(() => { errorContainer.style.display = 'none'; }, duration);
             }
           } else {
@@ -982,14 +950,9 @@
           document.body.classList.toggle('tv-mode', State.tvMode);
           const btn = DOM.get('btnDisplay');
           if (btn) {
-            btn.textContent = State.tvMode ? '📺 TV Mode On' : '📺 Display Mode';
+            btn.textContent = State.tvMode ? '📺 TV Mode ' : '📺 Display';
             btn.classList.toggle('active', State.tvMode);
           }
-          
-          if (State.tvMode && window.innerWidth < 768) {
-            DOM.showMessage('warning', 'Mode TV optimal untuk layar besar', 3000);
-          }
-          
           DOM.showMessage('success', State.tvMode ? 'Mode TV diaktifkan' : 'Mode TV dimatikan');
           setTimeout(() => {
             Object.values(State.charts).forEach(ch => ch && ch.resize());
@@ -997,44 +960,6 @@
         },
         init: () => {
           DOM.get('btnDisplay')?.addEventListener('click', TVMode.toggle);
-        }
-      };
-
-      // ========== EXPORT DATA ==========
-      const ExportData = {
-        toCSV: () => {
-          const data = State.filteredRealisasi;
-          if (!data || data.length === 0) {
-            DOM.showMessage('warning', 'Tidak ada data untuk diekspor');
-            return;
-          }
-
-          const csvData = data.map(d => ({
-            'Tanggal Order': d.tglOrder ? DataProcessor.formatDate(d.tglOrder) : '-',
-            'Kode Order': d.orderCode,
-            'Pabrik': d.pabrik,
-            'Penerima': d.penerima,
-            'Kota': d.kota,
-            'QTY': d.qty,
-            'No Polisi': d.noPolisi,
-            'Status': d.status,
-            'Kategori Status': d.statusCategory,
-            'Tanggal Muat': d.tglMuat ? DataProcessor.formatDate(d.tglMuat) : '-'
-          }));
-
-          const csv = Papa.unparse(csvData);
-          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `distribusi-minyak-${new Date().toISOString().split('T')[0]}.csv`;
-          a.click();
-          window.URL.revokeObjectURL(url);
-          
-          DOM.showMessage('success', `Berhasil mengekspor ${data.length} baris data`);
-        },
-        init: () => {
-          DOM.get('btnExport')?.addEventListener('click', ExportData.toCSV);
         }
       };
 
@@ -1059,7 +984,10 @@
         parseNumber: (val) => {
           if (val == null || val === '') return 0;
           try {
-            return Number(val.toString().replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
+            const str = val.toString().trim();
+            const cleaned = str.replace(/\./g, '').replace(',', '.');
+            const num = parseFloat(cleaned);
+            return isNaN(num) ? 0 : num;
           } catch {
             return 0;
           }
@@ -1068,73 +996,72 @@
           if (!val) return null;
           try {
             const str = val.toString().trim();
+            
             const num = Number(str);
-            if (!isNaN(num) && num > 40000) return new Date((num - 25569) * 86400 * 1000);
+            if (!isNaN(num) && num > 40000) {
+              return new Date((num - 25569) * 86400 * 1000);
+            }
+            
             const dmy = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
-            if (dmy) return new Date(dmy[3], dmy[2] - 1, dmy[1]);
+            if (dmy) {
+              return new Date(dmy[3], dmy[2] - 1, dmy[1]);
+            }
+            
             const ymd = str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
-            if (ymd) return new Date(ymd[1], ymd[2] - 1, ymd[3]);
+            if (ymd) {
+              return new Date(ymd[1], ymd[2] - 1, ymd[3]);
+            }
+            
             const d = new Date(str);
             return isNaN(d) ? null : d;
           } catch {
             return null;
           }
         },
+        
         getStatusCategory: (status) => {
           if (!status) return 'PROGRESS';
-          const s = status.toString().toLowerCase();
+          const s = status.toString().toLowerCase().trim();
           
-          // DELIVERED
-          if (s.includes('delivered') || s.includes('selesai') || s.includes('terkirim')) 
+          if (s.includes('delivered') || s.includes('selesai') || s.includes('terkirim')) {
             return 'DELIVERED';
-          
-          // ON DELIVERY
-          if (s.includes('on delivery') || s.includes('dalam perjalanan')) 
+          }
+          if (s.includes('on delivery') || s.includes('dalam perjalanan') || s.includes('perjalanan')) {
             return 'ON_DELIVERY';
-          
-          // CANCEL
-          if (s.includes('cancel') || s.includes('batal')) 
+          }
+          if (s.includes('cancel') || s.includes('batal')) {
             return 'CANCEL';
-          
-          // PARTIAL
-          if (s.includes('partial') || s.includes('sebagian')) 
+          }
+          if (s.includes('partial') || s.includes('sebagian')) {
             return 'PARTIAL';
-          
-          // SUB-KATEGORI PROGRESS
-          if (s.includes('antrian') || s.includes('pick up') || s.includes('pickup')) 
-            return 'PROGRESS_ANTRIAN';
-          
-          if (s.includes('proses') || s.includes('diproses') || s.includes('processing')) 
-            return 'PROGRESS_PROSES';
-          
-          if (s.includes('menunggu') || s.includes('jadwal') || s.includes('pelayaran') || s.includes('tunggu')) 
-            return 'PROGRESS_MENUNGGU';
-          
-          // DEFAULT PROGRESS
+          }
           return 'PROGRESS';
         },
+        
         processRealisasiRow: (row) => {
-          if (!Array.isArray(row)) return null;
+          if (!Array.isArray(row) || row.length < 17) return null;
           
-          if (!row[REALISASI_COLUMNS.orderCode]) return null;
+          const orderCode = row[REALISASI_COLUMNS.orderCode] || '';
+          if (!orderCode || orderCode.toString().trim() === '') return null;
           
           let noPolisi = row[REALISASI_COLUMNS.noPolisi] || '';
-          noPolisi = noPolisi ? noPolisi.toString().trim().toUpperCase() || '-' : '-';
+          noPolisi = noPolisi ? noPolisi.toString().trim().toUpperCase() : '-';
           
           return {
             tglOrder: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglOrder]),
-            orderCode: row[REALISASI_COLUMNS.orderCode] || '',
+            orderCode: orderCode.toString().trim(),
             pabrik: row[REALISASI_COLUMNS.pabrik] || 'Unknown',
             penerima: row[REALISASI_COLUMNS.penerima] || 'Unknown',
             kota: row[REALISASI_COLUMNS.kota] || 'Unknown',
             qty: DataProcessor.parseNumber(row[REALISASI_COLUMNS.qty]),
-            noPolisi,
+            noPolisi: noPolisi,
             rencanaMuat: DataProcessor.parseDate(row[REALISASI_COLUMNS.rencanaMuat]),
             status: row[REALISASI_COLUMNS.status] || '',
             statusCategory: DataProcessor.getStatusCategory(row[REALISASI_COLUMNS.status]),
             tglMuat: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglMuat])
           };
         },
+        
         processMasterRow: (row) => {
           if (!Array.isArray(row)) return null;
 
@@ -1162,6 +1089,7 @@
             qtyOrder
           };
         },
+        
         calculateRealisasiStats: (data) => {
           const orderStatuses = new Map();
           const orderQtys = new Map();
@@ -1178,13 +1106,7 @@
             orderQtys.set(key, (orderQtys.get(key) || 0) + (item.qty || 0));
           });
 
-          const progress = { 
-            count: 0, 
-            qty: 0,
-            antrian: { count: 0, qty: 0 },
-            proses: { count: 0, qty: 0 },
-            menunggu: { count: 0, qty: 0 }
-          };
+          const progress = { count: 0, qty: 0 };
           const onDelivery = { count: 0, qty: 0 };
           const delivered = { count: 0, qty: 0 };
           const cancel = { count: 0, qty: 0 };
@@ -1193,41 +1115,28 @@
           orderStatuses.forEach((statuses, code) => {
             const list = Array.from(statuses);
             const isPartial = list.length > 1;
+            
             let totalQty = 0;
-            data.forEach(item => { if (item.orderCode === code) totalQty += item.qty || 0; });
+            data.forEach(item => { 
+              if (item.orderCode === code) totalQty += item.qty || 0; 
+            });
 
             if (isPartial) {
               partial.count++;
               partial.qty += totalQty;
+              
               const breakdown = list.map(s => ({ 
                 status: s, 
                 qty: orderQtys.get(`${code}-${s}`) || 0 
               }));
               partial.details.push({ orderCode: code, breakdown });
+              
             } else {
               const finalStatus = list[0];
               
-              if (finalStatus === 'PROGRESS_ANTRIAN') { 
+              if (finalStatus === 'PROGRESS') { 
                 progress.count++; 
-                progress.qty += totalQty;
-                progress.antrian.count++;
-                progress.antrian.qty += totalQty;
-              }
-              else if (finalStatus === 'PROGRESS_PROSES') { 
-                progress.count++; 
-                progress.qty += totalQty;
-                progress.proses.count++;
-                progress.proses.qty += totalQty;
-              }
-              else if (finalStatus === 'PROGRESS_MENUNGGU') { 
-                progress.count++; 
-                progress.qty += totalQty;
-                progress.menunggu.count++;
-                progress.menunggu.qty += totalQty;
-              }
-              else if (finalStatus === 'PROGRESS') { 
-                progress.count++; 
-                progress.qty += totalQty;
+                progress.qty += totalQty; 
               }
               else if (finalStatus === 'ON_DELIVERY') { 
                 onDelivery.count++; 
@@ -1256,13 +1165,7 @@
             totalOrders,
             totalQty,
             totalRows: data.length,
-            progress: { 
-              ...progress, 
-              percentage: makePerc(progress.count),
-              antrian: { ...progress.antrian, percentage: makePerc(progress.antrian.count) },
-              proses: { ...progress.proses, percentage: makePerc(progress.proses.count) },
-              menunggu: { ...progress.menunggu, percentage: makePerc(progress.menunggu.count) }
-            },
+            progress: { ...progress, percentage: makePerc(progress.count) },
             onDelivery: { ...onDelivery, percentage: makePerc(onDelivery.count) },
             delivered: { ...delivered, percentage: makePerc(delivered.count) },
             cancel: { ...cancel, percentage: makePerc(cancel.count) },
@@ -1270,6 +1173,7 @@
             avgQtyPerOrder: totalOrders ? totalQty / totalOrders : 0
           };
         },
+        
         calculateMasterStats: (data) => {
           if (!data || data.length === 0) return { totalOrders: 0, totalQty: 0, avgQty: 0, periode: '-' };
           const map = new Map();
@@ -1291,15 +1195,19 @@
             periode: firstDate && lastDate ? `${DataProcessor.formatDate(firstDate)} - ${DataProcessor.formatDate(lastDate)}` : '-'
           };
         },
+        
         groupAndSum: (data, keyFn, limit = 10) => {
           const map = new Map();
           data.forEach(i => {
             const key = keyFn(i);
             if (key && key !== 'Unknown' && key !== '-') map.set(key, (map.get(key) || 0) + (i.qty || 0));
           });
-          return Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, limit);
+          return Array.from(map.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, limit);
         },
-        filterByDate: (data, from, to, field = 'tglOrder') => {
+        
+        filterByDate: (data, from, to, field) => {
           if (!from && !to) return data;
           return data.filter(item => {
             const d = item[field];
@@ -1321,36 +1229,20 @@
 
       // ========== RENDERER ==========
       const Renderer = {
-        destroyChart: (key) => {
-          if (State.charts[key]) {
-            State.charts[key].destroy();
-            State.charts[key] = null;
-          }
-        },
         masterSummary: (stats) => {
           DOM.updateText('masterTotalOrders', DataProcessor.formatNumber(stats.totalOrders));
           DOM.updateText('masterTotalQty', DataProcessor.formatNumber(stats.totalQty));
           DOM.updateText('masterAvgQty', DataProcessor.formatNumberDecimal(stats.avgQty, 1));
           DOM.updateText('masterPeriode', stats.periode);
         },
+        
         kpi: (stats) => {
           const topContainer = DOM.get('kpiContainer');
           const bottomContainer = DOM.get('kpiBottomContainer');
           if (!topContainer || !bottomContainer) return;
 
           const topList = [
-            { 
-              key: 'progress', 
-              label: 'PROGRESS', 
-              icon: '⏳', 
-              color: '#f1c40f', 
-              ...stats.progress,
-              sub: [
-                { label: 'Antrian Pick Up', icon: '🚛', color: '#f39c12', count: stats.progress.antrian.count, qty: stats.progress.antrian.qty },
-                { label: 'Proses Order', icon: '⚙️', color: '#f1c40f', count: stats.progress.proses.count, qty: stats.progress.proses.qty },
-                { label: 'Menunggu Jadwal', icon: '⏰', color: '#e67e22', count: stats.progress.menunggu.count, qty: stats.progress.menunggu.qty }
-              ]
-            },
+            { key: 'progress', label: 'PROGRESS', icon: '⏳', color: '#f1c40f', ...stats.progress },
             { key: 'onDelivery', label: 'ON DELIVERY', icon: '🚚', color: '#3498db', ...stats.onDelivery },
             { key: 'partial', label: 'PARSIAL', icon: '⚡', color: '#9b59b6', ...stats.partial }
           ];
@@ -1362,48 +1254,17 @@
 
           const glowClass = (count) => count > 0 ? 'glow-active' : 'glow-inactive';
 
-          topContainer.innerHTML = topList.map(s => {
-            if (s.key === 'progress') {
-              return `
-                <div class="kpi ${glowClass(s.count)}" style="border-top:4px solid ${s.color}; --glow-color:${s.color}80;">
-                  <div class="header">
-                    <span class="status-label">${s.label}</span>
-                    <span class="status-icon">${s.icon}</span>
-                  </div>
-                  <div class="main-value">${DataProcessor.formatNumber(s.count)}</div>
-                  <div class="qty-value">${DataProcessor.formatNumber(s.qty)} Qty</div>
-                  
-                  <div style="width:100%; margin:10px 0; padding:8px; background:rgba(0,0,0,0.2); border-radius:6px;">
-                    ${s.sub.map(sub => `
-                      <div style="display:flex; justify-content:space-between; margin:4px 0;">
-                        <span style="color:${sub.color}">
-                          ${sub.icon} ${sub.label}:
-                        </span>
-                        <span>
-                          ${DataProcessor.formatNumber(sub.count)} order 
-                          (${DataProcessor.formatNumber(sub.qty)} Qty)
-                        </span>
-                      </div>
-                    `).join('')}
-                  </div>
-                  
-                  <div class="percentage">${DataProcessor.formatNumberDecimal(s.percentage,1)}% dari total order</div>
-                </div>
-              `;
-            } else {
-              return `
-                <div class="kpi ${glowClass(s.count)}" style="border-top:4px solid ${s.color}; --glow-color:${s.color}80;">
-                  <div class="header">
-                    <span class="status-label">${s.label}</span>
-                    <span class="status-icon">${s.icon}</span>
-                  </div>
-                  <div class="main-value">${DataProcessor.formatNumber(s.count)}</div>
-                  <div class="qty-value">${DataProcessor.formatNumber(s.qty)} Qty</div>
-                  <div class="percentage">${DataProcessor.formatNumberDecimal(s.percentage,1)}% dari total order</div>
-                </div>
-              `;
-            }
-          }).join('');
+          topContainer.innerHTML = topList.map(s => `
+            <div class="kpi ${glowClass(s.count)}" style="border-top:4px solid ${s.color}; --glow-color:${s.color}80;">
+              <div class="header">
+                <span class="status-label">${s.label}</span>
+                <span class="status-icon">${s.icon}</span>
+              </div>
+              <div class="main-value">${DataProcessor.formatNumber(s.count)}</div>
+              <div class="qty-value">${DataProcessor.formatNumber(s.qty)} Qty</div>
+              <div class="percentage">${DataProcessor.formatNumberDecimal(s.percentage,1)}% dari total order</div>
+            </div>
+          `).join('');
 
           bottomContainer.innerHTML = bottomList.map(s => `
             <div class="kpi ${glowClass(s.count)}" style="border-top:4px solid ${s.color}; --glow-color:${s.color}80;">
@@ -1417,99 +1278,74 @@
             </div>
           `).join('');
         },
+        
         partialDetails: (stats) => {
           const container = DOM.get('partialContainer');
           const pill = DOM.get('partialPill');
           if (!container || !pill) return;
+          
           if (stats.partial.count === 0) {
             pill.textContent = 'Tidak ada';
             container.innerHTML = '<p class="note">✨ Semua order memiliki status murni</p>';
             return;
           }
+          
           pill.textContent = `${stats.partial.count} order`;
           let html = '<div class="partial-detail">';
           html += `<p style="margin-bottom:8px;font-weight:700;">⚡ ${stats.partial.count} Order dengan Status Campuran:</p>`;
+          
           stats.partial.details.slice(0,5).forEach(d => {
             html += `<div style="margin-top:12px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;">`;
             html += `<div style="font-weight:700;margin-bottom:6px;">📋 ${d.orderCode}</div>`;
             html += `<div style="display:flex;gap:16px;flex-wrap:wrap;">`;
+            
             d.breakdown.forEach(b => {
-              let cls = '';
-              if (b.status === 'DELIVERED') cls = 'badge-delivered';
-              else if (b.status === 'ON_DELIVERY') cls = 'badge-ondelivery';
-              else if (b.status === 'CANCEL') cls = 'badge-cancel';
-              else if (b.status === 'PARTIAL') cls = 'badge-partial';
-              else if (b.status === 'PROGRESS_ANTRIAN') cls = 'badge-progress-antrian';
-              else if (b.status === 'PROGRESS_PROSES') cls = 'badge-progress-proses';
-              else if (b.status === 'PROGRESS_MENUNGGU') cls = 'badge-progress-menunggu';
-              
-              html += `<div><span class="badge ${cls}">${b.status.replace('PROGRESS_', '')}</span> ${DataProcessor.formatNumber(b.qty)} Qty</div>`;
+              const cls = {
+                DELIVERED: 'badge-delivered',
+                ON_DELIVERY: 'badge-ondelivery',
+                PROGRESS: 'badge-progress',
+                CANCEL: 'badge-cancel',
+                PARTIAL: 'badge-partial'
+              }[b.status] || '';
+              html += `<div><span class="badge ${cls}">${b.status}</span> ${DataProcessor.formatNumber(b.qty)} Qty</div>`;
             });
+            
             html += `</div></div>`;
           });
-          if (stats.partial.details.length > 5) html += `<p class="note">... dan ${stats.partial.details.length-5} order lainnya</p>`;
+          
+          if (stats.partial.details.length > 5) {
+            html += `<p class="note">... dan ${stats.partial.details.length-5} order lainnya</p>`;
+          }
           html += '</div>';
           container.innerHTML = html;
         },
+        
         charts: (data, stats) => {
-          Renderer.destroyChart('status');
-          Renderer.destroyChart('city');
-          Renderer.destroyChart('factory');
+          // Hancurkan chart lama
+          Object.values(State.charts).forEach(c => c && c.destroy());
+          State.charts = {};
 
+          // Chart Status (di containerStatusDistribusi)
           const ctxStatus = DOM.get('chartStatus')?.getContext('2d');
           if (ctxStatus && stats.totalOrders) {
             State.charts.status = new Chart(ctxStatus, {
               type: 'doughnut',
               data: {
-                labels: [
-                  'Progress - Antrian', 
-                  'Progress - Proses', 
-                  'Progress - Menunggu',
-                  'On Delivery', 
-                  'Delivered', 
-                  'Cancel', 
-                  'Parsial'
-                ],
+                labels: ['Progress', 'On Delivery', 'Delivered', 'Cancel', 'Parsial'],
                 datasets: [{
-                  data: [
-                    stats.progress.antrian.count,
-                    stats.progress.proses.count,
-                    stats.progress.menunggu.count,
-                    stats.onDelivery.count,
-                    stats.delivered.count,
-                    stats.cancel.count,
-                    stats.partial.count
-                  ],
-                  backgroundColor: [
-                    CONFIG.CHART_COLORS.progress_antrian,
-                    CONFIG.CHART_COLORS.progress_proses,
-                    CONFIG.CHART_COLORS.progress_menunggu,
-                    CONFIG.CHART_COLORS.onDelivery,
-                    CONFIG.CHART_COLORS.delivered,
-                    CONFIG.CHART_COLORS.cancel,
-                    CONFIG.CHART_COLORS.partial
-                  ],
+                  data: [stats.progress.count, stats.onDelivery.count, stats.delivered.count, stats.cancel.count, stats.partial.count],
+                  backgroundColor: [CONFIG.CHART_COLORS.progress, CONFIG.CHART_COLORS.onDelivery, CONFIG.CHART_COLORS.delivered, CONFIG.CHART_COLORS.cancel, CONFIG.CHART_COLORS.partial],
                   borderWidth: 0
                 }]
               },
               options: { 
                 responsive: true, 
+                maintainAspectRatio: true,
                 plugins: { 
                   legend: { 
                     position: 'right', 
                     labels: { color: '#e9f1fb', font: { size:11 } } 
-                  },
-                  tooltip: {
-                    callbacks: {
-                      label: (context) => {
-                        const label = context.label || '';
-                        const value = context.raw || 0;
-                        const total = context.dataset.data.reduce((a,b) => a + b, 0);
-                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                        return `${label}: ${value} order (${percentage}%)`;
-                      }
-                    }
-                  }
+                  } 
                 }, 
                 cutout: '70%' 
               }
@@ -1518,31 +1354,15 @@
 
           const statusNote = DOM.get('statusNote');
           if (statusNote) {
-            statusNote.innerHTML = `
-              Total ${stats.totalOrders} order • Total QTY: ${DataProcessor.formatNumber(stats.totalQty)}
-              <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px;">
-                <div style="background:rgba(243,156,18,0.1); padding:8px; border-radius:6px;">
-                  <span style="color:#f39c12">🚛 Antrian Pick Up</span><br>
-                  ${DataProcessor.formatNumber(stats.progress.antrian.count)} order (${DataProcessor.formatNumber(stats.progress.antrian.qty)} Qty)
-                </div>
-                <div style="background:rgba(241,196,15,0.1); padding:8px; border-radius:6px;">
-                  <span style="color:#f1c40f">⚙️ Proses Order</span><br>
-                  ${DataProcessor.formatNumber(stats.progress.proses.count)} order (${DataProcessor.formatNumber(stats.progress.proses.qty)} Qty)
-                </div>
-                <div style="background:rgba(230,126,34,0.1); padding:8px; border-radius:6px;">
-                  <span style="color:#e67e22">⏰ Menunggu Jadwal</span><br>
-                  ${DataProcessor.formatNumber(stats.progress.menunggu.count)} order (${DataProcessor.formatNumber(stats.progress.menunggu.qty)} Qty)
-                </div>
-              </div>
-              <div style="margin-top:8px;">
-                <span style="color:#3498db">🚚 On Delivery: ${DataProcessor.formatNumber(stats.onDelivery.qty)} Qty</span> • 
-                <span style="color:#2ecc71">✅ Delivered: ${DataProcessor.formatNumber(stats.delivered.qty)} Qty</span> • 
-                <span style="color:#9b59b6">⚡ Parsial: ${DataProcessor.formatNumber(stats.partial.qty)} Qty</span> • 
-                <span style="color:#e74c3c">⛔ Cancel: ${DataProcessor.formatNumber(stats.cancel.qty)} Qty</span>
-              </div>
-            `;
+            statusNote.innerHTML = `Total ${stats.totalOrders} order • Total QTY: ${DataProcessor.formatNumber(stats.totalQty)}<br>
+              <span style="color:#f1c40f">⏳ Progress: ${DataProcessor.formatNumber(stats.progress.qty)} Qty</span> • 
+              <span style="color:#3498db">🚚 On Delivery: ${DataProcessor.formatNumber(stats.onDelivery.qty)} Qty</span> • 
+              <span style="color:#2ecc71">✅ Delivered: ${DataProcessor.formatNumber(stats.delivered.qty)} Qty</span> • 
+              <span style="color:#9b59b6">⚡ Parsial: ${DataProcessor.formatNumber(stats.partial.qty)} Qty</span> • 
+              <span style="color:#e74c3c">⛔ Cancel: ${DataProcessor.formatNumber(stats.cancel.qty)} Qty</span>`;
           }
 
+          // Chart Kota (di containerTopKota)
           const cityData = DataProcessor.groupAndSum(data, i => i.kota, 8);
           const ctxCity = DOM.get('chartCity')?.getContext('2d');
           if (ctxCity && cityData.length) {
@@ -1554,11 +1374,12 @@
                   label: 'QTY', 
                   data: cityData.map(d=>Math.round(d[1])), 
                   backgroundColor: 'rgba(52,152,219,0.7)', 
-                  borderRadius: 6 
+                  borderRadius:6 
                 }] 
               },
               options: { 
                 responsive: true, 
+                maintainAspectRatio: true,
                 plugins: { legend: { display: false } }, 
                 scales: { 
                   x: { ticks: { color:'#e9f1fb', maxRotation:45 } }, 
@@ -1568,6 +1389,7 @@
             });
           }
 
+          // Chart Pabrik (di containerTopPabrik)
           const factoryData = DataProcessor.groupAndSum(data, i => i.pabrik, 6);
           const ctxFactory = DOM.get('chartFactory')?.getContext('2d');
           if (ctxFactory && factoryData.length) {
@@ -1579,11 +1401,12 @@
                   label: 'QTY', 
                   data: factoryData.map(d=>Math.round(d[1])), 
                   backgroundColor: 'rgba(255,176,0,0.7)', 
-                  borderRadius: 6 
+                  borderRadius:6 
                 }] 
               },
               options: { 
                 responsive: true, 
+                maintainAspectRatio: true,
                 plugins: { legend: { display: false } }, 
                 scales: { 
                   x: { ticks: { color:'#e9f1fb', maxRotation:45 } }, 
@@ -1593,53 +1416,54 @@
             });
           }
         },
+        
         realTimeTable: (data) => {
           const tbody = DOM.get('rtBody');
           if (!tbody) return;
           
           const sorted = [...data]
-            .sort((a,b) => (b.tglMuat || b.tglOrder || 0) - (a.tglMuat || a.tglOrder || 0))
+            .sort((a,b) => {
+              const dateA = b.tglMuat || b.rencanaMuat || 0;
+              const dateB = a.tglMuat || a.rencanaMuat || 0;
+              return dateA - dateB;
+            })
             .slice(0,10);
-          
+            
           tbody.innerHTML = '';
           if (sorted.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">Tidak ada data</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Tidak ada data</td></tr>';
             return;
           }
           
           sorted.forEach(item => {
             const row = tbody.insertRow();
-            
             const npCell = row.insertCell();
             const np = item.noPolisi || '-';
-            if (np !== '-' && np !== 'UNKNOWN' && np.length > 2) { 
+            
+            if (np !== '-' && np !== 'UNKNOWN' && np.length>2) { 
               npCell.style.fontWeight='700'; 
               npCell.style.color='#ffb000'; 
-              npCell.textContent = np; 
+              npCell.textContent=np; 
             } else { 
               npCell.style.color='#a7b6c8'; 
               npCell.style.fontStyle='italic'; 
-              npCell.textContent = np; 
+              npCell.textContent='-'; 
             }
             
             row.insertCell().textContent = item.kota || '-';
-            row.insertCell().textContent = item.penerima || '-';
             
             const stCell = row.insertCell(); 
             stCell.textContent = item.status || '-';
-            
-            let statusClass = item.statusCategory.toLowerCase();
-            if (statusClass === 'progress_antrian') statusClass = 'progress-antrian';
-            else if (statusClass === 'progress_proses') statusClass = 'progress-proses';
-            else if (statusClass === 'progress_menunggu') statusClass = 'progress-menunggu';
-            else statusClass = statusClass.replace('_', '');
-            
-            stCell.className = `status-${statusClass}`;
+            stCell.className = `status-${item.statusCategory.toLowerCase().replace('_','')}`;
             
             row.insertCell().textContent = DataProcessor.formatNumber(item.qty);
-            row.insertCell().textContent = item.tglMuat ? DataProcessor.formatDate(item.tglMuat) : '-';
+            
+            const tglMuat = item.tglMuat ? DataProcessor.formatDate(item.tglMuat) : 
+                           (item.rencanaMuat ? DataProcessor.formatDate(item.rencanaMuat) : '-');
+            row.insertCell().textContent = tglMuat;
           });
         },
+        
         ringkasanData: (realStats, masterStats) => {
           DOM.updateText('totalRowsDetail', `${realStats.totalRows} baris`);
           DOM.updateText('totalOrdersDetail', `${realStats.totalOrders} order`);
@@ -1647,32 +1471,49 @@
           DOM.updateText('avgQtyDetail', DataProcessor.formatNumberDecimal(realStats.avgQtyPerOrder,1));
           DOM.updateText('masterInfoDetail', `${DataProcessor.formatNumber(masterStats.totalOrders)} order (${DataProcessor.formatNumber(masterStats.totalQty)} QTY)`);
           
-          if (State.filteredRealisasi.length > 0) {
-            const dates = State.filteredRealisasi
-              .map(d => d.tglOrder)
-              .filter(d => d instanceof Date && !isNaN(d));
-            if (dates.length > 0) {
-              const minDate = new Date(Math.min(...dates));
-              const maxDate = new Date(Math.max(...dates));
-              DOM.updateText('dataRange', `${DataProcessor.formatDate(minDate)} - ${DataProcessor.formatDate(maxDate)}`);
-            }
-          }
-          
           const refreshSec = DOM.get('refreshSec')?.value;
           DOM.updateText('refreshStatus', refreshSec === '0' ? 'Off' : `${refreshSec||30}s`);
           
-          const statusArr = [
-            State.dataStatus.realisasi ? '✅ Realisasi' : '❌ Realisasi',
-            State.dataStatus.master ? '✅ Master' : '❌ Master'
-          ];
+          const statusArr = [State.dataStatus.realisasi ? '✅ Realisasi' : '❌ Realisasi', 
+                            State.dataStatus.master ? '✅ Master' : '❌ Master'];
           DOM.updateText('dataStatus', statusArr.join(' • '));
           
           if (State.lastFetch) {
             DOM.updateText('lastUpdate', DataProcessor.formatTime(State.lastFetch));
             DOM.updateText('lastUpdateTime', `${DataProcessor.formatDate(State.lastFetch)} ${DataProcessor.formatTime(State.lastFetch)}`);
           }
-          
           DOM.updateText('liveStatus', '🟢 Live');
+        },
+        
+        // Fungsi baru untuk memverifikasi semua container
+        verifyAllContainers: () => {
+          const containerIds = [
+            'containerMasterOrder',
+            'containerStatusDistribusi',
+            'containerTopKota',
+            'containerTopPabrik',
+            'containerPartial',
+            'containerRealTime',
+            'containerRingkasan'
+          ];
+          
+          const results = [];
+          containerIds.forEach(id => {
+            const el = DOM.get(id);
+            results.push({
+              id: id,
+              exists: !!el,
+              element: el
+            });
+          });
+          
+          console.group('🔍 VERIFIKASI SEMUA CONTAINER');
+          results.forEach(r => {
+            console.log(`${r.exists ? '✅' : '❌'} ${r.id} ${r.exists ? '' : '(TIDAK DITEMUKAN!)'}`);
+          });
+          console.groupEnd();
+          
+          return results;
         }
       };
 
@@ -1681,52 +1522,37 @@
         startCountdown: (seconds) => {
           if (State.countdownTimer) clearInterval(State.countdownTimer);
           if (seconds <= 0) { 
-            DOM.updateText('nextUpdateText', 'Off'); 
+            // Hapus elemen nextUpdateText jika ada
             return; 
           }
-          State.nextUpdateTime = Date.now() + seconds * 1000;
-          State.countdownTimer = setInterval(() => {
-            const rem = Math.max(0, Math.round((State.nextUpdateTime - Date.now()) / 1000));
-            DOM.updateText('nextUpdateText', rem ? `Update dalam ${rem}s` : 'Updating...');
-          }, 100);
+          State.nextUpdateTime = Date.now() + seconds*1000;
+          // Tidak perlu countdown karena tidak ada elemen nextUpdateText
         },
         setup: () => {
           if (State.refreshTimer) clearInterval(State.refreshTimer);
           const sec = Number(DOM.get('refreshSec')?.value || 0);
           if (sec > 0) {
-            State.refreshTimer = setInterval(() => App.refresh(), sec * 1000);
+            State.refreshTimer = setInterval(() => App.refresh(), sec*1000);
             AutoRefresh.startCountdown(sec);
-          } else {
-            DOM.updateText('nextUpdateText', 'Off');
           }
         }
       };
 
       // ========== DATA FETCHER ==========
       const DataFetcher = {
-        fetchCSV: (url, type) => new Promise((resolve, reject) => {
+        fetchCSV: (url, type) => new Promise((resolve,reject) => {
           Papa.parse(url, { 
-            download: true, 
-            header: false, 
-            skipEmptyLines: true,
-            complete: (r) => {
-              if (r.data?.length > 1) {
-                resolve(r.data);
-              } else {
-                reject(new Error(`Data ${type} kosong atau tidak valid`));
-              }
-            },
-            error: (error) => {
-              console.error(`Error fetching ${type}:`, error);
-              reject(new Error(`Gagal mengambil data ${type}`));
-            }
+            download:true, 
+            header:false, 
+            skipEmptyLines:true, 
+            complete: (r) => r.data?.length ? resolve(r.data) : reject(new Error(`Data ${type} kosong`)), 
+            error: reject 
           });
         }),
         fetchAllData: async () => {
           if (State.isRefreshing) return;
           DOM.showRefreshIndicator(true);
           State.isRefreshing = true;
-          
           try {
             const [realRes, masterRes] = await Promise.allSettled([
               DataFetcher.fetchCSV(CONFIG.REALISASI_URL, 'realisasi'),
@@ -1736,44 +1562,35 @@
             let realisasiData = [];
             if (realRes.status === 'fulfilled') {
               const rows = realRes.value;
-              for (let i = 1; i < rows.length; i++) {
+              for (let i=1; i<rows.length; i++) {
                 const item = DataProcessor.processRealisasiRow(rows[i]);
                 if (item && item.orderCode) realisasiData.push(item);
               }
               State.dataStatus.realisasi = realisasiData.length > 0;
             } else {
               console.error('Realisasi gagal:', realRes.reason);
-              DOM.showMessage('warning', 'Data realisasi gagal dimuat, menggunakan data sebelumnya');
-              realisasiData = State.realisasiData || [];
             }
 
             let masterData = [];
             if (masterRes.status === 'fulfilled') {
               const rows = masterRes.value;
-              for (let i = 1; i < rows.length; i++) {
+              for (let i=1; i<rows.length; i++) {
                 const item = DataProcessor.processMasterRow(rows[i]);
                 if (item) masterData.push(item);
               }
               State.dataStatus.master = masterData.length > 0;
             } else {
               console.error('Master gagal:', masterRes.reason);
-              DOM.showMessage('warning', 'Data master gagal dimuat, menggunakan data sebelumnya');
-              masterData = State.masterData || [];
             }
 
             State.realisasiData = realisasiData;
             State.masterData = masterData;
             State.lastFetch = new Date();
-            
             return { realisasiData, masterData };
-            
           } catch (err) {
             console.error('Fetch error:', err);
-            DOM.showMessage('error', 'Gagal mengambil data');
-            return { 
-              realisasiData: State.realisasiData || [], 
-              masterData: State.masterData || [] 
-            };
+            DOM.showMessage('error','Gagal mengambil data');
+            return { realisasiData: State.realisasiData || [], masterData: State.masterData || [] };
           } finally {
             DOM.showRefreshIndicator(false);
             State.isRefreshing = false;
@@ -1781,28 +1598,11 @@
         }
       };
 
-      // ========== CONNECTION HANDLER ==========
-      const ConnectionHandler = {
-        init: () => {
-          window.addEventListener('online', () => {
-            DOM.get('connectionStatus').style.display = 'none';
-            DOM.showMessage('success', 'Koneksi kembali tersambung');
-            App.refresh();
-          });
-
-          window.addEventListener('offline', () => {
-            DOM.get('connectionStatus').style.display = 'flex';
-          });
-        }
-      };
-
       // ========== APP ==========
       const App = {
         refresh: async () => {
           if (State.isRefreshing) return;
-          
           const { realisasiData, masterData } = await DataFetcher.fetchAllData();
-          
           const from = DOM.get('fromDate')?.value;
           const to = DOM.get('toDate')?.value;
           
@@ -1820,18 +1620,14 @@
           Renderer.ringkasanData(realStats, masterStats);
 
           AutoRefresh.startCountdown(Number(DOM.get('refreshSec')?.value || 30));
-          
-          const msg = `Update: ${State.filteredRealisasi.length} realisasi, ${masterStats.totalOrders} master`;
-          DOM.showMessage('success', msg);
+          DOM.showMessage('success', `Update: ${State.filteredRealisasi.length} realisasi, ${masterStats.totalOrders} master`);
         },
         init: () => {
           const today = new Date();
           const thirtyAgo = new Date(); 
-          thirtyAgo.setDate(today.getDate() - 30);
-          
+          thirtyAgo.setDate(today.getDate()-30);
           const fromInput = DOM.get('fromDate'); 
           if (fromInput) fromInput.value = thirtyAgo.toISOString().split('T')[0];
-          
           const toInput = DOM.get('toDate'); 
           if (toInput) toInput.value = today.toISOString().split('T')[0];
 
@@ -1844,20 +1640,97 @@
           DOM.get('toDate')?.addEventListener('change', () => App.refresh());
 
           TVMode.init();
-          ExportData.init();
-          ConnectionHandler.init();
-          
           App.refresh();
           AutoRefresh.setup();
+          
+          // Verifikasi container setelah inisialisasi
+          setTimeout(() => {
+            Renderer.verifyAllContainers();
+          }, 1000);
         }
       };
 
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', App.init);
-      } else {
-        App.init();
-      }
+      // Fungsi global untuk debugging
+      window.toggleContainerInfo = function() {
+        document.body.classList.toggle('show-container-info');
+        console.log('Container info toggled:', document.body.classList.contains('show-container-info'));
+      };
+      
+      window.testAllContainers = function() {
+        const results = Renderer.verifyAllContainers();
+        const missing = results.filter(r => !r.exists);
+        
+        if (missing.length > 0) {
+          alert(`⚠️ PERHATIAN: ${missing.length} container tidak ditemukan!\n\n` + 
+                missing.map(m => `❌ ${m.id}`).join('\n'));
+        } else {
+          alert('✅ Semua 7 container ditemukan!\n\n' + 
+                results.map(r => `✅ ${r.id}`).join('\n'));
+        }
+        
+        // Highlight semua container
+        results.forEach(r => {
+          if (r.element) {
+            r.element.style.transition = 'border 0.3s';
+            r.element.style.border = '3px solid #ffb000';
+            setTimeout(() => {
+              r.element.style.border = '1px solid var(--line)';
+            }, 2000);
+          }
+        });
+      };
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', App.init);
+      else App.init();
     })();
+  </script>
+
+  <!-- Script tambahan untuk demonstrasi akses container via ID -->
+  <script>
+    // Contoh cara mengakses container via ID (bisa dihapus jika tidak diperlukan)
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('=== DAFTAR KONTAINER DENGAN ID ===');
+      console.log('1. Master Order:', document.getElementById('containerMasterOrder'));
+      console.log('2. Status Distribusi:', document.getElementById('containerStatusDistribusi'));
+      console.log('3. Top Kota:', document.getElementById('containerTopKota'));
+      console.log('4. Top Pabrik:', document.getElementById('containerTopPabrik'));
+      console.log('5. Partial:', document.getElementById('containerPartial'));
+      console.log('6. Real Time:', document.getElementById('containerRealTime'));
+      console.log('7. Ringkasan:', document.getElementById('containerRingkasan'));
+      
+      // Contoh fungsi untuk menyembunyikan container tertentu
+      window.hideContainer = function(containerId) {
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.style.display = container.style.display === 'none' ? 'block' : 'none';
+          console.log(`Container ${containerId} sekarang: ${container.style.display}`);
+        }
+      };
+      
+      // Contoh fungsi untuk mengubah warna border container
+      window.highlightContainer = function(containerId, color) {
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.style.border = `3px solid ${color}`;
+          setTimeout(() => {
+            container.style.border = '1px solid var(--line)';
+          }, 2000);
+        }
+      };
+      
+      // Tambahkan akses mudah ke semua container
+      window.containers = {
+        master: document.getElementById('containerMasterOrder'),
+        status: document.getElementById('containerStatusDistribusi'),
+        kota: document.getElementById('containerTopKota'),
+        pabrik: document.getElementById('containerTopPabrik'),
+        partial: document.getElementById('containerPartial'),
+        realtime: document.getElementById('containerRealTime'),
+        ringkasan: document.getElementById('containerRingkasan')
+      };
+      
+      console.log('✅ Container objects tersedia di window.containers');
+    });
   </script>
 </body>
 </html>
