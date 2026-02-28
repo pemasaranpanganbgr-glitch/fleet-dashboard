@@ -441,6 +441,41 @@
       border-bottom: 1px dotted var(--warning);
     }
 
+    /* Delivered Detail */
+    .delivered-detail {
+      font-size: 11px;
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      width: 100%;
+    }
+
+    .detail-popup {
+      margin-top: 12px;
+      padding: 8px;
+      background: rgba(46, 204, 113, 0.1);
+      border-radius: 6px;
+      font-size: 10px;
+      text-align: left;
+      border-left: 2px solid #2ecc71;
+    }
+
+    .btn-detail {
+      margin-top: 6px;
+      background: transparent;
+      border: 1px solid #2ecc71;
+      color: #2ecc71;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 9px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-detail:hover {
+      background: rgba(46, 204, 113, 0.2);
+    }
+
     /* ===== GRID CARD UTAMA ===== */
     .main {
       display: grid;
@@ -529,18 +564,19 @@
     .status-cancel { color: var(--danger); }
     .status-partial { color: var(--partial); }
 
-    /* ===== BADGE UNTUK PARSIAL ===== */
+    /* ===== BADGE ===== */
     .badge {
       padding: 2px 8px;
       border-radius: 12px;
       font-size: 10px;
       font-weight: 700;
+      display: inline-block;
     }
-    .badge-delivered { background: rgba(46, 204, 113, 0.2); color: var(--success); }
-    .badge-progress { background: rgba(241, 196, 15, 0.2); color: var(--warning); }
-    .badge-cancel { background: rgba(231, 76, 60, 0.2); color: var(--danger); }
-    .badge-ondelivery { background: rgba(52, 152, 219, 0.2); color: var(--info); }
-    .badge-partial { background: rgba(155, 89, 182, 0.2); color: var(--partial); }
+    .badge-delivered { background: rgba(46, 204, 113, 0.2); color: var(--success); border: 1px solid rgba(46, 204, 113, 0.3); }
+    .badge-progress { background: rgba(241, 196, 15, 0.2); color: var(--warning); border: 1px solid rgba(241, 196, 15, 0.3); }
+    .badge-cancel { background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 1px solid rgba(231, 76, 60, 0.3); }
+    .badge-ondelivery { background: rgba(52, 152, 219, 0.2); color: var(--info); border: 1px solid rgba(52, 152, 219, 0.3); }
+    .badge-partial { background: rgba(155, 89, 182, 0.2); color: var(--partial); border: 1px solid rgba(155, 89, 182, 0.3); }
 
     /* ===== PARTIAL DETAIL ===== */
     .partial-detail {
@@ -585,7 +621,7 @@
       font-size: 12px;
     }
 
-    /* ===== REFRESH INDICATOR (animasi titik) ===== */
+    /* ===== REFRESH INDICATOR ===== */
     .refresh-indicator {
       position: fixed;
       top: 20px;
@@ -681,6 +717,8 @@
   <div style="position: fixed; bottom: 20px; left: 20px; z-index: 9999; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 20px; font-size: 11px;">
     <button onclick="toggleContainerInfo()" style="background: #333; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer;">🔍 Tampilkan ID Container</button>
     <button onclick="debugProgress()" style="background: #f1c40f; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">📊 Debug Progress</button>
+    <button onclick="debugPartial()" style="background: #9b59b6; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">⚡ Debug Partial</button>
+    <button onclick="debugDelivered()" style="background: #2ecc71; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">✅ Debug Delivered</button>
     <button onclick="debugStatusCategories()" style="background: #3498db; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">🔍 Cek Status</button>
     <button onclick="testAllContainers()" style="background: #ffb000; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">🧪 Test Container</button>
   </div>
@@ -880,7 +918,7 @@
         <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
       </div>
       <div class="footer-info">
-        <span>📊 Versi Final - Progress: ✅ Fixed (Status Delivery masuk ON DELIVERY)</span>
+        <span>📊 Versi Final - Progress, Partial, Delivered: ✅ Fixed</span>
       </div>
       <div class="copyright">copyright © 2026 By RH</div>
     </footer>
@@ -1004,6 +1042,16 @@
           if (!date || !(date instanceof Date) || isNaN(date)) return '-';
           return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(date);
         },
+        formatDateTime: (date) => {
+          if (!date || !(date instanceof Date) || isNaN(date)) return '-';
+          return new Intl.DateTimeFormat('id-ID', { 
+            day: '2-digit', 
+            month: 'short', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }).format(date);
+        },
         parseNumber: (val) => {
           if (val == null || val === '') return 0;
           try {
@@ -1042,7 +1090,7 @@
           }
         },
         
-        // ========== PERBAIKAN UTAMA: KATEGORISASI STATUS YANG TEPAT ==========
+        // ========== KATEGORISASI STATUS YANG TEPAT ==========
         getStatusCategory: (status, tglOrder = null) => {
           if (!status || status.toString().trim() === '') {
             return 'UNKNOWN';
@@ -1157,8 +1205,8 @@
           };
         },
         
+        // ========== HITUNG STATISTIK PROGRESS ==========
         calculateProgressStats: (data, fromDate, toDate) => {
-          // Filter berdasarkan periode
           const filteredByDate = data.filter(item => {
             if (!item.tglOrder) return true;
             const orderDate = new Date(item.tglOrder);
@@ -1172,7 +1220,6 @@
             return true;
           });
 
-          // Group by Order Code (untuk menghitung order unik)
           const orderMap = new Map();
           
           filteredByDate.forEach(item => {
@@ -1195,7 +1242,6 @@
             orderData.items.push(item);
           });
 
-          // Hitung statistik PROGRESS
           const progressStats = {
             count: 0,
             qty: 0,
@@ -1208,9 +1254,6 @@
           orderMap.forEach((orderData, orderCode) => {
             const statusList = Array.from(orderData.statuses);
             
-            // Sebuah order dianggap PROGRESS jika:
-            // 1. Statusnya adalah PROGRESS
-            // 2. Dan tidak ada status DELIVERED atau CANCEL
             const hasProgressStatus = statusList.includes('PROGRESS');
             const hasDeliveredOrCancel = statusList.includes('DELIVERED') || statusList.includes('CANCEL');
             
@@ -1225,20 +1268,17 @@
                 itemCount: orderData.items.length
               });
               
-              // Breakdown per tanggal
               if (orderData.firstSeen) {
                 const dateKey = new Date(orderData.firstSeen).toISOString().split('T')[0];
                 progressStats.dailyBreakdown[dateKey] = (progressStats.dailyBreakdown[dateKey] || 0) + 1;
               }
               
-              // Breakdown per status
               statusList.forEach(status => {
                 progressStats.statusBreakdown[status] = (progressStats.statusBreakdown[status] || 0) + 1;
               });
             }
           });
 
-          // Hitung rata-rata waktu proses
           const ordersWithAge = progressStats.orders.filter(o => o.firstSeen);
           if (ordersWithAge.length > 0) {
             const totalAge = ordersWithAge.reduce((sum, o) => {
@@ -1251,8 +1291,208 @@
           return progressStats;
         },
         
+        // ========== HITUNG STATISTIK PARTIAL ==========
+        calculatePartialStats: (data, fromDate, toDate) => {
+          const filteredByDate = data.filter(item => {
+            if (!item.tglOrder) return true;
+            const orderDate = new Date(item.tglOrder);
+            
+            if (fromDate && orderDate < new Date(fromDate)) return false;
+            if (toDate) {
+              const to = new Date(toDate);
+              to.setHours(23, 59, 59, 999);
+              if (orderDate > to) return false;
+            }
+            return true;
+          });
+
+          const orderMap = new Map();
+          
+          filteredByDate.forEach(item => {
+            const code = item.orderCode;
+            if (!code) return;
+            
+            if (!orderMap.has(code)) {
+              orderMap.set(code, {
+                orderCode: code,
+                statuses: new Set(),
+                totalQty: 0,
+                firstSeen: item.tglOrder,
+                items: []
+              });
+            }
+            
+            const orderData = orderMap.get(code);
+            orderData.statuses.add(item.statusCategory);
+            orderData.totalQty += (item.qty || 0);
+            orderData.items.push(item);
+          });
+
+          const partialStats = {
+            count: 0,
+            qty: 0,
+            details: [],
+            statusBreakdown: {},
+            orderCodes: []
+          };
+
+          orderMap.forEach((orderData, orderCode) => {
+            const statusList = Array.from(orderData.statuses);
+            
+            const isPartial = statusList.length > 1 || statusList.includes('PARTIAL');
+            
+            if (isPartial) {
+              partialStats.count++;
+              partialStats.qty += orderData.totalQty;
+              partialStats.orderCodes.push(orderCode);
+              
+              const breakdown = [];
+              const statusQty = new Map();
+              
+              orderData.items.forEach(item => {
+                const status = item.statusCategory;
+                statusQty.set(status, (statusQty.get(status) || 0) + (item.qty || 0));
+              });
+              
+              statusQty.forEach((qty, status) => {
+                breakdown.push({
+                  status: status,
+                  qty: qty
+                });
+              });
+              
+              partialStats.details.push({
+                orderCode: orderCode,
+                breakdown: breakdown,
+                totalQty: orderData.totalQty,
+                firstSeen: orderData.firstSeen,
+                statusCount: statusList.length
+              });
+              
+              statusList.forEach(status => {
+                partialStats.statusBreakdown[status] = (partialStats.statusBreakdown[status] || 0) + 1;
+              });
+            }
+          });
+
+          return partialStats;
+        },
+        
+        // ========== HITUNG STATISTIK DELIVERED DENGAN RINCIAN ==========
+        calculateDeliveredStats: (data, fromDate, toDate) => {
+          const filteredByDate = data.filter(item => {
+            if (!item.tglOrder) return true;
+            const orderDate = new Date(item.tglOrder);
+            
+            if (fromDate && orderDate < new Date(fromDate)) return false;
+            if (toDate) {
+              const to = new Date(toDate);
+              to.setHours(23, 59, 59, 999);
+              if (orderDate > to) return false;
+            }
+            return true;
+          });
+
+          const orderMap = new Map();
+          
+          filteredByDate.forEach(item => {
+            const code = item.orderCode;
+            if (!code) return;
+            
+            if (!orderMap.has(code)) {
+              orderMap.set(code, {
+                orderCode: code,
+                statuses: new Set(),
+                deliveredQty: 0,
+                otherQty: 0,
+                totalQty: 0,
+                items: []
+              });
+            }
+            
+            const orderData = orderMap.get(code);
+            orderData.statuses.add(item.statusCategory);
+            orderData.totalQty += (item.qty || 0);
+            
+            if (item.statusCategory === 'DELIVERED') {
+              orderData.deliveredQty += (item.qty || 0);
+            } else {
+              orderData.otherQty += (item.qty || 0);
+            }
+            
+            orderData.items.push({
+              status: item.statusCategory,
+              qty: item.qty || 0,
+              tgl: item.tglMuat || item.tglOrder
+            });
+          });
+
+          const deliveredStats = {
+            totalDeliveredQty: 0,
+            totalOrdersWithDelivered: 0,
+            pureDelivered: {
+              count: 0,
+              qty: 0,
+              orders: []
+            },
+            mixedDelivered: {
+              count: 0,
+              deliveredQty: 0,
+              otherQty: 0,
+              details: []
+            }
+          };
+
+          orderMap.forEach((orderData, orderCode) => {
+            const statusList = Array.from(orderData.statuses);
+            const hasDelivered = statusList.includes('DELIVERED');
+            
+            if (hasDelivered) {
+              deliveredStats.totalOrdersWithDelivered++;
+              deliveredStats.totalDeliveredQty += orderData.deliveredQty;
+              
+              if (statusList.length === 1 && statusList[0] === 'DELIVERED') {
+                deliveredStats.pureDelivered.count++;
+                deliveredStats.pureDelivered.qty += orderData.deliveredQty;
+                deliveredStats.pureDelivered.orders.push({
+                  orderCode: orderCode,
+                  qty: orderData.deliveredQty
+                });
+              } else {
+                deliveredStats.mixedDelivered.count++;
+                deliveredStats.mixedDelivered.deliveredQty += orderData.deliveredQty;
+                deliveredStats.mixedDelivered.otherQty += orderData.otherQty;
+                
+                const breakdown = [];
+                orderData.items.forEach(item => {
+                  const existing = breakdown.find(b => b.status === item.status);
+                  if (existing) {
+                    existing.qty += item.qty;
+                  } else {
+                    breakdown.push({
+                      status: item.status,
+                      qty: item.qty
+                    });
+                  }
+                });
+                
+                deliveredStats.mixedDelivered.details.push({
+                  orderCode: orderCode,
+                  deliveredQty: orderData.deliveredQty,
+                  otherQty: orderData.otherQty,
+                  totalQty: orderData.totalQty,
+                  breakdown: breakdown.sort((a, b) => b.qty - a.qty),
+                  firstSeen: orderData.items[0]?.tgl
+                });
+              }
+            }
+          });
+
+          return deliveredStats;
+        },
+        
+        // ========== HITUNG STATISTIK REALISASI ==========
         calculateRealisasiStats: (data, fromDate, toDate) => {
-          // Filter berdasarkan periode
           const filteredByDate = data.filter(item => {
             if (!item.tglOrder) return true;
             const orderDate = new Date(item.tglOrder);
@@ -1417,15 +1657,14 @@
           DOM.updateText('masterPeriode', stats.periode);
         },
         
+        // ========== RENDER PROGRESS CONTAINER ==========
         renderProgressContainer: (progressStats) => {
           const kpiContainer = DOM.get('kpiContainer');
           if (!kpiContainer) return;
 
-          // Cari atau buat elemen Progress
           let progressCard = document.getElementById('containerProgress');
           
           if (!progressCard) {
-            // Buat card Progress khusus dengan ID
             progressCard = document.createElement('div');
             progressCard.id = 'containerProgress';
             progressCard.className = 'kpi';
@@ -1433,7 +1672,6 @@
             kpiContainer.prepend(progressCard);
           }
 
-          // Update konten
           const hasProgress = progressStats.count > 0;
           const glowClass = hasProgress ? 'glow-active' : 'glow-inactive';
           
@@ -1441,12 +1679,10 @@
           progressCard.style.borderTop = `4px solid #f1c40f`;
           progressCard.style.setProperty('--glow-color', '#f1c40f80');
 
-          // Hitung persentase dari total order
           const totalOrders = State.filteredRealisasi.length ? 
             new Set(State.filteredRealisasi.map(i => i.orderCode)).size : 0;
           const percentage = totalOrders ? (progressStats.count / totalOrders * 100) : 0;
 
-          // Buat breakdown tanggal untuk tooltip
           const dateBreakdown = Object.entries(progressStats.dailyBreakdown)
             .sort((a, b) => b[0].localeCompare(a[0]))
             .slice(0, 5)
@@ -1456,7 +1692,6 @@
             })
             .join('<br>');
 
-          // Buat breakdown status
           const statusBreakdown = Object.entries(progressStats.statusBreakdown)
             .map(([status, count]) => `${status}: ${count}`)
             .join(' • ');
@@ -1488,12 +1723,228 @@
           `;
         },
         
-        kpi: (stats) => {
+        // ========== RENDER PARTIAL CONTAINER ==========
+        renderPartialContainer: (partialStats) => {
+          const container = document.getElementById('partialContainer');
+          const pill = document.getElementById('partialPill');
+          
+          if (!container || !pill) return;
+          
+          pill.textContent = partialStats.count === 0 ? 'Tidak ada' : `${partialStats.count} order`;
+          
+          if (partialStats.count === 0) {
+            container.innerHTML = '<p class="note">✨ Semua order memiliki status tunggal (murni)</p>';
+            return;
+          }
+          
+          const sortedDetails = [...partialStats.details].sort((a, b) => b.statusCount - a.statusCount);
+          
+          let html = `
+            <div class="partial-detail">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <p style="font-weight: 700; color: #9b59b6;">
+                  ⚡ ${partialStats.count} Order dengan Status Campuran
+                </p>
+                <span class="badge badge-partial" style="font-size: 11px;">
+                  Total QTY: ${DataProcessor.formatNumber(partialStats.qty)}
+                </span>
+              </div>
+          `;
+          
+          if (Object.keys(partialStats.statusBreakdown).length > 0) {
+            html += '<div style="margin-bottom: 12px; padding: 6px; background: rgba(155,89,182,0.05); border-radius: 6px;">';
+            html += '<div style="font-size: 10px; color: #9b59b6; margin-bottom: 4px;">📊 Komposisi Status:</div>';
+            html += '<div style="display: flex; gap: 12px; flex-wrap: wrap;">';
+            
+            Object.entries(partialStats.statusBreakdown).forEach(([status, count]) => {
+              const color = {
+                PROGRESS: '#f1c40f',
+                ON_DELIVERY: '#3498db',
+                DELIVERED: '#2ecc71',
+                CANCEL: '#e74c3c',
+                PARTIAL: '#9b59b6',
+                UNKNOWN: '#95a5a6'
+              }[status] || '#95a5a6';
+              
+              html += `<span style="color: ${color}; font-size: 10px; font-weight: 600;">${status}: ${count}</span>`;
+            });
+            
+            html += '</div></div>';
+          }
+          
+          sortedDetails.slice(0, 5).forEach((detail, idx) => {
+            const dominantStatus = detail.breakdown.sort((a, b) => b.qty - a.qty)[0]?.status || 'PARTIAL';
+            const borderColor = {
+              PROGRESS: '#f1c40f',
+              ON_DELIVERY: '#3498db',
+              DELIVERED: '#2ecc71',
+              CANCEL: '#e74c3c',
+              PARTIAL: '#9b59b6'
+            }[dominantStatus] || '#9b59b6';
+            
+            html += `
+              <div style="margin-top: ${idx > 0 ? '12px' : '0'}; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border-left: 3px solid ${borderColor};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <div style="font-weight: 700; font-size: 12px; color: ${borderColor};">📋 ${detail.orderCode}</div>
+                  <div style="display: flex; gap: 8px;">
+                    <span class="badge" style="background: rgba(255,255,255,0.1);">${detail.statusCount} status</span>
+                    <span class="badge" style="background: rgba(255,255,255,0.1);">${DataProcessor.formatNumber(detail.totalQty)} Qty</span>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+            `;
+            
+            const sortedBreakdown = [...detail.breakdown].sort((a, b) => b.qty - a.qty);
+            
+            sortedBreakdown.forEach(b => {
+              const cls = {
+                PROGRESS: 'badge-progress',
+                ON_DELIVERY: 'badge-ondelivery',
+                DELIVERED: 'badge-delivered',
+                CANCEL: 'badge-cancel',
+                PARTIAL: 'badge-partial'
+              }[b.status] || '';
+              
+              const percentage = ((b.qty / detail.totalQty) * 100).toFixed(1);
+              
+              html += `
+                <div style="min-width: 120px;">
+                  <span class="badge ${cls}" style="margin-right: 4px;">${b.status}</span>
+                  <span style="color: #e9f1fb; font-size: 11px;">${DataProcessor.formatNumber(b.qty)} Qty</span>
+                  <span style="color: #a7b6c8; font-size: 10px; margin-left: 4px;">(${percentage}%)</span>
+                </div>
+              `;
+            });
+            
+            html += `</div>`;
+            
+            if (detail.firstSeen) {
+              const tgl = new Date(detail.firstSeen).toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+              });
+              html += `<div style="margin-top: 8px; font-size: 9px; color: #a7b6c8;">📅 Order: ${tgl}</div>`;
+            }
+            
+            html += `</div>`;
+          });
+          
+          if (partialStats.details.length > 5) {
+            html += `
+              <div style="margin-top: 12px; padding: 8px; background: rgba(155,89,182,0.1); border-radius: 6px; text-align: center;">
+                <span class="note">... dan ${partialStats.details.length - 5} order PARTIAL lainnya</span>
+              </div>
+            `;
+          }
+          
+          html += '</div>';
+          container.innerHTML = html;
+        },
+        
+        // ========== RENDER DELIVERED CONTAINER ==========
+        renderDeliveredContainer: (deliveredStats) => {
+          const bottomContainer = document.getElementById('kpiBottomContainer');
+          if (!bottomContainer) return null;
+
+          let deliveredCard = document.getElementById('containerDelivered');
+          
+          if (!deliveredCard) {
+            deliveredCard = document.createElement('div');
+            deliveredCard.id = 'containerDelivered';
+            deliveredCard.className = 'kpi';
+            deliveredCard.setAttribute('data-container-id', 'containerDelivered');
+          }
+
+          const totalOrders = State.filteredRealisasi.length ? 
+            new Set(State.filteredRealisasi.map(i => i.orderCode)).size : 0;
+          const percentage = totalOrders ? (deliveredStats.totalOrdersWithDelivered / totalOrders * 100) : 0;
+
+          const hasDelivered = deliveredStats.totalOrdersWithDelivered > 0;
+          const glowClass = hasDelivered ? 'glow-active' : 'glow-inactive';
+          
+          deliveredCard.className = `kpi ${glowClass}`;
+          deliveredCard.style.borderTop = `4px solid #2ecc71`;
+          deliveredCard.style.setProperty('--glow-color', '#2ecc7180');
+
+          deliveredCard.setAttribute('data-delivered-count', deliveredStats.mixedDelivered.count);
+          
+          let tooltipContent = '';
+          if (deliveredStats.mixedDelivered.count > 0) {
+            tooltipContent = '📊 Order dengan status campuran:\n';
+            deliveredStats.mixedDelivered.details.slice(0, 3).forEach(d => {
+              tooltipContent += `${d.orderCode}: Delivered ${DataProcessor.formatNumber(d.deliveredQty)} Qty, Lainnya ${DataProcessor.formatNumber(d.otherQty)} Qty\n`;
+            });
+            if (deliveredStats.mixedDelivered.details.length > 3) {
+              tooltipContent += `... dan ${deliveredStats.mixedDelivered.details.length - 3} order lainnya`;
+            }
+          }
+
+          deliveredCard.innerHTML = `
+            <div class="header">
+              <span class="status-label">DELIVERED</span>
+              <span class="status-icon">✅</span>
+            </div>
+            <div class="main-value">${DataProcessor.formatNumber(deliveredStats.totalOrdersWithDelivered)}</div>
+            <div class="qty-value">${DataProcessor.formatNumber(deliveredStats.totalDeliveredQty)} Qty</div>
+            <div class="percentage">${DataProcessor.formatNumberDecimal(percentage, 1)}% dari total order</div>
+            
+            <div class="delivered-detail">
+              <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                <span style="color: #2ecc71;">✅ Murni Delivered:</span>
+                <span>${deliveredStats.pureDelivered.count} order (${DataProcessor.formatNumber(deliveredStats.pureDelivered.qty)} Qty)</span>
+              </div>
+              
+              ${deliveredStats.mixedDelivered.count > 0 ? `
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; cursor: help;" 
+                     title="${tooltipContent}">
+                  <span style="color: #f1c40f;">🔄 Campuran:</span>
+                  <span>${deliveredStats.mixedDelivered.count} order (Delivered: ${DataProcessor.formatNumber(deliveredStats.mixedDelivered.deliveredQty)} Qty)</span>
+                </div>
+              ` : ''}
+              
+              <div style="margin-top: 6px; font-size: 8px; color: var(--text-secondary);">
+                Update: ${new Date().toLocaleTimeString('id-ID')}
+              </div>
+            </div>
+            
+            ${deliveredStats.mixedDelivered.count > 0 ? `
+              <div id="deliveredDetail" style="display: none; margin-top: 12px; padding: 8px; background: rgba(46,204,113,0.1); border-radius: 6px; font-size: 10px; text-align: left; border-left: 2px solid #2ecc71;">
+                <div style="font-weight: 700; color: #2ecc71; margin-bottom: 6px;">📋 Rincian Order Campuran:</div>
+                ${deliveredStats.mixedDelivered.details.slice(0, 5).map(d => `
+                  <div style="margin-bottom: 8px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 4px;">
+                    <div style="font-weight: 600; color: #2ecc71;">${d.orderCode}</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+                      ${d.breakdown.map(b => {
+                        const isDelivered = b.status === 'DELIVERED';
+                        return `
+                          <span style="color: ${isDelivered ? '#2ecc71' : '#a7b6c8'};">
+                            ${b.status}: ${DataProcessor.formatNumber(b.qty)} Qty
+                          </span>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                `).join('')}
+                ${deliveredStats.mixedDelivered.details.length > 5 ? `
+                  <div style="text-align: center; color: #a7b6c8;">... dan ${deliveredStats.mixedDelivered.details.length - 5} lainnya</div>
+                ` : ''}
+              </div>
+              <button class="btn-detail" onclick="toggleDeliveredDetail()">🔍 Lihat Rincian</button>
+            ` : ''}
+            
+            <div class="container-info">ID: containerDelivered</div>
+          `;
+
+          return deliveredCard;
+        },
+        
+        // ========== RENDER KPI CARDS ==========
+        kpi: (stats, deliveredStats) => {
           const topContainer = DOM.get('kpiContainer');
           const bottomContainer = DOM.get('kpiBottomContainer');
           if (!topContainer || !bottomContainer) return;
 
-          // Hapus semua card di topContainer kecuali Progress
           const progressCard = document.getElementById('containerProgress');
           topContainer.innerHTML = '';
           if (progressCard) topContainer.appendChild(progressCard);
@@ -1503,19 +1954,12 @@
             { key: 'partial', label: 'PARSIAL', icon: '⚡', color: '#9b59b6', ...stats.partial }
           ];
           
-          const bottomList = [
-            { key: 'delivered', label: 'DELIVERED', icon: '✅', color: '#2ecc71', ...stats.delivered },
-            { key: 'cancel', label: 'CANCEL', icon: '⛔', color: '#e74c3c', ...stats.cancel }
-          ];
-
-          const glowClass = (count) => count > 0 ? 'glow-active' : 'glow-inactive';
-
-          // Render On Delivery dan Partial
           topList.forEach(s => {
             const card = document.createElement('div');
-            card.className = `kpi ${glowClass(s.count)}`;
+            card.className = `kpi ${s.count > 0 ? 'glow-active' : 'glow-inactive'}`;
             card.style.borderTop = `4px solid ${s.color}`;
             card.style.setProperty('--glow-color', `${s.color}80`);
+            card.setAttribute('data-container-id', `container-${s.key}`);
             card.innerHTML = `
               <div class="header">
                 <span class="status-label">${s.label}</span>
@@ -1524,71 +1968,39 @@
               <div class="main-value">${DataProcessor.formatNumber(s.count)}</div>
               <div class="qty-value">${DataProcessor.formatNumber(s.qty)} Qty</div>
               <div class="percentage">${DataProcessor.formatNumberDecimal(s.percentage,1)}% dari total order</div>
+              <div class="container-info">ID: container-${s.key}</div>
             `;
             topContainer.appendChild(card);
           });
 
-          // Render Delivered dan Cancel
-          bottomContainer.innerHTML = bottomList.map(s => `
-            <div class="kpi ${glowClass(s.count)}" style="border-top:4px solid ${s.color}; --glow-color:${s.color}80;">
-              <div class="header">
-                <span class="status-label">${s.label}</span>
-                <span class="status-icon">${s.icon}</span>
-              </div>
-              <div class="main-value">${DataProcessor.formatNumber(s.count)}</div>
-              <div class="qty-value">${DataProcessor.formatNumber(s.qty)} Qty</div>
-              <div class="percentage">${DataProcessor.formatNumberDecimal(s.percentage,1)}% dari total order</div>
+          const deliveredCard = Renderer.renderDeliveredContainer(deliveredStats);
+          
+          const cancelCard = document.createElement('div');
+          cancelCard.className = `kpi ${stats.cancel.count > 0 ? 'glow-active' : 'glow-inactive'}`;
+          cancelCard.style.borderTop = `4px solid #e74c3c`;
+          cancelCard.style.setProperty('--glow-color', '#e74c3c80');
+          cancelCard.setAttribute('data-container-id', 'container-cancel');
+          cancelCard.innerHTML = `
+            <div class="header">
+              <span class="status-label">CANCEL</span>
+              <span class="status-icon">⛔</span>
             </div>
-          `).join('');
+            <div class="main-value">${DataProcessor.formatNumber(stats.cancel.count)}</div>
+            <div class="qty-value">${DataProcessor.formatNumber(stats.cancel.qty)} Qty</div>
+            <div class="percentage">${DataProcessor.formatNumberDecimal(stats.cancel.percentage,1)}% dari total order</div>
+            <div class="container-info">ID: container-cancel</div>
+          `;
+
+          bottomContainer.innerHTML = '';
+          if (deliveredCard) bottomContainer.appendChild(deliveredCard);
+          bottomContainer.appendChild(cancelCard);
         },
         
-        partialDetails: (stats) => {
-          const container = DOM.get('partialContainer');
-          const pill = DOM.get('partialPill');
-          if (!container || !pill) return;
-          
-          if (stats.partial.count === 0) {
-            pill.textContent = 'Tidak ada';
-            container.innerHTML = '<p class="note">✨ Semua order memiliki status murni</p>';
-            return;
-          }
-          
-          pill.textContent = `${stats.partial.count} order`;
-          let html = '<div class="partial-detail">';
-          html += `<p style="margin-bottom:8px;font-weight:700;">⚡ ${stats.partial.count} Order dengan Status Campuran:</p>`;
-          
-          stats.partial.details.slice(0,5).forEach(d => {
-            html += `<div style="margin-top:12px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;">`;
-            html += `<div style="font-weight:700;margin-bottom:6px;">📋 ${d.orderCode}</div>`;
-            html += `<div style="display:flex;gap:16px;flex-wrap:wrap;">`;
-            
-            d.breakdown.forEach(b => {
-              const cls = {
-                DELIVERED: 'badge-delivered',
-                ON_DELIVERY: 'badge-ondelivery',
-                PROGRESS: 'badge-progress',
-                CANCEL: 'badge-cancel',
-                PARTIAL: 'badge-partial'
-              }[b.status] || '';
-              html += `<div><span class="badge ${cls}">${b.status}</span> ${DataProcessor.formatNumber(b.qty)} Qty</div>`;
-            });
-            
-            html += `</div></div>`;
-          });
-          
-          if (stats.partial.details.length > 5) {
-            html += `<p class="note">... dan ${stats.partial.details.length-5} order lainnya</p>`;
-          }
-          html += '</div>';
-          container.innerHTML = html;
-        },
-        
+        // ========== RENDER CHARTS ==========
         charts: (data, stats) => {
-          // Hancurkan chart lama
           Object.values(State.charts).forEach(c => c && c.destroy());
           State.charts = {};
 
-          // Chart Status (di containerStatusDistribusi)
           const ctxStatus = DOM.get('chartStatus')?.getContext('2d');
           if (ctxStatus && stats.totalOrders) {
             State.charts.status = new Chart(ctxStatus, {
@@ -1639,7 +2051,6 @@
               <span style="color:#e74c3c">⛔ Cancel: ${DataProcessor.formatNumber(stats.cancel.qty)} Qty</span>`;
           }
 
-          // Chart Kota (di containerTopKota)
           const cityData = DataProcessor.groupAndSum(data, i => i.kota, 8);
           const ctxCity = DOM.get('chartCity')?.getContext('2d');
           if (ctxCity && cityData.length) {
@@ -1666,7 +2077,6 @@
             });
           }
 
-          // Chart Pabrik (di containerTopPabrik)
           const factoryData = DataProcessor.groupAndSum(data, i => i.pabrik, 6);
           const ctxFactory = DOM.get('chartFactory')?.getContext('2d');
           if (ctxFactory && factoryData.length) {
@@ -1694,6 +2104,7 @@
           }
         },
         
+        // ========== RENDER REAL TIME TABLE ==========
         realTimeTable: (data) => {
           const tbody = DOM.get('rtBody');
           if (!tbody) return;
@@ -1743,6 +2154,7 @@
           });
         },
         
+        // ========== RENDER RINGKASAN ==========
         ringkasanData: (realStats, masterStats) => {
           DOM.updateText('totalRowsDetail', `${realStats.totalRows} baris`);
           DOM.updateText('totalOrdersDetail', `${realStats.totalOrders} order`);
@@ -1764,10 +2176,15 @@
           DOM.updateText('liveStatus', '🟢 Live');
         },
         
+        // ========== VERIFIKASI SEMUA CONTAINER ==========
         verifyAllContainers: () => {
           const containerIds = [
             'containerMasterOrder',
             'containerProgress',
+            'container-onDelivery',
+            'container-partial',
+            'containerDelivered',
+            'container-cancel',
             'containerStatusDistribusi',
             'containerTopKota',
             'containerTopPabrik',
@@ -1875,6 +2292,18 @@
         }
       };
 
+      // ========== GLOBAL FUNCTIONS ==========
+      window.toggleDeliveredDetail = function() {
+        const detailEl = document.getElementById('deliveredDetail');
+        if (detailEl) {
+          if (detailEl.style.display === 'none' || detailEl.style.display === '') {
+            detailEl.style.display = 'block';
+          } else {
+            detailEl.style.display = 'none';
+          }
+        }
+      };
+
       // ========== DEBUG FUNCTIONS ==========
       window.debugProgress = function() {
         const fromDate = document.getElementById('fromDate')?.value;
@@ -1918,7 +2347,6 @@
         console.groupEnd();
         console.groupEnd();
         
-        // Highlight container
         const progressCard = document.getElementById('containerProgress');
         if (progressCard) {
           progressCard.style.transition = 'all 0.3s';
@@ -1932,6 +2360,97 @@
         }
         
         return progressStats;
+      };
+
+      window.debugPartial = function() {
+        const fromDate = document.getElementById('fromDate')?.value;
+        const toDate = document.getElementById('toDate')?.value;
+        
+        const partialStats = DataProcessor.calculatePartialStats(State.realisasiData, fromDate, toDate);
+        
+        console.group('⚡ DEBUG PARTIAL CONTAINER');
+        console.log('Total Order PARTIAL:', partialStats.count);
+        console.log('Total QTY PARTIAL:', DataProcessor.formatNumber(partialStats.qty));
+        console.log('Order Codes:', partialStats.orderCodes);
+        
+        console.group('📊 Breakdown Status:');
+        Object.entries(partialStats.statusBreakdown).forEach(([status, count]) => {
+          console.log(`${status}: ${count} order`);
+        });
+        console.groupEnd();
+        
+        console.group('📋 Detail Order (5 pertama):');
+        partialStats.details.slice(0, 5).forEach(d => {
+          console.log({
+            orderCode: d.orderCode,
+            totalQty: DataProcessor.formatNumber(d.totalQty),
+            statusCount: d.statusCount,
+            breakdown: d.breakdown.map(b => `${b.status}: ${DataProcessor.formatNumber(b.qty)}`).join(', ')
+          });
+        });
+        console.groupEnd();
+        console.groupEnd();
+        
+        const partialCard = document.getElementById('containerPartial');
+        if (partialCard) {
+          partialCard.style.transition = 'all 0.3s';
+          partialCard.style.transform = 'scale(1.02)';
+          partialCard.style.boxShadow = '0 0 30px #9b59b6';
+          partialCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            partialCard.style.transform = '';
+            partialCard.style.boxShadow = '';
+          }, 2000);
+        }
+        
+        return partialStats;
+      };
+
+      window.debugDelivered = function() {
+        const fromDate = document.getElementById('fromDate')?.value;
+        const toDate = document.getElementById('toDate')?.value;
+        
+        const deliveredStats = DataProcessor.calculateDeliveredStats(State.realisasiData, fromDate, toDate);
+        
+        console.group('✅ DEBUG DELIVERED CONTAINER');
+        console.log('Periode:', fromDate || 'Awal', 's/d', toDate || 'Sekarang');
+        console.log('Total Order dengan Delivered:', deliveredStats.totalOrdersWithDelivered);
+        console.log('Total QTY Delivered:', DataProcessor.formatNumber(deliveredStats.totalDeliveredQty));
+        
+        console.group('📊 Pure Delivered (Murni):');
+        console.log('Jumlah Order:', deliveredStats.pureDelivered.count);
+        console.log('Total QTY:', DataProcessor.formatNumber(deliveredStats.pureDelivered.qty));
+        console.groupEnd();
+        
+        console.group('🔄 Mixed Delivered (Campuran):');
+        console.log('Jumlah Order:', deliveredStats.mixedDelivered.count);
+        console.log('QTY Delivered:', DataProcessor.formatNumber(deliveredStats.mixedDelivered.deliveredQty));
+        console.log('QTY Lainnya:', DataProcessor.formatNumber(deliveredStats.mixedDelivered.otherQty));
+        
+        console.group('📋 Rincian Order Campuran:');
+        deliveredStats.mixedDelivered.details.forEach(d => {
+          console.log(`${d.orderCode}:`);
+          d.breakdown.forEach(b => {
+            console.log(`  ${b.status}: ${DataProcessor.formatNumber(b.qty)} Qty`);
+          });
+        });
+        console.groupEnd();
+        console.groupEnd();
+        console.groupEnd();
+        
+        const deliveredCard = document.getElementById('containerDelivered');
+        if (deliveredCard) {
+          deliveredCard.style.transition = 'all 0.3s';
+          deliveredCard.style.transform = 'scale(1.02)';
+          deliveredCard.style.boxShadow = '0 0 30px #2ecc71';
+          deliveredCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            deliveredCard.style.transform = '';
+            deliveredCard.style.boxShadow = '';
+          }, 2000);
+        }
+        
+        return deliveredStats;
       };
 
       window.debugStatusCategories = function() {
@@ -1966,11 +2485,9 @@
           alert(`⚠️ PERHATIAN: ${missing.length} container tidak ditemukan!\n\n` + 
                 missing.map(m => `❌ ${m.id}`).join('\n'));
         } else {
-          alert('✅ Semua 8 container ditemukan!\n\n' + 
-                results.map(r => `✅ ${r.id}`).join('\n'));
+          alert('✅ Semua container ditemukan!');
         }
         
-        // Highlight semua container
         results.forEach(r => {
           if (r.element) {
             r.element.style.transition = 'border 0.3s';
@@ -1993,18 +2510,16 @@
           State.filteredRealisasi = DataProcessor.filterByDate(realisasiData, from, to, 'tglOrder');
           State.filteredMaster = DataProcessor.filterByDate(masterData, from, to, 'tglOrder');
 
-          // Hitung progress dengan logika baru
           const progressStats = DataProcessor.calculateProgressStats(State.filteredRealisasi, from, to);
+          const partialStats = DataProcessor.calculatePartialStats(State.filteredRealisasi, from, to);
+          const deliveredStats = DataProcessor.calculateDeliveredStats(State.filteredRealisasi, from, to);
           const realStats = DataProcessor.calculateRealisasiStats(State.filteredRealisasi, from, to);
           const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
 
-          // Render container progress
           Renderer.renderProgressContainer(progressStats);
-          
-          // Render lainnya
+          Renderer.renderPartialContainer(partialStats);
           Renderer.masterSummary(masterStats);
-          Renderer.kpi(realStats);
-          Renderer.partialDetails(realStats);
+          Renderer.kpi(realStats, deliveredStats);
           Renderer.charts(State.filteredRealisasi, realStats);
           Renderer.realTimeTable(State.filteredRealisasi);
           Renderer.ringkasanData(realStats, masterStats);
@@ -2012,8 +2527,9 @@
           AutoRefresh.startCountdown(Number(DOM.get('refreshSec')?.value || 30));
           DOM.showMessage('success', `Update: ${State.filteredRealisasi.length} realisasi, ${masterStats.totalOrders} master`);
           
-          // Log progress
-          console.log(`📊 Progress: ${progressStats.count} order unik, ${DataProcessor.formatNumber(progressStats.qty)} QTY, rata-rata ${progressStats.avgProcessingTime.toFixed(1)} hari`);
+          console.log(`📊 Progress: ${progressStats.count} order unik, ${DataProcessor.formatNumber(progressStats.qty)} QTY`);
+          console.log(`⚡ Partial: ${partialStats.count} order, ${DataProcessor.formatNumber(partialStats.qty)} QTY`);
+          console.log(`✅ Delivered: ${deliveredStats.totalOrdersWithDelivered} order, ${DataProcessor.formatNumber(deliveredStats.totalDeliveredQty)} QTY (Mixed: ${deliveredStats.mixedDelivered.count})`);
         },
         init: () => {
           const today = new Date();
@@ -2036,7 +2552,6 @@
           App.refresh();
           AutoRefresh.setup();
           
-          // Verifikasi container setelah inisialisasi
           setTimeout(() => {
             Renderer.verifyAllContainers();
           }, 1000);
@@ -2054,17 +2569,24 @@
       console.log('=== DAFTAR KONTAINER DENGAN ID ===');
       console.log('1. Master Order:', document.getElementById('containerMasterOrder'));
       console.log('2. Progress:', document.getElementById('containerProgress'));
-      console.log('3. Status Distribusi:', document.getElementById('containerStatusDistribusi'));
-      console.log('4. Top Kota:', document.getElementById('containerTopKota'));
-      console.log('5. Top Pabrik:', document.getElementById('containerTopPabrik'));
-      console.log('6. Partial:', document.getElementById('containerPartial'));
-      console.log('7. Real Time:', document.getElementById('containerRealTime'));
-      console.log('8. Ringkasan:', document.getElementById('containerRingkasan'));
+      console.log('3. On Delivery:', document.querySelector('[data-container-id="container-onDelivery"]'));
+      console.log('4. Partial (KPI):', document.querySelector('[data-container-id="container-partial"]'));
+      console.log('5. Delivered:', document.getElementById('containerDelivered'));
+      console.log('6. Cancel:', document.querySelector('[data-container-id="container-cancel"]'));
+      console.log('7. Status Distribusi:', document.getElementById('containerStatusDistribusi'));
+      console.log('8. Top Kota:', document.getElementById('containerTopKota'));
+      console.log('9. Top Pabrik:', document.getElementById('containerTopPabrik'));
+      console.log('10. Partial Detail:', document.getElementById('containerPartial'));
+      console.log('11. Real Time:', document.getElementById('containerRealTime'));
+      console.log('12. Ringkasan:', document.getElementById('containerRingkasan'));
       
-      // Container objects untuk akses mudah
       window.containers = {
         master: document.getElementById('containerMasterOrder'),
         progress: document.getElementById('containerProgress'),
+        onDelivery: document.querySelector('[data-container-id="container-onDelivery"]'),
+        partialKpi: document.querySelector('[data-container-id="container-partial"]'),
+        delivered: document.getElementById('containerDelivered'),
+        cancel: document.querySelector('[data-container-id="container-cancel"]'),
         status: document.getElementById('containerStatusDistribusi'),
         kota: document.getElementById('containerTopKota'),
         pabrik: document.getElementById('containerTopPabrik'),
@@ -2074,8 +2596,11 @@
       };
       
       console.log('✅ Container objects tersedia di window.containers');
-      console.log('✅ Gunakan debugProgress() untuk analisis detail Progress');
+      console.log('✅ Gunakan debugProgress() untuk analisis Progress');
+      console.log('✅ Gunakan debugPartial() untuk analisis Partial');
+      console.log('✅ Gunakan debugDelivered() untuk analisis Delivered');
       console.log('✅ Gunakan debugStatusCategories() untuk cek kategorisasi status');
+      console.log('✅ Gunakan toggleDeliveredDetail() untuk lihat rincian Delivered campuran');
     });
   </script>
 </body>
