@@ -681,6 +681,7 @@
   <div style="position: fixed; bottom: 20px; left: 20px; z-index: 9999; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 20px; font-size: 11px;">
     <button onclick="toggleContainerInfo()" style="background: #333; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer;">🔍 Tampilkan ID Container</button>
     <button onclick="debugProgress()" style="background: #f1c40f; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">📊 Debug Progress</button>
+    <button onclick="debugStatusCategories()" style="background: #3498db; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">🔍 Cek Status</button>
     <button onclick="testAllContainers()" style="background: #ffb000; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">🧪 Test Container</button>
   </div>
 
@@ -879,7 +880,7 @@
         <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
       </div>
       <div class="footer-info">
-        <span>📊 Versi Final - 7 Container dengan ID Spesifik (Progress: ✅ Fixed)</span>
+        <span>📊 Versi Final - Progress: ✅ Fixed (Status Delivery masuk ON DELIVERY)</span>
       </div>
       <div class="copyright">copyright © 2026 By RH</div>
     </footer>
@@ -914,47 +915,6 @@
         rencanaMuat: 13, // O
         status: 15,     // P
         tglMuat: 17     // R
-      };
-
-      // ========== KONFIGURASI STATUS ==========
-      const STATUS_CONFIG = {
-        PROGRESS: {
-          keywords: [
-            'proses order',
-            'menunggu jadwal pelayaran',
-            'pick up',
-            'antrian pick up',
-            'menunggu',
-            'proses',
-            'diproses',
-            'siap',
-            'persiapan',
-            'loading',
-            'persiapan muat'
-          ],
-          color: '#f1c40f',
-          icon: '⏳'
-        },
-        ON_DELIVERY: {
-          keywords: ['on delivery', 'dalam perjalanan', 'perjalanan', 'delivery', 'transit'],
-          color: '#3498db',
-          icon: '🚚'
-        },
-        DELIVERED: {
-          keywords: ['delivered', 'selesai', 'terkirim', 'complete', 'done', 'sampai'],
-          color: '#2ecc71',
-          icon: '✅'
-        },
-        CANCEL: {
-          keywords: ['cancel', 'batal', 'dibatalkan', 'void'],
-          color: '#e74c3c',
-          icon: '⛔'
-        },
-        PARTIAL: {
-          keywords: ['partial', 'sebagian'],
-          color: '#9b59b6',
-          icon: '⚡'
-        }
       };
 
       // ========== STATE GLOBAL ==========
@@ -1082,29 +1042,64 @@
           }
         },
         
+        // ========== PERBAIKAN UTAMA: KATEGORISASI STATUS YANG TEPAT ==========
         getStatusCategory: (status, tglOrder = null) => {
           if (!status || status.toString().trim() === '') {
-            // Jika status kosong, cek berdasarkan tanggal
-            if (tglOrder) {
-              const daysSinceOrder = Math.floor((new Date() - new Date(tglOrder)) / (1000 * 60 * 60 * 24));
-              if (daysSinceOrder <= 30) {
-                return 'PROGRESS'; // Order baru tanpa status dianggap PROGRESS
-              }
-            }
             return 'UNKNOWN';
           }
           
           const statusLower = status.toString().toLowerCase().trim();
           
-          // Cek kecocokan dengan setiap kategori
-          for (const [category, config] of Object.entries(STATUS_CONFIG)) {
-            if (config.keywords.some(keyword => statusLower.includes(keyword))) {
-              return category;
-            }
+          // ✅ PROGRESS: Hanya status-status ini
+          if (
+            statusLower === 'proses order' ||
+            statusLower.includes('proses order') ||
+            statusLower === 'antrian pick up' ||
+            statusLower.includes('antrian pick up') ||
+            statusLower === 'pick up' ||
+            statusLower.includes('pick up') ||
+            statusLower === 'menunggu jadwal pelayaran' ||
+            statusLower.includes('menunggu jadwal pelayaran')
+          ) {
+            return 'PROGRESS';
           }
           
-          // Default: jika tidak cocok dengan kategori manapun, anggap PROGRESS
-          return 'PROGRESS';
+          // ✅ ON DELIVERY: KHUSUS "Delivery" (bukan "Delivered")
+          if (
+            statusLower === 'delivery' ||
+            statusLower === 'on delivery' ||
+            (statusLower.includes('delivery') && !statusLower.includes('delivered'))
+          ) {
+            return 'ON_DELIVERY';
+          }
+          
+          // ✅ DELIVERED
+          if (
+            statusLower === 'delivered' ||
+            statusLower.includes('delivered')
+          ) {
+            return 'DELIVERED';
+          }
+          
+          // ✅ CANCEL
+          if (
+            statusLower === 'cancel' ||
+            statusLower.includes('cancel')
+          ) {
+            return 'CANCEL';
+          }
+          
+          // ✅ PARTIAL (jika ada)
+          if (
+            statusLower === 'partial' ||
+            statusLower.includes('partial')
+          ) {
+            return 'PARTIAL';
+          }
+          
+          // Default: jika tidak cocok, log warning
+          console.warn(`Status tidak dikenal: "${status}"`);
+          return 'UNKNOWN';
         },
         
         processRealisasiRow: (row) => {
@@ -1214,12 +1209,12 @@
             const statusList = Array.from(orderData.statuses);
             
             // Sebuah order dianggap PROGRESS jika:
-            // 1. Statusnya adalah PROGRESS atau
-            // 2. Atau jika partial tapi salah satu statusnya PROGRESS (masih dalam proses)
+            // 1. Statusnya adalah PROGRESS
+            // 2. Dan tidak ada status DELIVERED atau CANCEL
             const hasProgressStatus = statusList.includes('PROGRESS');
-            const hasNonFinalStatus = !statusList.includes('DELIVERED') && !statusList.includes('CANCEL');
+            const hasDeliveredOrCancel = statusList.includes('DELIVERED') || statusList.includes('CANCEL');
             
-            if (hasProgressStatus && hasNonFinalStatus) {
+            if (hasProgressStatus && !hasDeliveredOrCancel) {
               progressStats.count++;
               progressStats.qty += orderData.totalQty;
               progressStats.orders.push({
@@ -1291,6 +1286,7 @@
           const delivered = { count: 0, qty: 0 };
           const cancel = { count: 0, qty: 0 };
           const partial = { count: 0, qty: 0, details: [] };
+          const unknown = { count: 0, qty: 0 };
 
           orderStatuses.forEach((statuses, code) => {
             const list = Array.from(statuses);
@@ -1334,6 +1330,10 @@
                 partial.count++; 
                 partial.qty += totalQty; 
               }
+              else {
+                unknown.count++;
+                unknown.qty += totalQty;
+              }
             }
           });
 
@@ -1350,6 +1350,7 @@
             delivered: { ...delivered, percentage: makePerc(delivered.count) },
             cancel: { ...cancel, percentage: makePerc(cancel.count) },
             partial: { ...partial, percentage: makePerc(partial.count) },
+            unknown: { ...unknown, percentage: makePerc(unknown.count) },
             avgQtyPerOrder: totalOrders ? totalQty / totalOrders : 0
           };
         },
@@ -1437,8 +1438,8 @@
           const glowClass = hasProgress ? 'glow-active' : 'glow-inactive';
           
           progressCard.className = `kpi ${glowClass}`;
-          progressCard.style.borderTop = `4px solid ${STATUS_CONFIG.PROGRESS.color}`;
-          progressCard.style.setProperty('--glow-color', `${STATUS_CONFIG.PROGRESS.color}80`);
+          progressCard.style.borderTop = `4px solid #f1c40f`;
+          progressCard.style.setProperty('--glow-color', '#f1c40f80');
 
           // Hitung persentase dari total order
           const totalOrders = State.filteredRealisasi.length ? 
@@ -1463,7 +1464,7 @@
           progressCard.innerHTML = `
             <div class="header">
               <span class="status-label">PROGRESS</span>
-              <span class="status-icon">${STATUS_CONFIG.PROGRESS.icon}</span>
+              <span class="status-icon">⏳</span>
             </div>
             <div class="main-value">${DataProcessor.formatNumber(progressStats.count)}</div>
             <div class="qty-value">${DataProcessor.formatNumber(progressStats.qty)} Qty</div>
@@ -1475,7 +1476,7 @@
                   📊 ${Object.keys(progressStats.dailyBreakdown).length} hari
                 </span>
               </div>
-              <div style="margin-top: 6px; font-size: 9px; color: ${STATUS_CONFIG.PROGRESS.color}; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
+              <div style="margin-top: 6px; font-size: 9px; color: #f1c40f; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
                    title="${statusBreakdown}">
                 ⏱️ ${statusBreakdown}
               </div>
@@ -1593,10 +1594,24 @@
             State.charts.status = new Chart(ctxStatus, {
               type: 'doughnut',
               data: {
-                labels: ['Progress', 'On Delivery', 'Delivered', 'Cancel', 'Parsial'],
+                labels: ['Progress', 'On Delivery', 'Delivered', 'Cancel', 'Parsial', 'Unknown'],
                 datasets: [{
-                  data: [stats.progress.count, stats.onDelivery.count, stats.delivered.count, stats.cancel.count, stats.partial.count],
-                  backgroundColor: [CONFIG.CHART_COLORS.progress, CONFIG.CHART_COLORS.onDelivery, CONFIG.CHART_COLORS.delivered, CONFIG.CHART_COLORS.cancel, CONFIG.CHART_COLORS.partial],
+                  data: [
+                    stats.progress.count, 
+                    stats.onDelivery.count, 
+                    stats.delivered.count, 
+                    stats.cancel.count, 
+                    stats.partial.count,
+                    stats.unknown?.count || 0
+                  ],
+                  backgroundColor: [
+                    '#f1c40f', 
+                    '#3498db', 
+                    '#2ecc71', 
+                    '#e74c3c', 
+                    '#9b59b6',
+                    '#95a5a6'
+                  ],
                   borderWidth: 0
                 }]
               },
@@ -1716,7 +1731,9 @@
             
             const stCell = row.insertCell(); 
             stCell.textContent = item.status || '-';
-            stCell.className = `status-${item.statusCategory ? item.statusCategory.toLowerCase().replace('_','') : 'unknown'}`;
+            const statusClass = item.statusCategory ? 
+              `status-${item.statusCategory.toLowerCase().replace('_','')}` : '';
+            stCell.className = statusClass;
             
             row.insertCell().textContent = DataProcessor.formatNumber(item.qty);
             
@@ -1917,6 +1934,25 @@
         return progressStats;
       };
 
+      window.debugStatusCategories = function() {
+        if (!State.realisasiData || State.realisasiData.length === 0) {
+          console.log('Data belum tersedia');
+          return;
+        }
+        
+        const uniqueStatus = [...new Set(State.realisasiData.map(d => d.status))];
+        
+        console.group('🔍 CEK KATEGORISASI STATUS');
+        console.log('Status yang ditemukan di data:', uniqueStatus.length);
+        
+        uniqueStatus.forEach(status => {
+          const category = DataProcessor.getStatusCategory(status);
+          console.log(`"${status}" → ${category}`);
+        });
+        
+        console.groupEnd();
+      };
+
       window.toggleContainerInfo = function() {
         document.body.classList.toggle('show-container-info');
         console.log('Container info toggled:', document.body.classList.contains('show-container-info'));
@@ -2017,7 +2053,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('=== DAFTAR KONTAINER DENGAN ID ===');
       console.log('1. Master Order:', document.getElementById('containerMasterOrder'));
-      console.log('2. Progress:', document.getElementById('containerProgress')); // Baru!
+      console.log('2. Progress:', document.getElementById('containerProgress'));
       console.log('3. Status Distribusi:', document.getElementById('containerStatusDistribusi'));
       console.log('4. Top Kota:', document.getElementById('containerTopKota'));
       console.log('5. Top Pabrik:', document.getElementById('containerTopPabrik'));
@@ -2039,6 +2075,7 @@
       
       console.log('✅ Container objects tersedia di window.containers');
       console.log('✅ Gunakan debugProgress() untuk analisis detail Progress');
+      console.log('✅ Gunakan debugStatusCategories() untuk cek kategorisasi status');
     });
   </script>
 </body>
