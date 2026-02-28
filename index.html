@@ -442,7 +442,7 @@
     }
 
     /* Delivered Detail */
-    .delivered-detail {
+    .delivered-detail, .cancel-detail {
       font-size: 11px;
       margin-top: 12px;
       padding-top: 8px;
@@ -463,8 +463,7 @@
     .btn-detail {
       margin-top: 6px;
       background: transparent;
-      border: 1px solid #2ecc71;
-      color: #2ecc71;
+      border: 1px solid;
       padding: 2px 8px;
       border-radius: 12px;
       font-size: 9px;
@@ -473,7 +472,7 @@
     }
 
     .btn-detail:hover {
-      background: rgba(46, 204, 113, 0.2);
+      opacity: 0.8;
     }
 
     /* ===== GRID CARD UTAMA ===== */
@@ -719,6 +718,7 @@
     <button onclick="debugProgress()" style="background: #f1c40f; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">📊 Debug Progress</button>
     <button onclick="debugPartial()" style="background: #9b59b6; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">⚡ Debug Partial</button>
     <button onclick="debugDelivered()" style="background: #2ecc71; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">✅ Debug Delivered</button>
+    <button onclick="debugCancel()" style="background: #e74c3c; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">⛔ Debug Cancel</button>
     <button onclick="debugStatusCategories()" style="background: #3498db; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">🔍 Cek Status</button>
     <button onclick="testAllContainers()" style="background: #ffb000; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">🧪 Test Container</button>
   </div>
@@ -918,7 +918,7 @@
         <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
       </div>
       <div class="footer-info">
-        <span>📊 Versi Final - Progress, Partial, Delivered: ✅ Fixed</span>
+        <span>📊 Versi Final - Progress, Partial, Delivered, Cancel: ✅ Fixed</span>
       </div>
       <div class="copyright">copyright © 2026 By RH</div>
     </footer>
@@ -1491,6 +1491,119 @@
           return deliveredStats;
         },
         
+        // ========== HITUNG STATISTIK CANCEL DENGAN RINCIAN ==========
+        calculateCancelStats: (data, fromDate, toDate) => {
+          const filteredByDate = data.filter(item => {
+            if (!item.tglOrder) return true;
+            const orderDate = new Date(item.tglOrder);
+            
+            if (fromDate && orderDate < new Date(fromDate)) return false;
+            if (toDate) {
+              const to = new Date(toDate);
+              to.setHours(23, 59, 59, 999);
+              if (orderDate > to) return false;
+            }
+            return true;
+          });
+
+          const orderMap = new Map();
+          
+          filteredByDate.forEach(item => {
+            const code = item.orderCode;
+            if (!code) return;
+            
+            if (!orderMap.has(code)) {
+              orderMap.set(code, {
+                orderCode: code,
+                statuses: new Set(),
+                cancelQty: 0,
+                otherQty: 0,
+                totalQty: 0,
+                items: []
+              });
+            }
+            
+            const orderData = orderMap.get(code);
+            orderData.statuses.add(item.statusCategory);
+            orderData.totalQty += (item.qty || 0);
+            
+            if (item.statusCategory === 'CANCEL') {
+              orderData.cancelQty += (item.qty || 0);
+            } else {
+              orderData.otherQty += (item.qty || 0);
+            }
+            
+            orderData.items.push({
+              status: item.statusCategory,
+              qty: item.qty || 0,
+              tgl: item.tglMuat || item.tglOrder
+            });
+          });
+
+          const cancelStats = {
+            totalCancelQty: 0,
+            totalOrdersWithCancel: 0,
+            pureCancel: {
+              count: 0,
+              qty: 0,
+              orders: []
+            },
+            mixedCancel: {
+              count: 0,
+              cancelQty: 0,
+              otherQty: 0,
+              details: []
+            }
+          };
+
+          orderMap.forEach((orderData, orderCode) => {
+            const statusList = Array.from(orderData.statuses);
+            const hasCancel = statusList.includes('CANCEL');
+            
+            if (hasCancel) {
+              cancelStats.totalOrdersWithCancel++;
+              cancelStats.totalCancelQty += orderData.cancelQty;
+              
+              if (statusList.length === 1 && statusList[0] === 'CANCEL') {
+                cancelStats.pureCancel.count++;
+                cancelStats.pureCancel.qty += orderData.cancelQty;
+                cancelStats.pureCancel.orders.push({
+                  orderCode: orderCode,
+                  qty: orderData.cancelQty
+                });
+              } else {
+                cancelStats.mixedCancel.count++;
+                cancelStats.mixedCancel.cancelQty += orderData.cancelQty;
+                cancelStats.mixedCancel.otherQty += orderData.otherQty;
+                
+                const breakdown = [];
+                orderData.items.forEach(item => {
+                  const existing = breakdown.find(b => b.status === item.status);
+                  if (existing) {
+                    existing.qty += item.qty;
+                  } else {
+                    breakdown.push({
+                      status: item.status,
+                      qty: item.qty
+                    });
+                  }
+                });
+                
+                cancelStats.mixedCancel.details.push({
+                  orderCode: orderCode,
+                  cancelQty: orderData.cancelQty,
+                  otherQty: orderData.otherQty,
+                  totalQty: orderData.totalQty,
+                  breakdown: breakdown.sort((a, b) => b.qty - a.qty),
+                  firstSeen: orderData.items[0]?.tgl
+                });
+              }
+            }
+          });
+
+          return cancelStats;
+        },
+        
         // ========== HITUNG STATISTIK REALISASI ==========
         calculateRealisasiStats: (data, fromDate, toDate) => {
           const filteredByDate = data.filter(item => {
@@ -1910,7 +2023,7 @@
             
             ${deliveredStats.mixedDelivered.count > 0 ? `
               <div id="deliveredDetail" style="display: none; margin-top: 12px; padding: 8px; background: rgba(46,204,113,0.1); border-radius: 6px; font-size: 10px; text-align: left; border-left: 2px solid #2ecc71;">
-                <div style="font-weight: 700; color: #2ecc71; margin-bottom: 6px;">📋 Rincian Order Campuran:</div>
+                <div style="font-weight: 700; color: #2ecc71; margin-bottom: 6px;">📋 Rincian Order Campuran (DELIVERED):</div>
                 ${deliveredStats.mixedDelivered.details.slice(0, 5).map(d => `
                   <div style="margin-bottom: 8px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 4px;">
                     <div style="font-weight: 600; color: #2ecc71;">${d.orderCode}</div>
@@ -1930,7 +2043,7 @@
                   <div style="text-align: center; color: #a7b6c8;">... dan ${deliveredStats.mixedDelivered.details.length - 5} lainnya</div>
                 ` : ''}
               </div>
-              <button class="btn-detail" onclick="toggleDeliveredDetail()">🔍 Lihat Rincian</button>
+              <button class="btn-detail" onclick="toggleDeliveredDetail()" style="border-color: #2ecc71; color: #2ecc71;">🔍 Lihat Rincian Delivered</button>
             ` : ''}
             
             <div class="container-info">ID: containerDelivered</div>
@@ -1939,8 +2052,105 @@
           return deliveredCard;
         },
         
+        // ========== RENDER CANCEL CONTAINER ==========
+        renderCancelContainer: (cancelStats) => {
+          const bottomContainer = document.getElementById('kpiBottomContainer');
+          if (!bottomContainer) return null;
+
+          let cancelCard = document.getElementById('containerCancel');
+          
+          if (!cancelCard) {
+            cancelCard = document.createElement('div');
+            cancelCard.id = 'containerCancel';
+            cancelCard.className = 'kpi';
+            cancelCard.setAttribute('data-container-id', 'containerCancel');
+          }
+
+          const totalOrders = State.filteredRealisasi.length ? 
+            new Set(State.filteredRealisasi.map(i => i.orderCode)).size : 0;
+          const percentage = totalOrders ? (cancelStats.totalOrdersWithCancel / totalOrders * 100) : 0;
+
+          const hasCancel = cancelStats.totalOrdersWithCancel > 0;
+          const glowClass = hasCancel ? 'glow-active' : 'glow-inactive';
+          
+          cancelCard.className = `kpi ${glowClass}`;
+          cancelCard.style.borderTop = `4px solid #e74c3c`;
+          cancelCard.style.setProperty('--glow-color', '#e74c3c80');
+
+          cancelCard.setAttribute('data-cancel-count', cancelStats.mixedCancel.count);
+          
+          let tooltipContent = '';
+          if (cancelStats.mixedCancel.count > 0) {
+            tooltipContent = '📊 Order dengan status campuran (CANCEL):\n';
+            cancelStats.mixedCancel.details.slice(0, 3).forEach(d => {
+              tooltipContent += `${d.orderCode}: Cancel ${DataProcessor.formatNumber(d.cancelQty)} Qty, Lainnya ${DataProcessor.formatNumber(d.otherQty)} Qty\n`;
+            });
+            if (cancelStats.mixedCancel.details.length > 3) {
+              tooltipContent += `... dan ${cancelStats.mixedCancel.details.length - 3} order lainnya`;
+            }
+          }
+
+          cancelCard.innerHTML = `
+            <div class="header">
+              <span class="status-label">CANCEL</span>
+              <span class="status-icon">⛔</span>
+            </div>
+            <div class="main-value">${DataProcessor.formatNumber(cancelStats.totalOrdersWithCancel)}</div>
+            <div class="qty-value">${DataProcessor.formatNumber(cancelStats.totalCancelQty)} Qty</div>
+            <div class="percentage">${DataProcessor.formatNumberDecimal(percentage, 1)}% dari total order</div>
+            
+            <div class="cancel-detail">
+              <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                <span style="color: #e74c3c;">⛔ Murni Cancel:</span>
+                <span>${cancelStats.pureCancel.count} order (${DataProcessor.formatNumber(cancelStats.pureCancel.qty)} Qty)</span>
+              </div>
+              
+              ${cancelStats.mixedCancel.count > 0 ? `
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; cursor: help;" 
+                     title="${tooltipContent}">
+                  <span style="color: #f1c40f;">🔄 Campuran:</span>
+                  <span>${cancelStats.mixedCancel.count} order (Cancel: ${DataProcessor.formatNumber(cancelStats.mixedCancel.cancelQty)} Qty)</span>
+                </div>
+              ` : ''}
+              
+              <div style="margin-top: 6px; font-size: 8px; color: var(--text-secondary);">
+                Update: ${new Date().toLocaleTimeString('id-ID')}
+              </div>
+            </div>
+            
+            ${cancelStats.mixedCancel.count > 0 ? `
+              <div id="cancelDetail" style="display: none; margin-top: 12px; padding: 8px; background: rgba(231,76,60,0.1); border-radius: 6px; font-size: 10px; text-align: left; border-left: 2px solid #e74c3c;">
+                <div style="font-weight: 700; color: #e74c3c; margin-bottom: 6px;">📋 Rincian Order Campuran (CANCEL):</div>
+                ${cancelStats.mixedCancel.details.slice(0, 5).map(d => `
+                  <div style="margin-bottom: 8px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 4px;">
+                    <div style="font-weight: 600; color: #e74c3c;">${d.orderCode}</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+                      ${d.breakdown.map(b => {
+                        const isCancel = b.status === 'CANCEL';
+                        return `
+                          <span style="color: ${isCancel ? '#e74c3c' : '#a7b6c8'};">
+                            ${b.status}: ${DataProcessor.formatNumber(b.qty)} Qty
+                          </span>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                `).join('')}
+                ${cancelStats.mixedCancel.details.length > 5 ? `
+                  <div style="text-align: center; color: #a7b6c8;">... dan ${cancelStats.mixedCancel.details.length - 5} lainnya</div>
+                ` : ''}
+              </div>
+              <button class="btn-detail" onclick="toggleCancelDetail()" style="border-color: #e74c3c; color: #e74c3c;">🔍 Lihat Rincian Cancel</button>
+            ` : ''}
+            
+            <div class="container-info">ID: containerCancel</div>
+          `;
+
+          return cancelCard;
+        },
+        
         // ========== RENDER KPI CARDS ==========
-        kpi: (stats, deliveredStats) => {
+        kpi: (stats, deliveredStats, cancelStats) => {
           const topContainer = DOM.get('kpiContainer');
           const bottomContainer = DOM.get('kpiBottomContainer');
           if (!topContainer || !bottomContainer) return;
@@ -1974,26 +2184,11 @@
           });
 
           const deliveredCard = Renderer.renderDeliveredContainer(deliveredStats);
-          
-          const cancelCard = document.createElement('div');
-          cancelCard.className = `kpi ${stats.cancel.count > 0 ? 'glow-active' : 'glow-inactive'}`;
-          cancelCard.style.borderTop = `4px solid #e74c3c`;
-          cancelCard.style.setProperty('--glow-color', '#e74c3c80');
-          cancelCard.setAttribute('data-container-id', 'container-cancel');
-          cancelCard.innerHTML = `
-            <div class="header">
-              <span class="status-label">CANCEL</span>
-              <span class="status-icon">⛔</span>
-            </div>
-            <div class="main-value">${DataProcessor.formatNumber(stats.cancel.count)}</div>
-            <div class="qty-value">${DataProcessor.formatNumber(stats.cancel.qty)} Qty</div>
-            <div class="percentage">${DataProcessor.formatNumberDecimal(stats.cancel.percentage,1)}% dari total order</div>
-            <div class="container-info">ID: container-cancel</div>
-          `;
+          const cancelCard = Renderer.renderCancelContainer(cancelStats);
 
           bottomContainer.innerHTML = '';
           if (deliveredCard) bottomContainer.appendChild(deliveredCard);
-          bottomContainer.appendChild(cancelCard);
+          if (cancelCard) bottomContainer.appendChild(cancelCard);
         },
         
         // ========== RENDER CHARTS ==========
@@ -2184,7 +2379,7 @@
             'container-onDelivery',
             'container-partial',
             'containerDelivered',
-            'container-cancel',
+            'containerCancel',
             'containerStatusDistribusi',
             'containerTopKota',
             'containerTopPabrik',
@@ -2296,11 +2491,14 @@
       window.toggleDeliveredDetail = function() {
         const detailEl = document.getElementById('deliveredDetail');
         if (detailEl) {
-          if (detailEl.style.display === 'none' || detailEl.style.display === '') {
-            detailEl.style.display = 'block';
-          } else {
-            detailEl.style.display = 'none';
-          }
+          detailEl.style.display = detailEl.style.display === 'none' ? 'block' : 'none';
+        }
+      };
+
+      window.toggleCancelDetail = function() {
+        const detailEl = document.getElementById('cancelDetail');
+        if (detailEl) {
+          detailEl.style.display = detailEl.style.display === 'none' ? 'block' : 'none';
         }
       };
 
@@ -2453,6 +2651,53 @@
         return deliveredStats;
       };
 
+      window.debugCancel = function() {
+        const fromDate = document.getElementById('fromDate')?.value;
+        const toDate = document.getElementById('toDate')?.value;
+        
+        const cancelStats = DataProcessor.calculateCancelStats(State.realisasiData, fromDate, toDate);
+        
+        console.group('⛔ DEBUG CANCEL CONTAINER');
+        console.log('Periode:', fromDate || 'Awal', 's/d', toDate || 'Sekarang');
+        console.log('Total Order dengan Cancel:', cancelStats.totalOrdersWithCancel);
+        console.log('Total QTY Cancel:', DataProcessor.formatNumber(cancelStats.totalCancelQty));
+        
+        console.group('📊 Pure Cancel (Murni):');
+        console.log('Jumlah Order:', cancelStats.pureCancel.count);
+        console.log('Total QTY:', DataProcessor.formatNumber(cancelStats.pureCancel.qty));
+        console.groupEnd();
+        
+        console.group('🔄 Mixed Cancel (Campuran):');
+        console.log('Jumlah Order:', cancelStats.mixedCancel.count);
+        console.log('QTY Cancel:', DataProcessor.formatNumber(cancelStats.mixedCancel.cancelQty));
+        console.log('QTY Lainnya:', DataProcessor.formatNumber(cancelStats.mixedCancel.otherQty));
+        
+        console.group('📋 Rincian Order Campuran:');
+        cancelStats.mixedCancel.details.forEach(d => {
+          console.log(`${d.orderCode}:`);
+          d.breakdown.forEach(b => {
+            console.log(`  ${b.status}: ${DataProcessor.formatNumber(b.qty)} Qty`);
+          });
+        });
+        console.groupEnd();
+        console.groupEnd();
+        console.groupEnd();
+        
+        const cancelCard = document.getElementById('containerCancel');
+        if (cancelCard) {
+          cancelCard.style.transition = 'all 0.3s';
+          cancelCard.style.transform = 'scale(1.02)';
+          cancelCard.style.boxShadow = '0 0 30px #e74c3c';
+          cancelCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            cancelCard.style.transform = '';
+            cancelCard.style.boxShadow = '';
+          }, 2000);
+        }
+        
+        return cancelStats;
+      };
+
       window.debugStatusCategories = function() {
         if (!State.realisasiData || State.realisasiData.length === 0) {
           console.log('Data belum tersedia');
@@ -2513,13 +2758,14 @@
           const progressStats = DataProcessor.calculateProgressStats(State.filteredRealisasi, from, to);
           const partialStats = DataProcessor.calculatePartialStats(State.filteredRealisasi, from, to);
           const deliveredStats = DataProcessor.calculateDeliveredStats(State.filteredRealisasi, from, to);
+          const cancelStats = DataProcessor.calculateCancelStats(State.filteredRealisasi, from, to);
           const realStats = DataProcessor.calculateRealisasiStats(State.filteredRealisasi, from, to);
           const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
 
           Renderer.renderProgressContainer(progressStats);
           Renderer.renderPartialContainer(partialStats);
           Renderer.masterSummary(masterStats);
-          Renderer.kpi(realStats, deliveredStats);
+          Renderer.kpi(realStats, deliveredStats, cancelStats);
           Renderer.charts(State.filteredRealisasi, realStats);
           Renderer.realTimeTable(State.filteredRealisasi);
           Renderer.ringkasanData(realStats, masterStats);
@@ -2530,6 +2776,7 @@
           console.log(`📊 Progress: ${progressStats.count} order unik, ${DataProcessor.formatNumber(progressStats.qty)} QTY`);
           console.log(`⚡ Partial: ${partialStats.count} order, ${DataProcessor.formatNumber(partialStats.qty)} QTY`);
           console.log(`✅ Delivered: ${deliveredStats.totalOrdersWithDelivered} order, ${DataProcessor.formatNumber(deliveredStats.totalDeliveredQty)} QTY (Mixed: ${deliveredStats.mixedDelivered.count})`);
+          console.log(`⛔ Cancel: ${cancelStats.totalOrdersWithCancel} order, ${DataProcessor.formatNumber(cancelStats.totalCancelQty)} QTY (Mixed: ${cancelStats.mixedCancel.count})`);
         },
         init: () => {
           const today = new Date();
@@ -2572,7 +2819,7 @@
       console.log('3. On Delivery:', document.querySelector('[data-container-id="container-onDelivery"]'));
       console.log('4. Partial (KPI):', document.querySelector('[data-container-id="container-partial"]'));
       console.log('5. Delivered:', document.getElementById('containerDelivered'));
-      console.log('6. Cancel:', document.querySelector('[data-container-id="container-cancel"]'));
+      console.log('6. Cancel:', document.getElementById('containerCancel'));
       console.log('7. Status Distribusi:', document.getElementById('containerStatusDistribusi'));
       console.log('8. Top Kota:', document.getElementById('containerTopKota'));
       console.log('9. Top Pabrik:', document.getElementById('containerTopPabrik'));
@@ -2586,7 +2833,7 @@
         onDelivery: document.querySelector('[data-container-id="container-onDelivery"]'),
         partialKpi: document.querySelector('[data-container-id="container-partial"]'),
         delivered: document.getElementById('containerDelivered'),
-        cancel: document.querySelector('[data-container-id="container-cancel"]'),
+        cancel: document.getElementById('containerCancel'),
         status: document.getElementById('containerStatusDistribusi'),
         kota: document.getElementById('containerTopKota'),
         pabrik: document.getElementById('containerTopPabrik'),
@@ -2599,8 +2846,10 @@
       console.log('✅ Gunakan debugProgress() untuk analisis Progress');
       console.log('✅ Gunakan debugPartial() untuk analisis Partial');
       console.log('✅ Gunakan debugDelivered() untuk analisis Delivered');
+      console.log('✅ Gunakan debugCancel() untuk analisis Cancel');
       console.log('✅ Gunakan debugStatusCategories() untuk cek kategorisasi status');
       console.log('✅ Gunakan toggleDeliveredDetail() untuk lihat rincian Delivered campuran');
+      console.log('✅ Gunakan toggleCancelDetail() untuk lihat rincian Cancel campuran');
     });
   </script>
 </body>
