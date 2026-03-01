@@ -148,6 +148,35 @@
       font-size: 12px;
       display: flex;
       gap: 8px;
+      align-items: center;
+    }
+
+    /* ===== LIVE STATUS STYLES ===== */
+    #liveStatus {
+      transition: all 0.3s ease;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    
+    #liveStatus.connected {
+      background: rgba(46, 204, 113, 0.2);
+      animation: pulseGreen 2s infinite;
+    }
+    
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+    }
+    
+    #liveStatus.disconnected {
+      background: rgba(231, 76, 60, 0.2);
+    }
+    
+    #liveStatus.checking {
+      background: rgba(241, 196, 15, 0.2);
     }
 
     .controls-container {
@@ -721,6 +750,7 @@
     <button onclick="debugCancel()" style="background: #e74c3c; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">⛔ Debug Cancel</button>
     <button onclick="debugStatusCategories()" style="background: #3498db; color: white; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">🔍 Cek Status</button>
     <button onclick="testAllContainers()" style="background: #ffb000; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">🧪 Test Container</button>
+    <button onclick="testLiveStatus()" style="background: #2ecc71; color: black; border: none; padding: 3px 10px; border-radius: 12px; cursor: pointer; margin-left: 5px;">🟢 Test Live Status</button>
   </div>
 
   <div class="wrap">
@@ -735,7 +765,7 @@
           <p class="sub">
             <span>BGR Logistik</span>
             <span>•</span>
-            <span id="liveStatus">🟢 Live</span>
+            <span id="liveStatus" class="connected">🟢 Live</span>
           </p>
         </div>
       </div>
@@ -967,7 +997,9 @@
         isRefreshing: false,
         lastFetch: null,
         dataStatus: { realisasi: false, master: false },
-        tvMode: false
+        tvMode: false,
+        connectionStatus: 'connected', // 'connected', 'disconnected', 'checking'
+        lastPingTime: null
       };
 
       // ========== HELPER DOM ==========
@@ -1001,6 +1033,78 @@
         updateText: (id, text) => {
           const el = DOM.get(id);
           if (el) el.textContent = text;
+        }
+      };
+
+      // ========== LIVE STATUS MANAGER ==========
+      const LiveStatusManager = {
+        init: () => {
+          // Cek koneksi setiap 30 detik
+          setInterval(() => LiveStatusManager.checkConnection(), 30000);
+          LiveStatusManager.checkConnection();
+        },
+        
+        checkConnection: async () => {
+          const statusEl = document.getElementById('liveStatus');
+          if (!statusEl) return;
+          
+          // Ubah ke status checking
+          State.connectionStatus = 'checking';
+          statusEl.innerHTML = '🟡 Checking...';
+          statusEl.className = 'checking';
+          
+          try {
+            // Coba fetch data kecil untuk cek koneksi
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const response = await fetch(CONFIG.REALISASI_URL, {
+              method: 'HEAD',
+              signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+              State.connectionStatus = 'connected';
+              statusEl.innerHTML = '🟢 Live';
+              statusEl.className = 'connected';
+              
+              // Update last ping
+              State.lastPingTime = new Date();
+            } else {
+              throw new Error('Response not OK');
+            }
+          } catch (error) {
+            State.connectionStatus = 'disconnected';
+            statusEl.innerHTML = '🔴 Offline';
+            statusEl.className = 'disconnected';
+            
+            // Log error untuk debugging
+            console.warn('Connection check failed:', error.message);
+          }
+        },
+        
+        updateFromFetch: (success) => {
+          const statusEl = document.getElementById('liveStatus');
+          if (!statusEl) return;
+          
+          if (success) {
+            statusEl.innerHTML = '🟢 Live';
+            statusEl.className = 'connected';
+            State.lastPingTime = new Date();
+          } else {
+            const minutesAgo = State.lastFetch ? 
+              Math.floor((new Date() - State.lastFetch) / 60000) : null;
+            
+            if (minutesAgo !== null && minutesAgo < 5) {
+              statusEl.innerHTML = `🟡 Last update ${minutesAgo}m ago`;
+              statusEl.className = 'checking';
+            } else {
+              statusEl.innerHTML = '🔴 Offline';
+              statusEl.className = 'disconnected';
+            }
+          }
         }
       };
 
@@ -2367,6 +2471,17 @@
           if (State.lastFetch) {
             DOM.updateText('lastUpdate', DataProcessor.formatTime(State.lastFetch));
             DOM.updateText('lastUpdateTime', `${DataProcessor.formatDate(State.lastFetch)} ${DataProcessor.formatTime(State.lastFetch)}`);
+            
+            // Update live status dengan info last fetch
+            const liveStatus = DOM.get('liveStatus');
+            if (liveStatus && State.connectionStatus === 'connected') {
+              const minutesAgo = Math.floor((new Date() - State.lastFetch) / 60000);
+              if (minutesAgo < 5) {
+                liveStatus.innerHTML = `🟢 Live (${minutesAgo}m ago)`;
+              } else {
+                liveStatus.innerHTML = `🟢 Connected (${minutesAgo}m ago)`;
+              }
+            }
           }
           DOM.updateText('liveStatus', '🟢 Live');
         },
@@ -2442,7 +2557,11 @@
           if (State.isRefreshing) return;
           DOM.showRefreshIndicator(true);
           State.isRefreshing = true;
+          
           try {
+            // Update status ke checking
+            LiveStatusManager.updateFromFetch(false);
+            
             const [realRes, masterRes] = await Promise.allSettled([
               DataFetcher.fetchCSV(CONFIG.REALISASI_URL, 'realisasi'),
               DataFetcher.fetchCSV(CONFIG.MASTER_URL, 'master')
@@ -2475,9 +2594,17 @@
             State.realisasiData = realisasiData;
             State.masterData = masterData;
             State.lastFetch = new Date();
+            
+            // Update status ke connected jika setidaknya satu sukses
+            const hasData = (realRes.status === 'fulfilled' && realRes.value?.length > 0) ||
+                            (masterRes.status === 'fulfilled' && masterRes.value?.length > 0);
+            
+            LiveStatusManager.updateFromFetch(hasData);
+            
             return { realisasiData, masterData };
           } catch (err) {
             console.error('Fetch error:', err);
+            LiveStatusManager.updateFromFetch(false);
             DOM.showMessage('error','Gagal mengambil data');
             return { realisasiData: State.realisasiData || [], masterData: State.masterData || [] };
           } finally {
@@ -2743,6 +2870,36 @@
           }
         });
       };
+      
+      window.testLiveStatus = function() {
+        console.group('🟢 TEST LIVE STATUS');
+        console.log('Current status:', State.connectionStatus);
+        console.log('Last fetch:', State.lastFetch ? DataProcessor.formatDateTime(State.lastFetch) : 'Never');
+        console.log('Last ping:', State.lastPingTime ? DataProcessor.formatDateTime(State.lastPingTime) : 'Never');
+        
+        // Test manual override
+        const statusEl = document.getElementById('liveStatus');
+        const states = ['connected', 'checking', 'disconnected'];
+        let idx = 0;
+        
+        const interval = setInterval(() => {
+          if (idx >= states.length) {
+            clearInterval(interval);
+            // Kembalikan ke status sebenarnya
+            LiveStatusManager.updateFromFetch(State.dataStatus.realisasi || State.dataStatus.master);
+            return;
+          }
+          
+          const state = states[idx];
+          statusEl.innerHTML = state === 'connected' ? '🟢 Live' :
+                              state === 'checking' ? '🟡 Checking...' : '🔴 Offline';
+          statusEl.className = state;
+          console.log(`Test status: ${state}`);
+          idx++;
+        }, 1500);
+        
+        console.groupEnd();
+      };
 
       // ========== APP ==========
       const App = {
@@ -2780,12 +2937,18 @@
         },
         init: () => {
           const today = new Date();
-          const thirtyAgo = new Date(); 
-          thirtyAgo.setDate(today.getDate()-30);
+          
+          // Set fromDate ke 1 Januari tahun berjalan
+          const janFirst = new Date(today.getFullYear(), 0, 1); // Bulan 0 = Januari
+          
           const fromInput = DOM.get('fromDate'); 
-          if (fromInput) fromInput.value = thirtyAgo.toISOString().split('T')[0];
+          if (fromInput) fromInput.value = janFirst.toISOString().split('T')[0];
+          
           const toInput = DOM.get('toDate'); 
           if (toInput) toInput.value = today.toISOString().split('T')[0];
+
+          // Inisialisasi Live Status Manager
+          LiveStatusManager.init();
 
           DOM.get('btnRefresh')?.addEventListener('click', () => App.refresh());
           DOM.get('refreshSec')?.addEventListener('change', () => { 
@@ -2850,6 +3013,7 @@
       console.log('✅ Gunakan debugStatusCategories() untuk cek kategorisasi status');
       console.log('✅ Gunakan toggleDeliveredDetail() untuk lihat rincian Delivered campuran');
       console.log('✅ Gunakan toggleCancelDetail() untuk lihat rincian Cancel campuran');
+      console.log('✅ Gunakan testLiveStatus() untuk test animasi Live Status');
     });
   </script>
 </body>
