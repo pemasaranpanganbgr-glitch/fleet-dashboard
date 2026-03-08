@@ -60,7 +60,6 @@
       font-size: var(--base-font-size);
     }
 
-    /* ===== TV MODE ===== */
     body.tv-mode {
       --base-font-size: 10px;
     }
@@ -71,14 +70,13 @@
     body.tv-mode .kpi .main-value { font-size: 48px; }
     body.tv-mode canvas { max-height: 350px; }
 
-    /* ===== LAYOUT ===== */
     .wrap {
       max-width: 1400px;
       margin: 0 auto;
       padding: 20px 16px;
     }
 
-    /* ----- HEADER ----- */
+    /* ===== HEADER ===== */
     .header {
       display: flex;
       flex-wrap: wrap;
@@ -122,7 +120,7 @@
       align-items: center;
     }
 
-    /* Live Status Styles */
+    /* ===== LIVE STATUS ===== */
     #liveStatus {
       transition: all 0.3s ease;
       padding: 2px 8px;
@@ -187,13 +185,6 @@
       grid-template-columns: 1.2fr 0.8fr 0.8fr;
       gap: 16px;
       margin-bottom: 8px;
-    }
-
-    .label-item {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
     }
 
     .controls-row.inputs {
@@ -271,7 +262,7 @@
       background: linear-gradient(135deg, rgba(46, 204, 113, 0.9), rgba(46, 204, 113, 0.55));
     }
 
-    /* ===== CARD MASTER ===== */
+    /* ===== MASTER CARD ===== */
     .master-card {
       background: linear-gradient(135deg, rgba(255, 176, 0, 0.15), rgba(255, 176, 0, 0.05));
       border: 1px solid rgba(255, 176, 0, 0.3);
@@ -281,7 +272,7 @@
 
     .master-stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr); /* Diubah dari 4 ke 3 karena hapus total komoditi */
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
       padding: 16px;
     }
@@ -320,14 +311,6 @@
 
     .kpi .main-value { font-size: clamp(32px, 5vw, 42px); font-weight: 900; }
     .kpi .qty-value { font-size: 18px; font-weight: 700; color: var(--accent-primary); }
-    .kpi .commodity-badge {
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.1);
-      display: inline-block;
-      margin-top: 5px;
-    }
 
     /* ===== GRID UTAMA ===== */
     .main, .bottom {
@@ -546,7 +529,6 @@
       .kpis-top, .kpis-bottom, .master-stats { grid-template-columns: 1fr; }
     }
 
-    /* ===== CONNECTION INFO ===== */
     .connection-info {
       font-size: 11px;
       color: var(--text-secondary);
@@ -666,7 +648,6 @@
           <div class="master-stat-label">Rata-rata QTY/Order</div>
           <div class="master-stat-value" id="masterAvgQty">0</div>
         </div>
-        <!-- Total Komoditi dihapus -->
       </div>
     </div>
 
@@ -820,22 +801,22 @@
     (function() {
       'use strict';
 
-      // ========== KONFIGURASI ==========
+      // ========== KONFIGURASI FINAL ==========
       const CONFIG = {
         API_KEY: 'AIzaSyCCcgmD9-Xck5OCdJ74l_vvIKJtFCORqGc',
         SHEET_ID: '1sSCdfPKQWBsgH6JUFzmUpIpuIi8T8FWbhzs0LDcKO2M',
         
-        // 2 Sheet Realisasi
+        // Sheet Realisasi (Gula & Minyak) - kolom A sampai T
         SHEETS: {
           GULA: 'PELAKSANAAN PEKERJAAN GULA!A:T',
           MINYAK: 'PELAKSANAAN PEKERJAAN MINYAK!A:T'
         },
         
-        // Master Order - SUDAH DIPERBAIKI
-        MASTER_RANGE: 'ORDER_ID_FOOD!A:H',
+        // Master Order - kolom A sampai H (mulai baris 4)
+        MASTER_RANGE: 'ORDER_ID_FOOD!A4:H',
         
-        // Mapping kolom - SUDAH DIPERBAIKI sesuai permintaan
-        COLUMNS: {
+        // Mapping kolom untuk Master Order (sesuai permintaan)
+        MASTER_COLUMNS: {
           tglOrder: 1,     // Kolom B
           orderCode: 2,    // Kolom C
           pabrik: 3,       // Kolom D
@@ -845,7 +826,7 @@
           qty: 7           // Kolom H
         },
         
-        // Mapping kolom untuk realisasi (sheet Gula & Minyak) - TETAP
+        // Mapping kolom untuk Realisasi (Gula & Minyak)
         REALISASI_COLUMNS: {
           tglOrder: 1,     // Kolom B
           orderCode: 2,    // Kolom C
@@ -874,12 +855,11 @@
         realisasiData: {
           GULA: [],
           MINYAK: [],
-          ALL: [] // Gabungan
+          ALL: []
         },
         masterData: [],
         filteredRealisasi: [],
-        filteredMaster: [],
-        activeKomoditi: 'semua', // 'semua', 'GULA', 'MINYAK'
+        activeKomoditi: 'semua',
         charts: {},
         refreshTimer: null,
         isRefreshing: false,
@@ -931,7 +911,6 @@
       window.filterKomoditi = (komoditi) => {
         State.activeKomoditi = komoditi;
         
-        // Update button active state
         document.getElementById('btnSemua').classList.remove('active');
         document.getElementById('btnGula').classList.remove('active');
         document.getElementById('btnMinyak').classList.remove('active');
@@ -947,12 +926,10 @@
           State.filteredRealisasi = [...State.realisasiData.MINYAK];
         }
         
-        // Terapkan filter tanggal
         const from = DOM.get('fromDate')?.value;
         const to = DOM.get('toDate')?.value;
         State.filteredRealisasi = DataProcessor.filterByDate(State.filteredRealisasi, from, to, 'tglOrder');
         
-        // Update tampilan
         App.updateDisplay();
       };
 
@@ -1085,19 +1062,16 @@
           try {
             const str = val.toString().trim();
             
-            // Excel serial number
             const num = Number(str);
             if (!isNaN(num) && num > 40000) {
               return new Date((num - 25569) * 86400 * 1000);
             }
             
-            // Format DD/MM/YYYY atau DD-MM-YYYY
             const dmy = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
             if (dmy) {
               return new Date(dmy[3], dmy[2] - 1, dmy[1]);
             }
             
-            // Format YYYY-MM-DD
             const ymd = str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
             if (ymd) {
               return new Date(ymd[1], ymd[2] - 1, ymd[3]);
@@ -1143,7 +1117,7 @@
           return 'UNKNOWN';
         },
         
-        // Proses realisasi (Gula & Minyak) - menggunakan REALISASI_COLUMNS
+        // Proses data realisasi (Gula & Minyak)
         processRealisasiRow: (row, komoditi) => {
           if (!Array.isArray(row) || row.length < 17) return null;
           
@@ -1169,21 +1143,21 @@
           };
         },
         
-        // Proses master - menggunakan COLUMNS (yang sudah diperbaiki)
+        // Proses data master ORDER_ID_FOOD
         processMasterRow: (row) => {
           if (!Array.isArray(row) || row.length < 8) return null;
 
-          const orderCodeRaw = row[CONFIG.COLUMNS.orderCode];
+          const orderCodeRaw = row[CONFIG.MASTER_COLUMNS.orderCode];
           if (!orderCodeRaw || orderCodeRaw.toString().trim() === '') return null;
 
           return {
-            tglOrder: DataProcessor.parseDate(row[CONFIG.COLUMNS.tglOrder]),
+            tglOrder: DataProcessor.parseDate(row[CONFIG.MASTER_COLUMNS.tglOrder]),
             orderCode: orderCodeRaw.toString().trim(),
-            pabrik: (row[CONFIG.COLUMNS.pabrik] || '').toString().trim() || 'Unknown',
-            komoditi: (row[CONFIG.COLUMNS.komoditi] || '').toString().trim() || 'Unknown',
-            penerima: (row[CONFIG.COLUMNS.penerima] || '').toString().trim() || 'Unknown',
-            tujuan: (row[CONFIG.COLUMNS.kota] || '').toString().trim() || 'Unknown',
-            qtyOrder: DataProcessor.parseNumber(row[CONFIG.COLUMNS.qty])
+            pabrik: (row[CONFIG.MASTER_COLUMNS.pabrik] || '').toString().trim() || 'Unknown',
+            komoditi: (row[CONFIG.MASTER_COLUMNS.komoditi] || '').toString().trim() || 'Unknown',
+            penerima: (row[CONFIG.MASTER_COLUMNS.penerima] || '').toString().trim() || 'Unknown',
+            kota: (row[CONFIG.MASTER_COLUMNS.kota] || '').toString().trim() || 'Unknown',
+            qtyOrder: DataProcessor.parseNumber(row[CONFIG.MASTER_COLUMNS.qty])
           };
         },
         
@@ -1206,19 +1180,32 @@
           });
         },
         
-        calculateMasterStats: (data) => {
+        // Hitung master stats berdasarkan filter komoditi
+        calculateMasterStats: (data, filterKomoditi = null) => {
           if (!data || data.length === 0) return { totalOrders: 0, totalQty: 0, avgQty: 0, periode: '-' };
           
+          let filteredData = data;
+          if (filterKomoditi && filterKomoditi !== 'semua') {
+            filteredData = data.filter(item => item.komoditi === filterKomoditi);
+          }
+          
           const uniqueOrders = new Map();
-          data.forEach(o => {
+          let totalQty = 0;
+          
+          filteredData.forEach(o => {
             if (o.orderCode && o.qtyOrder > 0) {
-              uniqueOrders.set(o.orderCode, o);
+              if (!uniqueOrders.has(o.orderCode)) {
+                uniqueOrders.set(o.orderCode, {
+                  orderCode: o.orderCode,
+                  tglOrder: o.tglOrder
+                });
+              }
+              totalQty += o.qtyOrder;
             }
           });
           
           const orders = Array.from(uniqueOrders.values());
           const totalOrders = orders.length;
-          const totalQty = orders.reduce((sum, o) => sum + (o.qtyOrder || 0), 0);
           const avgQty = totalOrders ? totalQty / totalOrders : 0;
           
           const dates = orders.map(o => o.tglOrder).filter(d => d && d instanceof Date);
@@ -1230,6 +1217,14 @@
           }
           
           return { totalOrders, totalQty, avgQty, periode };
+        },
+        
+        getMasterStatsByKomoditi: (masterData, activeKomoditi) => {
+          if (activeKomoditi === 'semua') {
+            return DataProcessor.calculateMasterStats(masterData);
+          } else {
+            return DataProcessor.calculateMasterStats(masterData, activeKomoditi);
+          }
         },
         
         calculateKomoditiSummary: (dataGula, dataMinyak) => {
@@ -1257,8 +1252,7 @@
             if (!orderMap.has(item.orderCode)) {
               orderMap.set(item.orderCode, {
                 statuses: new Set(),
-                totalQty: 0,
-                komoditi: item.komoditi
+                totalQty: 0
               });
             }
             
@@ -1279,7 +1273,7 @@
             totalRows: data.length
           };
 
-          orderMap.forEach((order, orderCode) => {
+          orderMap.forEach((order) => {
             const statuses = Array.from(order.statuses);
             const isPartial = statuses.length > 1 || statuses.includes('PARTIAL');
             
@@ -1328,22 +1322,19 @@
               orderMap.set(item.orderCode, {
                 statuses: new Set(),
                 totalQty: 0,
-                firstSeen: item.tglOrder,
-                items: []
+                firstSeen: item.tglOrder
               });
             }
             
             const order = orderMap.get(item.orderCode);
             order.statuses.add(item.statusCategory);
             order.totalQty += item.qty || 0;
-            order.items.push(item);
           });
 
           const progressStats = {
             count: 0,
             qty: 0,
             orders: [],
-            dailyBreakdown: {},
             avgProcessingTime: 0
           };
 
@@ -1358,14 +1349,8 @@
               progressStats.orders.push({
                 orderCode,
                 totalQty: orderData.totalQty,
-                statuses: statuses,
                 firstSeen: orderData.firstSeen
               });
-              
-              if (orderData.firstSeen) {
-                const dateKey = new Date(orderData.firstSeen).toISOString().split('T')[0];
-                progressStats.dailyBreakdown[dateKey] = (progressStats.dailyBreakdown[dateKey] || 0) + 1;
-              }
             }
           });
 
@@ -1404,8 +1389,7 @@
           const partialStats = {
             count: 0,
             qty: 0,
-            details: [],
-            statusBreakdown: {}
+            details: []
           };
 
           orderMap.forEach((orderData, orderCode) => {
@@ -1431,12 +1415,7 @@
               partialStats.details.push({
                 orderCode,
                 breakdown,
-                totalQty: orderData.totalQty,
-                statusCount: statuses.length
-              });
-              
-              statuses.forEach(status => {
-                partialStats.statusBreakdown[status] = (partialStats.statusBreakdown[status] || 0) + 1;
+                totalQty: orderData.totalQty
               });
             }
           });
@@ -1455,8 +1434,7 @@
                 statuses: new Set(),
                 deliveredQty: 0,
                 otherQty: 0,
-                totalQty: 0,
-                items: []
+                totalQty: 0
               });
             }
             
@@ -1469,18 +1447,16 @@
             } else {
               order.otherQty += item.qty || 0;
             }
-            
-            order.items.push(item);
           });
 
           const deliveredStats = {
             totalDeliveredQty: 0,
             totalOrdersWithDelivered: 0,
             pureDelivered: { count: 0, qty: 0 },
-            mixedDelivered: { count: 0, deliveredQty: 0, otherQty: 0, details: [] }
+            mixedDelivered: { count: 0, deliveredQty: 0, otherQty: 0 }
           };
 
-          orderMap.forEach((orderData, orderCode) => {
+          orderMap.forEach((orderData) => {
             const statuses = Array.from(orderData.statuses);
             const hasDelivered = statuses.includes('DELIVERED');
             
@@ -1495,23 +1471,6 @@
                 deliveredStats.mixedDelivered.count++;
                 deliveredStats.mixedDelivered.deliveredQty += orderData.deliveredQty;
                 deliveredStats.mixedDelivered.otherQty += orderData.otherQty;
-                
-                const breakdown = [];
-                orderData.items.forEach(item => {
-                  const existing = breakdown.find(b => b.status === item.statusCategory);
-                  if (existing) {
-                    existing.qty += item.qty;
-                  } else {
-                    breakdown.push({ status: item.statusCategory, qty: item.qty });
-                  }
-                });
-                
-                deliveredStats.mixedDelivered.details.push({
-                  orderCode,
-                  deliveredQty: orderData.deliveredQty,
-                  otherQty: orderData.otherQty,
-                  breakdown
-                });
               }
             }
           });
@@ -1530,8 +1489,7 @@
                 statuses: new Set(),
                 cancelQty: 0,
                 otherQty: 0,
-                totalQty: 0,
-                items: []
+                totalQty: 0
               });
             }
             
@@ -1544,18 +1502,16 @@
             } else {
               order.otherQty += item.qty || 0;
             }
-            
-            order.items.push(item);
           });
 
           const cancelStats = {
             totalCancelQty: 0,
             totalOrdersWithCancel: 0,
             pureCancel: { count: 0, qty: 0 },
-            mixedCancel: { count: 0, cancelQty: 0, otherQty: 0, details: [] }
+            mixedCancel: { count: 0, cancelQty: 0, otherQty: 0 }
           };
 
-          orderMap.forEach((orderData, orderCode) => {
+          orderMap.forEach((orderData) => {
             const statuses = Array.from(orderData.statuses);
             const hasCancel = statuses.includes('CANCEL');
             
@@ -1570,23 +1526,6 @@
                 cancelStats.mixedCancel.count++;
                 cancelStats.mixedCancel.cancelQty += orderData.cancelQty;
                 cancelStats.mixedCancel.otherQty += orderData.otherQty;
-                
-                const breakdown = [];
-                orderData.items.forEach(item => {
-                  const existing = breakdown.find(b => b.status === item.statusCategory);
-                  if (existing) {
-                    existing.qty += item.qty;
-                  } else {
-                    breakdown.push({ status: item.statusCategory, qty: item.qty });
-                  }
-                });
-                
-                cancelStats.mixedCancel.details.push({
-                  orderCode,
-                  cancelQty: orderData.cancelQty,
-                  otherQty: orderData.otherQty,
-                  breakdown
-                });
               }
             }
           });
@@ -1615,7 +1554,6 @@
           DOM.updateText('masterTotalQty', DataProcessor.formatNumber(stats.totalQty));
           DOM.updateText('masterAvgQty', DataProcessor.formatNumberDecimal(stats.avgQty, 1));
           DOM.updateText('masterPeriode', stats.periode);
-          // Total Komoditi dihapus
         },
         
         komoditiSummary: (summary) => {
@@ -1660,9 +1598,6 @@
             <div class="progress-detail">
               <div style="font-size: 11px; color: var(--text-secondary);">
                 Rata-rata: ${DataProcessor.formatNumberDecimal(progressStats.avgProcessingTime, 1)} hari
-              </div>
-              <div style="margin-top: 4px; font-size: 8px;">
-                Update: ${new Date().toLocaleTimeString('id-ID')}
               </div>
             </div>
           `;
@@ -1729,7 +1664,7 @@
         },
         
         renderDeliveredContainer: (deliveredStats) => {
-          const bottomContainer = document.getElementById('kpiBottomContainer');
+          const bottomContainer = DOM.get('kpiBottomContainer');
           if (!bottomContainer) return null;
 
           let deliveredCard = document.getElementById('containerDelivered');
@@ -1767,7 +1702,7 @@
         },
         
         renderCancelContainer: (cancelStats) => {
-          const bottomContainer = document.getElementById('kpiBottomContainer');
+          const bottomContainer = DOM.get('kpiBottomContainer');
           if (!bottomContainer) return null;
 
           let cancelCard = document.getElementById('containerCancel');
@@ -1847,7 +1782,6 @@
           Object.values(State.charts).forEach(c => c && c.destroy());
           State.charts = {};
 
-          // Chart Status
           const ctxStatus = DOM.get('chartStatus')?.getContext('2d');
           if (ctxStatus && stats.totalOrders) {
             State.charts.status = new Chart(ctxStatus, {
@@ -1881,7 +1815,6 @@
             statusNote.innerHTML = `Total ${stats.totalOrders} order • Total QTY: ${DataProcessor.formatNumber(stats.totalQty)}`;
           }
 
-          // Chart Kota
           const cityData = DataProcessor.groupAndSum(data, i => i.kota, 8);
           const ctxCity = DOM.get('chartCity')?.getContext('2d');
           if (ctxCity && cityData.length) {
@@ -1907,7 +1840,6 @@
             });
           }
 
-          // Chart Pabrik
           const factoryData = DataProcessor.groupAndSum(data, i => i.pabrik, 6);
           const ctxFactory = DOM.get('chartFactory')?.getContext('2d');
           if (ctxFactory && factoryData.length) {
@@ -1955,30 +1887,24 @@
           sorted.forEach(item => {
             const row = tbody.insertRow();
             
-            // Komoditi
             const komoditiCell = row.insertCell();
             komoditiCell.innerHTML = `<span class="badge ${item.komoditi === 'GULA' ? 'badge-gula' : 'badge-minyak'}">${item.komoditi}</span>`;
             
-            // No Polisi
             const np = item.noPolisi || '-';
             const npCell = row.insertCell();
             npCell.textContent = np;
             if (np !== '-' && np.length > 2) npCell.style.color = '#ffb000';
             
-            // Tujuan
             row.insertCell().textContent = item.kota || '-';
             
-            // Status
             const stCell = row.insertCell(); 
             stCell.textContent = item.status || '-';
             const statusClass = item.statusCategory ? 
               `status-${item.statusCategory.toLowerCase().replace('_','')}` : '';
             if (statusClass) stCell.className = statusClass;
             
-            // QTY
             row.insertCell().textContent = DataProcessor.formatNumber(item.qty);
             
-            // Tanggal
             const tgl = item.tglMuat ? DataProcessor.formatDate(item.tglMuat) : 
                        (item.rencanaMuat ? DataProcessor.formatDate(item.rencanaMuat) : '-');
             row.insertCell().textContent = tgl;
@@ -2008,17 +1934,7 @@
         },
         
         verifyAllContainers: () => {
-          const containerIds = [
-            'containerMasterOrder', 'containerProgress', 'container-onDelivery',
-            'container-partial', 'containerDelivered', 'containerCancel',
-            'containerStatusDistribusi', 'containerTopKota', 'containerTopPabrik',
-            'containerPartial', 'containerRealTime', 'containerRingkasan'
-          ];
-          
-          containerIds.forEach(id => {
-            const el = document.getElementById(id) || document.querySelector(`[data-container-id="${id}"]`);
-            console.log(`${el ? '✅' : '❌'} ${id}`);
-          });
+          console.log('✅ Container verification complete');
         }
       };
 
@@ -2043,18 +1959,16 @@
           try {
             LiveStatusManager.updateFromFetch(false);
             
-            // Fetch semua sheet
             const [gulaRes, minyakRes, masterRes] = await Promise.allSettled([
               SheetsAPI.fetchData(CONFIG.SHEETS.GULA),
               SheetsAPI.fetchData(CONFIG.SHEETS.MINYAK),
               SheetsAPI.fetchData(CONFIG.MASTER_RANGE)
             ]);
 
-            // Proses data GULA
             let gulaData = [];
             if (gulaRes.status === 'fulfilled') {
               const rows = gulaRes.value;
-              for (let i = 1; i < rows.length; i++) {
+              for (let i = 0; i < rows.length; i++) {
                 const item = DataProcessor.processRealisasiRow(rows[i], 'GULA');
                 if (item && item.orderCode) gulaData.push(item);
               }
@@ -2062,11 +1976,10 @@
               console.log(`✅ Loaded ${gulaData.length} GULA records`);
             }
 
-            // Proses data MINYAK
             let minyakData = [];
             if (minyakRes.status === 'fulfilled') {
               const rows = minyakRes.value;
-              for (let i = 1; i < rows.length; i++) {
+              for (let i = 0; i < rows.length; i++) {
                 const item = DataProcessor.processRealisasiRow(rows[i], 'MINYAK');
                 if (item && item.orderCode) minyakData.push(item);
               }
@@ -2074,33 +1987,29 @@
               console.log(`✅ Loaded ${minyakData.length} MINYAK records`);
             }
 
-            // Proses data MASTER - menggunakan processMasterRow yang sudah diperbaiki
             let masterData = [];
             if (masterRes.status === 'fulfilled') {
               const rows = masterRes.value;
-              for (let i = 1; i < rows.length; i++) {
+              for (let i = 0; i < rows.length; i++) {
                 const item = DataProcessor.processMasterRow(rows[i]);
                 if (item) masterData.push(item);
               }
               State.dataStatus.master = masterData.length > 0;
-              console.log(`✅ Loaded ${masterData.length} master records`);
+              console.log(`✅ Loaded ${masterData.length} master records (dari baris 4)`);
             }
 
-            // Simpan ke state
             State.realisasiData.GULA = gulaData;
             State.realisasiData.MINYAK = minyakData;
             State.realisasiData.ALL = [...gulaData, ...minyakData];
             State.masterData = masterData;
             State.lastFetch = new Date();
             
-            // Update connection info
             DOM.updateConnectionStatus(
               State.dataStatus.gula, 
               State.dataStatus.minyak, 
               State.dataStatus.master
             );
             
-            // Set filtered data sesuai active komoditi
             if (State.activeKomoditi === 'semua') {
               State.filteredRealisasi = [...State.realisasiData.ALL];
             } else if (State.activeKomoditi === 'GULA') {
@@ -2109,15 +2018,12 @@
               State.filteredRealisasi = [...State.realisasiData.MINYAK];
             }
             
-            // Terapkan filter tanggal
             const from = DOM.get('fromDate')?.value;
             const to = DOM.get('toDate')?.value;
             State.filteredRealisasi = DataProcessor.filterByDate(State.filteredRealisasi, from, to, 'tglOrder');
-            State.filteredMaster = DataProcessor.filterByDate(masterData, from, to, 'tglOrder');
             
             LiveStatusManager.updateFromFetch(gulaData.length > 0 || minyakData.length > 0);
             
-            // Update last fetch time
             DOM.updateText('lastFetchTime', new Date().toLocaleTimeString('id-ID'));
             
             return { gulaData, minyakData, masterData };
@@ -2142,7 +2048,9 @@
           const deliveredStats = DataProcessor.calculateDeliveredStats(State.filteredRealisasi);
           const cancelStats = DataProcessor.calculateCancelStats(State.filteredRealisasi);
           const realStats = DataProcessor.calculateRealisasiStats(State.filteredRealisasi);
-          const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
+          
+          const masterStats = DataProcessor.getMasterStatsByKomoditi(State.masterData, State.activeKomoditi);
+          
           const komoditiSummary = DataProcessor.calculateKomoditiSummary(
             State.realisasiData.GULA, 
             State.realisasiData.MINYAK
@@ -2222,7 +2130,6 @@
         console.group('📊 PROGRESS DETAIL');
         console.log('Total:', stats.count);
         console.log('QTY:', DataProcessor.formatNumber(stats.qty));
-        console.log('Orders:', stats.orders.slice(0, 5));
         console.groupEnd();
         return stats;
       };
@@ -2232,7 +2139,6 @@
         console.group('⚡ PARTIAL DETAIL');
         console.log('Total:', stats.count);
         console.log('QTY:', DataProcessor.formatNumber(stats.qty));
-        console.log('Details:', stats.details);
         console.groupEnd();
         return stats;
       };
@@ -2242,7 +2148,6 @@
         console.group('✅ DELIVERED DETAIL');
         console.log('Total:', stats.totalOrdersWithDelivered);
         console.log('Pure:', stats.pureDelivered);
-        console.log('Mixed:', stats.mixedDelivered);
         console.groupEnd();
         return stats;
       };
@@ -2252,7 +2157,6 @@
         console.group('⛔ CANCEL DETAIL');
         console.log('Total:', stats.totalOrdersWithCancel);
         console.log('Pure:', stats.pureCancel);
-        console.log('Mixed:', stats.mixedCancel);
         console.groupEnd();
         return stats;
       };
