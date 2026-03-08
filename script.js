@@ -32,68 +32,87 @@
       if (type === 'error') {
         if (!errEl) return;
         errEl.style.display = 'block';
-        errEl.style.padding = '10px';
-        errEl.style.marginTop = '10px';
-        errEl.style.background = 'rgba(231,76,60,0.2)';
-        errEl.style.borderRadius = '10px';
-        errEl.style.color = '#e74c3c';
-        errEl.textContent = '❌ ' + msg;
+        errEl.innerHTML = `❌ ${msg}`;
         setTimeout(() => { errEl.style.display = 'none'; }, duration);
       } else {
         if (!msgEl) return;
-        msgEl.style.color = '#2ecc71';
-        msgEl.textContent = '✅ ' + msg;
-        setTimeout(() => { msgEl.textContent = ''; }, duration);
+        msgEl.innerHTML = `✅ ${msg}`;
+        setTimeout(() => { msgEl.innerHTML = ''; }, duration);
       }
     }
   };
 
   const Utils = {
-    formatNumber: (num) => new Intl.NumberFormat('id-ID').format(Math.round(Number(num || 0))),
-    formatDecimal: (num, dec = 1) => new Intl.NumberFormat('id-ID', {
-      minimumFractionDigits: dec,
-      maximumFractionDigits: dec
-    }).format(Number(num || 0)),
+    formatNumber: (num) => {
+      const n = Number(num || 0);
+      return new Intl.NumberFormat('id-ID').format(Math.round(n));
+    },
+    formatDecimal: (num, dec = 1) => {
+      const n = Number(num || 0);
+      return new Intl.NumberFormat('id-ID', {
+        minimumFractionDigits: dec,
+        maximumFractionDigits: dec
+      }).format(n);
+    },
     formatDate: (val) => {
       if (!val) return '-';
-      const d = new Date(val);
-      if (isNaN(d)) return '-';
-      return new Intl.DateTimeFormat('id-ID', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      }).format(d);
+      try {
+        const d = new Date(val);
+        if (isNaN(d)) return '-';
+        return new Intl.DateTimeFormat('id-ID', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        }).format(d);
+      } catch {
+        return '-';
+      }
     },
     formatDateTime: (val) => {
       if (!val) return '-';
-      const d = new Date(val);
-      if (isNaN(d)) return '-';
-      return new Intl.DateTimeFormat('id-ID', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      }).format(d);
+      try {
+        const d = new Date(val);
+        if (isNaN(d)) return '-';
+        return new Intl.DateTimeFormat('id-ID', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).format(d);
+      } catch {
+        return '-';
+      }
     },
     getStatusClass: (status) => {
       const s = String(status || '').toUpperCase();
-      if (s === 'DELIVERED') return 'status-delivered';
-      if (s === 'ON_DELIVERY') return 'status-ondelivery';
-      if (s === 'PROGRESS') return 'status-progress';
-      if (s === 'CANCEL') return 'status-cancel';
-      if (s === 'PARTIAL') return 'status-partial';
-      return '';
+      const map = {
+        'DELIVERED': 'status-delivered',
+        'ON_DELIVERY': 'status-ondelivery',
+        'PROGRESS': 'status-progress',
+        'CANCEL': 'status-cancel',
+        'PARTIAL': 'status-partial'
+      };
+      return map[s] || '';
     },
     getBadgeClass: (status) => {
       const s = String(status || '').toUpperCase();
-      if (s === 'DELIVERED') return 'badge-delivered';
-      if (s === 'ON_DELIVERY') return 'badge-ondelivery';
-      if (s === 'PROGRESS') return 'badge-progress';
-      if (s === 'CANCEL') return 'badge-cancel';
-      if (s === 'PARTIAL') return 'badge-partial';
-      return '';
+      const map = {
+        'DELIVERED': 'badge-delivered',
+        'ON_DELIVERY': 'badge-ondelivery',
+        'PROGRESS': 'badge-progress',
+        'CANCEL': 'badge-cancel',
+        'PARTIAL': 'badge-partial'
+      };
+      return map[s] || '';
+    },
+    safeGet: (obj, path, defaultValue = 0) => {
+      try {
+        return path.split('.').reduce((o, p) => o?.[p] ?? defaultValue, obj);
+      } catch {
+        return defaultValue;
+      }
     }
   };
 
@@ -120,6 +139,8 @@
 
   const Renderer = {
     masterSummary(masterStats, filters) {
+      if (!masterStats) return;
+      
       DOM.updateText('masterTotalOrders', Utils.formatNumber(masterStats.totalOrders));
       DOM.updateText('masterTotalQty', Utils.formatNumber(masterStats.totalQty));
       DOM.updateText('masterAvgQty', Utils.formatDecimal(masterStats.avgQty, 1));
@@ -131,6 +152,8 @@
     },
 
     komoditiSummary(summary) {
+      if (!summary) return;
+      
       DOM.updateText('gulaOrderCount', `${Utils.formatNumber(summary?.gula?.orders || 0)} order`);
       DOM.updateText('gulaTotalQty', Utils.formatNumber(summary?.gula?.qty || 0));
       DOM.updateText('gulaProgress', `${Utils.formatNumber(summary?.gula?.progress || 0)} order`);
@@ -151,8 +174,10 @@
         kpiContainer.prepend(progressCard);
       }
 
-      const percentage = totalOrders ? ((Number(progressStats.count || 0) / Number(totalOrders)) * 100) : 0;
-      progressCard.className = `kpi ${(progressStats.count || 0) > 0 ? 'glow-active' : 'glow-inactive'}`;
+      const count = progressStats?.count || 0;
+      const percentage = totalOrders ? ((count / Number(totalOrders)) * 100) : 0;
+      
+      progressCard.className = `kpi ${count > 0 ? 'glow-active' : 'glow-inactive'}`;
       progressCard.style.borderTop = '4px solid #f1c40f';
       progressCard.style.setProperty('--glow-color', '#f1c40f80');
 
@@ -161,11 +186,11 @@
           <span style="font-weight:700;">PROGRESS</span>
           <span>⏳</span>
         </div>
-        <div class="main-value">${Utils.formatNumber(progressStats.count || 0)}</div>
-        <div class="qty-value">${Utils.formatNumber(progressStats.qty || 0)} Qty</div>
+        <div class="main-value">${Utils.formatNumber(count)}</div>
+        <div class="qty-value">${Utils.formatNumber(progressStats?.qty || 0)} Qty</div>
         <div>${Utils.formatDecimal(percentage, 1)}% dari total</div>
         <div style="margin-top:8px; font-size:11px; color:var(--text-secondary);">
-          Rata-rata: ${Utils.formatDecimal(progressStats.avgProcessingTime || 0, 1)} hari
+          Rata-rata: ${Utils.formatDecimal(progressStats?.avgProcessingTime || 0, 1)} hari
         </div>
       `;
     },
@@ -187,11 +212,11 @@
         <div class="partial-detail">
           <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
             <p style="font-weight:700; color:#9b59b6;">⚡ ${Utils.formatNumber(count)} Order dengan Status Campuran</p>
-            <span class="badge badge-partial">Total: ${Utils.formatNumber(partialStats.qty || 0)} Qty</span>
+            <span class="badge badge-partial">Total: ${Utils.formatNumber(partialStats?.qty || 0)} Qty</span>
           </div>
       `;
 
-      (partialStats.details || []).slice(0, 5).forEach(detail => {
+      (partialStats?.details || []).slice(0, 5).forEach(detail => {
         html += `
           <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:8px;">
             <div style="font-weight:700; margin-bottom:8px;">📋 ${detail.orderCode || '-'}</div>
@@ -210,7 +235,7 @@
         html += `</div></div>`;
       });
 
-      if ((partialStats.details || []).length > 5) {
+      if ((partialStats?.details || []).length > 5) {
         html += `<div class="note" style="margin-top:8px;">... dan ${(partialStats.details || []).length - 5} lainnya</div>`;
       }
 
@@ -247,6 +272,12 @@
         <div style="margin-top:8px; font-size:11px; color:#2ecc71;">✅ Murni: ${Utils.formatNumber(pure)} order</div>
         ${mixed > 0 ? `<div style="font-size:11px; color:#f1c40f;">🔄 Campuran: ${Utils.formatNumber(mixed)} order</div>` : ''}
       `;
+      
+      if (!document.getElementById('containerDelivered')) {
+        const bottomContainer = DOM.get('kpiBottomContainer');
+        if (bottomContainer) bottomContainer.appendChild(card);
+      }
+      
       return card;
     },
 
@@ -279,6 +310,12 @@
         <div style="margin-top:8px; font-size:11px; color:#e74c3c;">⛔ Murni: ${Utils.formatNumber(pure)} order</div>
         ${mixed > 0 ? `<div style="font-size:11px; color:#f1c40f;">🔄 Campuran: ${Utils.formatNumber(mixed)} order</div>` : ''}
       `;
+      
+      if (!document.getElementById('containerCancel')) {
+        const bottomContainer = DOM.get('kpiBottomContainer');
+        if (bottomContainer) bottomContainer.appendChild(card);
+      }
+      
       return card;
     },
 
@@ -287,13 +324,14 @@
       const bottomContainer = DOM.get('kpiBottomContainer');
       if (!topContainer || !bottomContainer) return;
 
+      // Clear containers but preserve progress card
       const progressCard = document.getElementById('containerProgress');
       topContainer.innerHTML = '';
       if (progressCard) topContainer.appendChild(progressCard);
 
       const topList = [
         { label: 'ON DELIVERY', icon: '🚚', color: '#3498db', data: stats?.onDelivery || {} },
-        { label: 'PARSIAL', icon: '⚡', color: '#9b59b6', data: stats?.partial || {} }
+        { label: 'PARTIAL', icon: '⚡', color: '#9b59b6', data: stats?.partial || {} }
       ];
 
       topList.forEach(item => {
@@ -324,23 +362,28 @@
     },
 
     chartsFromBackend(charts, stats) {
-      Object.values(State.charts).forEach(c => c && c.destroy());
+      // Destroy existing charts
+      Object.values(State.charts).forEach(c => {
+        if (c && typeof c.destroy === 'function') c.destroy();
+      });
       State.charts = {};
 
+      // Status Chart
       const ctxStatus = DOM.get('chartStatus')?.getContext('2d');
-      if (ctxStatus) {
+      if (ctxStatus && charts?.status) {
         State.charts.status = new Chart(ctxStatus, {
           type: 'doughnut',
           data: {
-            labels: (charts?.status || []).map(i => i.label),
+            labels: charts.status.map(i => i.label),
             datasets: [{
-              data: (charts?.status || []).map(i => i.value),
+              data: charts.status.map(i => i.value),
               backgroundColor: ['#f1c40f', '#3498db', '#2ecc71', '#e74c3c', '#9b59b6'],
               borderWidth: 0
             }]
           },
           options: {
             responsive: true,
+            maintainAspectRatio: true,
             plugins: {
               legend: {
                 position: 'right',
@@ -354,8 +397,9 @@
 
       DOM.updateText('statusNote', `Total ${Utils.formatNumber(stats?.totalOrders || 0)} order • Total QTY: ${Utils.formatNumber(stats?.totalQty || 0)}`);
 
+      // City Chart
       const ctxCity = DOM.get('chartCity')?.getContext('2d');
-      if (ctxCity && (charts?.kota || []).length) {
+      if (ctxCity && charts?.kota?.length) {
         State.charts.city = new Chart(ctxCity, {
           type: 'bar',
           data: {
@@ -369,17 +413,25 @@
           },
           options: {
             responsive: true,
+            maintainAspectRatio: true,
             plugins: { legend: { display: false } },
             scales: {
-              x: { ticks: { color: '#e9f1fb', maxRotation: 45 } },
-              y: { ticks: { color: '#e9f1fb' } }
+              x: { 
+                ticks: { color: '#e9f1fb', maxRotation: 45 },
+                grid: { color: 'rgba(255,255,255,0.1)' }
+              },
+              y: { 
+                ticks: { color: '#e9f1fb' },
+                grid: { color: 'rgba(255,255,255,0.1)' }
+              }
             }
           }
         });
       }
 
+      // Factory Chart
       const ctxFactory = DOM.get('chartFactory')?.getContext('2d');
-      if (ctxFactory && (charts?.pabrik || []).length) {
+      if (ctxFactory && charts?.pabrik?.length) {
         State.charts.factory = new Chart(ctxFactory, {
           type: 'bar',
           data: {
@@ -393,10 +445,17 @@
           },
           options: {
             responsive: true,
+            maintainAspectRatio: true,
             plugins: { legend: { display: false } },
             scales: {
-              x: { ticks: { color: '#e9f1fb', maxRotation: 45 } },
-              y: { ticks: { color: '#e9f1fb' } }
+              x: { 
+                ticks: { color: '#e9f1fb', maxRotation: 45 },
+                grid: { color: 'rgba(255,255,255,0.1)' }
+              },
+              y: { 
+                ticks: { color: '#e9f1fb' },
+                grid: { color: 'rgba(255,255,255,0.1)' }
+              }
             }
           }
         });
@@ -424,7 +483,7 @@
         st.className = Utils.getStatusClass(item.statusCategory);
 
         row.insertCell().textContent = Utils.formatNumber(item.qty || 0);
-        row.insertCell().textContent = Utils.formatDate(item.tglMuat || item.rencanaMuat || item.tglOrder);
+        row.insertCell().textContent = Utils.formatDate(item.tglMuat || item.rencanaMuat);
       });
     },
 
@@ -440,12 +499,47 @@
       DOM.updateText('dataStatus', '✅ Backend Apps Script • ✅ Frontend HTML');
       DOM.updateText('lastUpdateTime', Utils.formatDateTime(payload?.generatedAt || new Date()));
       DOM.updateText('lastUpdate', Utils.formatDateTime(payload?.generatedAt || new Date()));
+    },
+
+    // Main render function with error handling
+    renderAll(payload) {
+      if (!payload) {
+        console.warn('No payload to render');
+        return;
+      }
+
+      try {
+        console.log('Rendering payload:', payload);
+        
+        if (payload.masterStats) {
+          this.masterSummary(payload.masterStats, payload.filters);
+        }
+        
+        if (payload.komoditiSummary) {
+          this.komoditiSummary(payload.komoditiSummary);
+        }
+        
+        this.renderProgressContainer(payload.progressStats, payload.stats?.totalOrders);
+        this.renderPartialContainer(payload.partialStats);
+        this.kpi(payload.stats, payload.deliveredStats, payload.cancelStats);
+        this.chartsFromBackend(payload.charts, payload.stats);
+        this.realTimeTable(payload.realtime);
+        this.ringkasanData(payload.stats, payload.masterStats, payload);
+        
+        DOM.showMessage('success', 'Dashboard berhasil diperbarui');
+      } catch (error) {
+        console.error('Error rendering:', error);
+        DOM.showMessage('error', 'Error menampilkan data: ' + error.message);
+      }
     }
   };
 
   const DataFetcher = {
     async fetchAllData() {
-      if (State.isRefreshing) return null;
+      if (State.isRefreshing) {
+        console.log('Already refreshing, skipping...');
+        return null;
+      }
 
       State.isRefreshing = true;
       DOM.showRefreshIndicator(true);
@@ -455,22 +549,38 @@
         const from = DOM.get('fromDate')?.value || '';
         const to = DOM.get('toDate')?.value || '';
         const komoditi = State.activeKomoditi || 'semua';
-        const url = `${CONFIG.WEB_APP_URL}?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&komoditi=${encodeURIComponent(komoditi)}`;
+        
+        // Build URL with params
+        const url = new URL(CONFIG.WEB_APP_URL);
+        url.searchParams.append('from', from);
+        url.searchParams.append('to', to);
+        url.searchParams.append('komoditi', komoditi);
+        
+        console.log('Fetching from:', url.toString());
 
-        const res = await fetch(url, { method: 'GET', cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetch(url, { 
+          method: 'GET', 
+          cache: 'no-store',
+          mode: 'cors'
+        });
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
 
         const json = await res.json();
+        console.log('Backend response:', json);
+        
         if (!json.success) throw new Error(json.message || 'Backend error');
 
         State.backendPayload = json;
         LiveStatus.setConnected();
         return json;
+        
       } catch (err) {
-        console.error(err);
+        console.error('Fetch error:', err);
         LiveStatus.setOffline();
-        DOM.showMessage('error', 'Gagal mengambil data dari Apps Script');
+        DOM.showMessage('error', 'Gagal mengambil data: ' + err.message);
         return null;
+        
       } finally {
         DOM.showRefreshIndicator(false);
         State.isRefreshing = false;
@@ -480,9 +590,14 @@
 
   const AutoRefresh = {
     setup() {
-      if (State.refreshTimer) clearInterval(State.refreshTimer);
+      if (State.refreshTimer) {
+        clearInterval(State.refreshTimer);
+        State.refreshTimer = null;
+      }
+      
       const sec = Number(DOM.get('refreshSec')?.value || 0);
       if (sec > 0) {
+        console.log(`Auto refresh set to ${sec} seconds`);
         State.refreshTimer = setInterval(() => App.refresh(), sec * 1000);
       }
     }
@@ -502,68 +617,84 @@
 
   function setKomoditi(active) {
     State.activeKomoditi = active;
-    DOM.get('btnSemua')?.classList.remove('active');
-    DOM.get('btnGula')?.classList.remove('active');
-    DOM.get('btnMinyak')?.classList.remove('active');
-
-    if (active === 'semua') DOM.get('btnSemua')?.classList.add('active');
-    if (active === 'GULA') DOM.get('btnGula')?.classList.add('active');
-    if (active === 'MINYAK') DOM.get('btnMinyak')?.classList.add('active');
+    
+    // Update active class
+    ['btnSemua', 'btnGula', 'btnMinyak'].forEach(id => {
+      const btn = DOM.get(id);
+      if (btn) btn.classList.remove('active');
+    });
+    
+    const activeBtn = DOM.get(active === 'semua' ? 'btnSemua' : 
+                             active === 'GULA' ? 'btnGula' : 'btnMinyak');
+    if (activeBtn) activeBtn.classList.add('active');
 
     App.refresh();
   }
 
   const App = {
-    updateDisplay() {
-      const payload = State.backendPayload;
-      if (!payload) return;
-
-      Renderer.masterSummary(payload.masterStats || {}, payload.filters || {});
-      Renderer.komoditiSummary(payload.komoditiSummary || {});
-      Renderer.renderProgressContainer(payload.progressStats || {}, payload.stats?.totalOrders || 0);
-      Renderer.renderPartialContainer(payload.partialStats || {});
-      Renderer.kpi(payload.stats || {}, payload.deliveredStats || {}, payload.cancelStats || {});
-      Renderer.chartsFromBackend(payload.charts || {}, payload.stats || {});
-      Renderer.realTimeTable(payload.realtime || []);
-      Renderer.ringkasanData(payload.stats || {}, payload.masterStats || {}, payload);
-    },
-
     async refresh() {
       const data = await DataFetcher.fetchAllData();
       if (data) {
-        App.updateDisplay();
-        DOM.showMessage('success', 'Data dashboard berhasil diperbarui');
+        Renderer.renderAll(data);
       }
     },
 
     initDefaultDate() {
       const today = new Date();
-      const janFirst = new Date(today.getFullYear(), 0, 1);
-      DOM.get('fromDate').value = janFirst.toISOString().split('T')[0];
-      DOM.get('toDate').value = today.toISOString().split('T')[0];
+      const firstDay = new Date(today.getFullYear(), 0, 1);
+      
+      const fromInput = DOM.get('fromDate');
+      const toInput = DOM.get('toDate');
+      
+      if (fromInput) {
+        fromInput.value = firstDay.toISOString().split('T')[0];
+      }
+      if (toInput) {
+        toInput.value = today.toISOString().split('T')[0];
+      }
     },
 
     bindEvents() {
-      DOM.get('btnRefresh')?.addEventListener('click', () => App.refresh());
+      DOM.get('btnRefresh')?.addEventListener('click', () => this.refresh());
       DOM.get('btnDisplay')?.addEventListener('click', TVMode.toggle);
       DOM.get('refreshSec')?.addEventListener('change', AutoRefresh.setup);
-      DOM.get('fromDate')?.addEventListener('change', () => App.refresh());
-      DOM.get('toDate')?.addEventListener('change', () => App.refresh());
+      DOM.get('fromDate')?.addEventListener('change', () => this.refresh());
+      DOM.get('toDate')?.addEventListener('change', () => this.refresh());
       DOM.get('btnSemua')?.addEventListener('click', () => setKomoditi('semua'));
       DOM.get('btnGula')?.addEventListener('click', () => setKomoditi('GULA'));
       DOM.get('btnMinyak')?.addEventListener('click', () => setKomoditi('MINYAK'));
+      
+      // Handle Enter key on inputs
+      ['fromDate', 'toDate'].forEach(id => {
+        DOM.get(id)?.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') this.refresh();
+        });
+      });
     },
 
     async init() {
-      App.initDefaultDate();
-      App.bindEvents();
-      await App.refresh();
+      console.log('Initializing app...');
+      
+      // Show loading state
+      LiveStatus.setChecking();
+      
+      // Initialize UI
+      this.initDefaultDate();
+      this.bindEvents();
+      
+      // First data fetch
+      await this.refresh();
+      
+      // Setup auto refresh
       AutoRefresh.setup();
+      
+      console.log('App initialized');
     }
   };
 
+  // Start app when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', App.init);
+    document.addEventListener('DOMContentLoaded', () => App.init());
   } else {
     App.init();
   }
