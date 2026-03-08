@@ -1,12 +1,153 @@
 (function() {
   'use strict';
 
-  const CONFIG = {
-    WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzikbUH9ULVZ2A5kuY8Z157IyVcAXbBjtDdsqm168a3KkwYPQVe9-0wFPHoW5g_SIge1A/exec'
+  // ============================================
+  // DATA DUMMY LENGKAP (LANGSUNG DI FRONTEND)
+  // ============================================
+  const DUMMY_DATA = {
+    success: true,
+    generatedAt: new Date().toISOString(),
+    filters: { from: '2026-01-01', to: '2026-03-08', komoditi: 'semua' },
+    
+    masterStats: {
+      totalOrders: 157,
+      totalQty: 98750,
+      avgQty: 629,
+      totalKomoditi: 2
+    },
+    
+    komoditiSummary: {
+      gula: {
+        orders: 98,
+        qty: 62400,
+        progress: 23
+      },
+      minyak: {
+        orders: 59,
+        qty: 36350,
+        progress: 15
+      }
+    },
+    
+    stats: {
+      totalOrders: 145,
+      totalQty: 89750,
+      avgQtyPerOrder: 619,
+      totalRows: 168,
+      
+      progress: {
+        count: 38,
+        qty: 22450,
+        percentage: 26.2
+      },
+      
+      onDelivery: {
+        count: 22,
+        qty: 13800,
+        percentage: 15.2
+      },
+      
+      partial: {
+        count: 12,
+        qty: 7650,
+        percentage: 8.3
+      }
+    },
+    
+    progressStats: {
+      count: 38,
+      qty: 22450,
+      avgProcessingTime: 2.8
+    },
+    
+    partialStats: {
+      count: 12,
+      qty: 7650,
+      details: [
+        {
+          orderCode: 'ORD-2026-001',
+          breakdown: [
+            { status: 'DELIVERED', qty: 500 },
+            { status: 'PROGRESS', qty: 300 }
+          ]
+        },
+        {
+          orderCode: 'ORD-2026-015',
+          breakdown: [
+            { status: 'DELIVERED', qty: 400 },
+            { status: 'ON_DELIVERY', qty: 250 }
+          ]
+        },
+        {
+          orderCode: 'ORD-2026-032',
+          breakdown: [
+            { status: 'PROGRESS', qty: 350 },
+            { status: 'CANCEL', qty: 150 }
+          ]
+        }
+      ]
+    },
+    
+    deliveredStats: {
+      totalOrdersWithDelivered: 73,
+      totalDeliveredQty: 45800,
+      pureDelivered: { count: 61 },
+      mixedDelivered: { count: 12 }
+    },
+    
+    cancelStats: {
+      totalOrdersWithCancel: 18,
+      totalCancelQty: 11200,
+      pureCancel: { count: 14 },
+      mixedCancel: { count: 4 }
+    },
+    
+    charts: {
+      status: [
+        { label: 'PROGRESS', value: 38 },
+        { label: 'ON DELIVERY', value: 22 },
+        { label: 'DELIVERED', value: 73 },
+        { label: 'CANCEL', value: 18 },
+        { label: 'PARTIAL', value: 12 }
+      ],
+      
+      kota: [
+        { label: 'JAKARTA', value: 24500 },
+        { label: 'BANDUNG', value: 18700 },
+        { label: 'SURABAYA', value: 15600 },
+        { label: 'MEDAN', value: 12400 },
+        { label: 'SEMARANG', value: 8900 },
+        { label: 'MAKASSAR', value: 7600 },
+        { label: 'PALEMBANG', value: 5400 },
+        { label: 'BALIKPAPAN', value: 4300 }
+      ],
+      
+      pabrik: [
+        { label: 'PABRIK A', value: 18700 },
+        { label: 'PABRIK B', value: 16200 },
+        { label: 'PABRIK C', value: 14800 },
+        { label: 'PABRIK D', value: 12300 },
+        { label: 'PABRIK E', value: 9800 },
+        { label: 'PABRIK F', value: 7600 }
+      ]
+    },
+    
+    realtime: [
+      { komoditi: 'GULA', noPolisi: 'B 1234 ABC', kota: 'JAKARTA', status: 'DELIVERED', statusCategory: 'DELIVERED', qty: 1000, tglMuat: '2026-03-08' },
+      { komoditi: 'MINYAK', noPolisi: 'B 5678 DEF', kota: 'BANDUNG', status: 'ON_DELIVERY', statusCategory: 'ON_DELIVERY', qty: 500, tglMuat: '2026-03-08' },
+      { komoditi: 'GULA', noPolisi: 'B 9012 GHI', kota: 'SURABAYA', status: 'PROGRESS', statusCategory: 'PROGRESS', qty: 750, tglMuat: '2026-03-07' },
+      { komoditi: 'GULA', noPolisi: 'B 3456 JKL', kota: 'MEDAN', status: 'DELIVERED', statusCategory: 'DELIVERED', qty: 1200, tglMuat: '2026-03-07' },
+      { komoditi: 'MINYAK', noPolisi: 'B 7890 MNO', kota: 'SEMARANG', status: 'DELIVERED', statusCategory: 'DELIVERED', qty: 600, tglMuat: '2026-03-06' },
+      { komoditi: 'GULA', noPolisi: 'B 2345 PQR', kota: 'JAKARTA', status: 'PARTIAL', statusCategory: 'PARTIAL', qty: 800, tglMuat: '2026-03-06' },
+      { komoditi: 'MINYAK', noPolisi: 'B 6789 STU', kota: 'BANDUNG', status: 'CANCEL', statusCategory: 'CANCEL', qty: 450, tglMuat: '2026-03-05' },
+      { komoditi: 'GULA', noPolisi: 'B 0123 VWX', kota: 'SURABAYA', status: 'DELIVERED', statusCategory: 'DELIVERED', qty: 900, tglMuat: '2026-03-05' },
+      { komoditi: 'MINYAK', noPolisi: 'B 4567 YZA', kota: 'MEDAN', status: 'PROGRESS', statusCategory: 'PROGRESS', qty: 550, tglMuat: '2026-03-04' },
+      { komoditi: 'GULA', noPolisi: 'B 8901 BCD', kota: 'PALEMBANG', status: 'DELIVERED', statusCategory: 'DELIVERED', qty: 1100, tglMuat: '2026-03-04' }
+    ]
   };
 
   const State = {
-    backendPayload: null,
+    backendPayload: DUMMY_DATA, // LANGSUNG PAKAI DATA DUMMY
     activeKomoditi: 'semua',
     charts: {},
     refreshTimer: null,
@@ -32,11 +173,11 @@
       if (type === 'error') {
         if (!errEl) return;
         errEl.style.display = 'block';
-        errEl.innerHTML = `❌ ${msg}`;
+        errEl.innerHTML = '❌ ' + msg;
         setTimeout(() => { errEl.style.display = 'none'; }, duration);
       } else {
         if (!msgEl) return;
-        msgEl.innerHTML = `✅ ${msg}`;
+        msgEl.innerHTML = '✅ ' + msg;
         setTimeout(() => { msgEl.innerHTML = ''; }, duration);
       }
     }
@@ -87,32 +228,21 @@
     },
     getStatusClass: (status) => {
       const s = String(status || '').toUpperCase();
-      const map = {
-        'DELIVERED': 'status-delivered',
-        'ON_DELIVERY': 'status-ondelivery',
-        'PROGRESS': 'status-progress',
-        'CANCEL': 'status-cancel',
-        'PARTIAL': 'status-partial'
-      };
-      return map[s] || '';
+      if (s === 'DELIVERED') return 'status-delivered';
+      if (s === 'ON_DELIVERY') return 'status-ondelivery';
+      if (s === 'PROGRESS') return 'status-progress';
+      if (s === 'CANCEL') return 'status-cancel';
+      if (s === 'PARTIAL') return 'status-partial';
+      return '';
     },
     getBadgeClass: (status) => {
       const s = String(status || '').toUpperCase();
-      const map = {
-        'DELIVERED': 'badge-delivered',
-        'ON_DELIVERY': 'badge-ondelivery',
-        'PROGRESS': 'badge-progress',
-        'CANCEL': 'badge-cancel',
-        'PARTIAL': 'badge-partial'
-      };
-      return map[s] || '';
-    },
-    safeGet: (obj, path, defaultValue = 0) => {
-      try {
-        return path.split('.').reduce((o, p) => o?.[p] ?? defaultValue, obj);
-      } catch {
-        return defaultValue;
-      }
+      if (s === 'DELIVERED') return 'badge-delivered';
+      if (s === 'ON_DELIVERY') return 'badge-ondelivery';
+      if (s === 'PROGRESS') return 'badge-progress';
+      if (s === 'CANCEL') return 'badge-cancel';
+      if (s === 'PARTIAL') return 'badge-partial';
+      return '';
     }
   };
 
@@ -120,7 +250,7 @@
     setConnected() {
       const el = DOM.get('liveStatus');
       if (!el) return;
-      el.textContent = '🟢 Live';
+      el.textContent = '🟢 Live (Data Dummy)';
       el.className = 'connected';
     },
     setChecking() {
@@ -139,12 +269,10 @@
 
   const Renderer = {
     masterSummary(masterStats, filters) {
-      if (!masterStats) return;
-      
-      DOM.updateText('masterTotalOrders', Utils.formatNumber(masterStats.totalOrders));
-      DOM.updateText('masterTotalQty', Utils.formatNumber(masterStats.totalQty));
-      DOM.updateText('masterAvgQty', Utils.formatDecimal(masterStats.avgQty, 1));
-      DOM.updateText('masterTotalKomoditi', String(masterStats.totalKomoditi || 2));
+      DOM.updateText('masterTotalOrders', Utils.formatNumber(masterStats?.totalOrders));
+      DOM.updateText('masterTotalQty', Utils.formatNumber(masterStats?.totalQty));
+      DOM.updateText('masterAvgQty', Utils.formatDecimal(masterStats?.avgQty, 1));
+      DOM.updateText('masterTotalKomoditi', String(masterStats?.totalKomoditi || 2));
 
       const from = filters?.from ? Utils.formatDate(filters.from) : '-';
       const to = filters?.to ? Utils.formatDate(filters.to) : '-';
@@ -152,8 +280,6 @@
     },
 
     komoditiSummary(summary) {
-      if (!summary) return;
-      
       DOM.updateText('gulaOrderCount', `${Utils.formatNumber(summary?.gula?.orders || 0)} order`);
       DOM.updateText('gulaTotalQty', Utils.formatNumber(summary?.gula?.qty || 0));
       DOM.updateText('gulaProgress', `${Utils.formatNumber(summary?.gula?.progress || 0)} order`);
@@ -273,11 +399,6 @@
         ${mixed > 0 ? `<div style="font-size:11px; color:#f1c40f;">🔄 Campuran: ${Utils.formatNumber(mixed)} order</div>` : ''}
       `;
       
-      if (!document.getElementById('containerDelivered')) {
-        const bottomContainer = DOM.get('kpiBottomContainer');
-        if (bottomContainer) bottomContainer.appendChild(card);
-      }
-      
       return card;
     },
 
@@ -311,11 +432,6 @@
         ${mixed > 0 ? `<div style="font-size:11px; color:#f1c40f;">🔄 Campuran: ${Utils.formatNumber(mixed)} order</div>` : ''}
       `;
       
-      if (!document.getElementById('containerCancel')) {
-        const bottomContainer = DOM.get('kpiBottomContainer');
-        if (bottomContainer) bottomContainer.appendChild(card);
-      }
-      
       return card;
     },
 
@@ -324,7 +440,6 @@
       const bottomContainer = DOM.get('kpiBottomContainer');
       if (!topContainer || !bottomContainer) return;
 
-      // Clear containers but preserve progress card
       const progressCard = document.getElementById('containerProgress');
       topContainer.innerHTML = '';
       if (progressCard) topContainer.appendChild(progressCard);
@@ -357,18 +472,16 @@
       });
 
       bottomContainer.innerHTML = '';
-      bottomContainer.appendChild(Renderer.renderDeliveredCard(deliveredStats, stats?.totalOrders || 0));
-      bottomContainer.appendChild(Renderer.renderCancelCard(cancelStats, stats?.totalOrders || 0));
+      bottomContainer.appendChild(this.renderDeliveredCard(deliveredStats, stats?.totalOrders || 0));
+      bottomContainer.appendChild(this.renderCancelCard(cancelStats, stats?.totalOrders || 0));
     },
 
     chartsFromBackend(charts, stats) {
-      // Destroy existing charts
       Object.values(State.charts).forEach(c => {
         if (c && typeof c.destroy === 'function') c.destroy();
       });
       State.charts = {};
 
-      // Status Chart
       const ctxStatus = DOM.get('chartStatus')?.getContext('2d');
       if (ctxStatus && charts?.status) {
         State.charts.status = new Chart(ctxStatus, {
@@ -383,7 +496,6 @@
           },
           options: {
             responsive: true,
-            maintainAspectRatio: true,
             plugins: {
               legend: {
                 position: 'right',
@@ -397,7 +509,6 @@
 
       DOM.updateText('statusNote', `Total ${Utils.formatNumber(stats?.totalOrders || 0)} order • Total QTY: ${Utils.formatNumber(stats?.totalQty || 0)}`);
 
-      // City Chart
       const ctxCity = DOM.get('chartCity')?.getContext('2d');
       if (ctxCity && charts?.kota?.length) {
         State.charts.city = new Chart(ctxCity, {
@@ -413,23 +524,15 @@
           },
           options: {
             responsive: true,
-            maintainAspectRatio: true,
             plugins: { legend: { display: false } },
             scales: {
-              x: { 
-                ticks: { color: '#e9f1fb', maxRotation: 45 },
-                grid: { color: 'rgba(255,255,255,0.1)' }
-              },
-              y: { 
-                ticks: { color: '#e9f1fb' },
-                grid: { color: 'rgba(255,255,255,0.1)' }
-              }
+              x: { ticks: { color: '#e9f1fb', maxRotation: 45 } },
+              y: { ticks: { color: '#e9f1fb' } }
             }
           }
         });
       }
 
-      // Factory Chart
       const ctxFactory = DOM.get('chartFactory')?.getContext('2d');
       if (ctxFactory && charts?.pabrik?.length) {
         State.charts.factory = new Chart(ctxFactory, {
@@ -445,17 +548,10 @@
           },
           options: {
             responsive: true,
-            maintainAspectRatio: true,
             plugins: { legend: { display: false } },
             scales: {
-              x: { 
-                ticks: { color: '#e9f1fb', maxRotation: 45 },
-                grid: { color: 'rgba(255,255,255,0.1)' }
-              },
-              y: { 
-                ticks: { color: '#e9f1fb' },
-                grid: { color: 'rgba(255,255,255,0.1)' }
-              }
+              x: { ticks: { color: '#e9f1fb', maxRotation: 45 } },
+              y: { ticks: { color: '#e9f1fb' } }
             }
           }
         });
@@ -496,149 +592,32 @@
 
       const refreshSec = DOM.get('refreshSec')?.value || '0';
       DOM.updateText('refreshStatus', refreshSec === '0' ? 'Off' : `${refreshSec}s`);
-      DOM.updateText('dataStatus', '✅ Backend Apps Script • ✅ Frontend HTML');
+      DOM.updateText('dataStatus', '✅ Data Dummy • Siap digunakan');
       DOM.updateText('lastUpdateTime', Utils.formatDateTime(payload?.generatedAt || new Date()));
       DOM.updateText('lastUpdate', Utils.formatDateTime(payload?.generatedAt || new Date()));
     },
 
-    // Main render function with error handling
-    renderAll(payload) {
-      if (!payload) {
-        console.warn('No payload to render');
-        return;
-      }
+    renderAll() {
+      const payload = State.backendPayload;
+      if (!payload) return;
 
-      try {
-        console.log('Rendering payload:', payload);
-        
-        if (payload.masterStats) {
-          this.masterSummary(payload.masterStats, payload.filters);
-        }
-        
-        if (payload.komoditiSummary) {
-          this.komoditiSummary(payload.komoditiSummary);
-        }
-        
-        this.renderProgressContainer(payload.progressStats, payload.stats?.totalOrders);
-        this.renderPartialContainer(payload.partialStats);
-        this.kpi(payload.stats, payload.deliveredStats, payload.cancelStats);
-        this.chartsFromBackend(payload.charts, payload.stats);
-        this.realTimeTable(payload.realtime);
-        this.ringkasanData(payload.stats, payload.masterStats, payload);
-        
-        DOM.showMessage('success', 'Dashboard berhasil diperbarui');
-      } catch (error) {
-        console.error('Error rendering:', error);
-        DOM.showMessage('error', 'Error menampilkan data: ' + error.message);
-      }
-    }
-  };
-
-  const DataFetcher = {
-    async fetchAllData() {
-      if (State.isRefreshing) {
-        console.log('Already refreshing, skipping...');
-        return null;
-      }
-
-      State.isRefreshing = true;
-      DOM.showRefreshIndicator(true);
-      LiveStatus.setChecking();
-
-      try {
-        const from = DOM.get('fromDate')?.value || '';
-        const to = DOM.get('toDate')?.value || '';
-        const komoditi = State.activeKomoditi || 'semua';
-        
-        // Build URL with params
-        const url = new URL(CONFIG.WEB_APP_URL);
-        url.searchParams.append('from', from);
-        url.searchParams.append('to', to);
-        url.searchParams.append('komoditi', komoditi);
-        
-        console.log('Fetching from:', url.toString());
-
-        const res = await fetch(url, { 
-          method: 'GET', 
-          cache: 'no-store',
-          mode: 'cors'
-        });
-        
-        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-
-        const json = await res.json();
-        console.log('Backend response:', json);
-        
-        if (!json.success) throw new Error(json.message || 'Backend error');
-
-        State.backendPayload = json;
-        LiveStatus.setConnected();
-        return json;
-        
-      } catch (err) {
-        console.error('Fetch error:', err);
-        LiveStatus.setOffline();
-        DOM.showMessage('error', 'Gagal mengambil data: ' + err.message);
-        return null;
-        
-      } finally {
-        DOM.showRefreshIndicator(false);
-        State.isRefreshing = false;
-      }
-    }
-  };
-
-  const AutoRefresh = {
-    setup() {
-      if (State.refreshTimer) {
-        clearInterval(State.refreshTimer);
-        State.refreshTimer = null;
-      }
+      console.log('Rendering with payload:', payload);
       
-      const sec = Number(DOM.get('refreshSec')?.value || 0);
-      if (sec > 0) {
-        console.log(`Auto refresh set to ${sec} seconds`);
-        State.refreshTimer = setInterval(() => App.refresh(), sec * 1000);
-      }
+      this.masterSummary(payload.masterStats, payload.filters);
+      this.komoditiSummary(payload.komoditiSummary);
+      this.renderProgressContainer(payload.progressStats, payload.stats?.totalOrders);
+      this.renderPartialContainer(payload.partialStats);
+      this.kpi(payload.stats, payload.deliveredStats, payload.cancelStats);
+      this.chartsFromBackend(payload.charts, payload.stats);
+      this.realTimeTable(payload.realtime);
+      this.ringkasanData(payload.stats, payload.masterStats, payload);
+      
+      LiveStatus.setConnected();
+      DOM.showMessage('success', 'Dashboard siap (Data Dummy)');
     }
   };
-
-  const TVMode = {
-    toggle() {
-      State.tvMode = !State.tvMode;
-      document.body.classList.toggle('tv-mode', State.tvMode);
-      const btn = DOM.get('btnDisplay');
-      if (btn) {
-        btn.textContent = State.tvMode ? '📺 TV Mode ON' : '📺 Display Mode';
-        btn.classList.toggle('active', State.tvMode);
-      }
-    }
-  };
-
-  function setKomoditi(active) {
-    State.activeKomoditi = active;
-    
-    // Update active class
-    ['btnSemua', 'btnGula', 'btnMinyak'].forEach(id => {
-      const btn = DOM.get(id);
-      if (btn) btn.classList.remove('active');
-    });
-    
-    const activeBtn = DOM.get(active === 'semua' ? 'btnSemua' : 
-                             active === 'GULA' ? 'btnGula' : 'btnMinyak');
-    if (activeBtn) activeBtn.classList.add('active');
-
-    App.refresh();
-  }
 
   const App = {
-    async refresh() {
-      const data = await DataFetcher.fetchAllData();
-      if (data) {
-        Renderer.renderAll(data);
-      }
-    },
-
     initDefaultDate() {
       const today = new Date();
       const firstDay = new Date(today.getFullYear(), 0, 1);
@@ -646,53 +625,57 @@
       const fromInput = DOM.get('fromDate');
       const toInput = DOM.get('toDate');
       
-      if (fromInput) {
-        fromInput.value = firstDay.toISOString().split('T')[0];
-      }
-      if (toInput) {
-        toInput.value = today.toISOString().split('T')[0];
-      }
+      if (fromInput) fromInput.value = firstDay.toISOString().split('T')[0];
+      if (toInput) toInput.value = today.toISOString().split('T')[0];
     },
 
     bindEvents() {
-      DOM.get('btnRefresh')?.addEventListener('click', () => this.refresh());
-      DOM.get('btnDisplay')?.addEventListener('click', TVMode.toggle);
-      DOM.get('refreshSec')?.addEventListener('change', AutoRefresh.setup);
-      DOM.get('fromDate')?.addEventListener('change', () => this.refresh());
-      DOM.get('toDate')?.addEventListener('change', () => this.refresh());
-      DOM.get('btnSemua')?.addEventListener('click', () => setKomoditi('semua'));
-      DOM.get('btnGula')?.addEventListener('click', () => setKomoditi('GULA'));
-      DOM.get('btnMinyak')?.addEventListener('click', () => setKomoditi('MINYAK'));
+      DOM.get('btnRefresh')?.addEventListener('click', () => {
+        Renderer.renderAll();
+        DOM.showMessage('success', 'Data di-refresh');
+      });
       
-      // Handle Enter key on inputs
-      ['fromDate', 'toDate'].forEach(id => {
-        DOM.get(id)?.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') this.refresh();
-        });
+      DOM.get('btnDisplay')?.addEventListener('click', () => {
+        State.tvMode = !State.tvMode;
+        document.body.classList.toggle('tv-mode', State.tvMode);
+        const btn = DOM.get('btnDisplay');
+        if (btn) {
+          btn.textContent = State.tvMode ? '📺 TV Mode ON' : '📺 Display Mode';
+          btn.classList.toggle('active', State.tvMode);
+        }
+      });
+
+      DOM.get('btnSemua')?.addEventListener('click', () => {
+        State.activeKomoditi = 'semua';
+        document.querySelectorAll('.commodity-btn').forEach(b => b.classList.remove('active'));
+        DOM.get('btnSemua')?.classList.add('active');
+        Renderer.renderAll();
+      });
+
+      DOM.get('btnGula')?.addEventListener('click', () => {
+        State.activeKomoditi = 'GULA';
+        document.querySelectorAll('.commodity-btn').forEach(b => b.classList.remove('active'));
+        DOM.get('btnGula')?.classList.add('active');
+        Renderer.renderAll();
+      });
+
+      DOM.get('btnMinyak')?.addEventListener('click', () => {
+        State.activeKomoditi = 'MINYAK';
+        document.querySelectorAll('.commodity-btn').forEach(b => b.classList.remove('active'));
+        DOM.get('btnMinyak')?.classList.add('active');
+        Renderer.renderAll();
       });
     },
 
-    async init() {
-      console.log('Initializing app...');
-      
-      // Show loading state
-      LiveStatus.setChecking();
-      
-      // Initialize UI
+    init() {
+      console.log('Initializing with dummy data...');
       this.initDefaultDate();
       this.bindEvents();
-      
-      // First data fetch
-      await this.refresh();
-      
-      // Setup auto refresh
-      AutoRefresh.setup();
-      
-      console.log('App initialized');
+      Renderer.renderAll();
     }
   };
 
-  // Start app when DOM is ready
+  // Start app
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => App.init());
   } else {
