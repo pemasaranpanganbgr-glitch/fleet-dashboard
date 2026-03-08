@@ -4,27 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dashboard Distribusi - BGR Logistik</title>
-  <meta name="description" content="Dashboard distribusi Gula & Minyak dengan integrasi Google Sheets" />
+  <meta name="description" content="Dashboard distribusi Gula & Minyak dengan Apps Script backend" />
   <meta name="theme-color" content="#071424" />
 
-  <!-- Font Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Library Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  
-  <!-- Google Sheets API -->
-  <script src="https://apis.google.com/js/api.js"></script>
 
   <style>
-    /* ===== RESET & VARIABEL ===== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
       --bg-primary: #071424;
@@ -42,7 +32,6 @@
       --gula: #f39c12;
       --minyak: #e67e22;
       --line: rgba(255, 255, 255, 0.08);
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
       --radius-sm: 10px;
       --radius-md: 14px;
       --radius-lg: 18px;
@@ -60,25 +49,15 @@
       font-size: var(--base-font-size);
     }
 
-    /* ===== TV MODE ===== */
-    body.tv-mode {
-      --base-font-size: 10px;
-    }
-
+    body.tv-mode { --base-font-size: 10px; }
     body.tv-mode .brand-logo img { height: 70px; }
     body.tv-mode h1 { font-size: 32px; }
     body.tv-mode .master-stat-value { font-size: 42px; }
     body.tv-mode .kpi .main-value { font-size: 48px; }
     body.tv-mode canvas { max-height: 350px; }
 
-    /* ===== LAYOUT ===== */
-    .wrap {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px 16px;
-    }
+    .wrap { max-width: 1400px; margin: 0 auto; padding: 20px 16px; }
 
-    /* ----- HEADER ----- */
     .header {
       display: flex;
       flex-wrap: wrap;
@@ -93,26 +72,11 @@
       margin-bottom: 20px;
     }
 
-    .brand-container {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+    .brand-container { display: flex; align-items: center; gap: 16px; }
+    .brand-logo img { height: 50px; filter: brightness(0) invert(1); }
+    .title { border-left: 1px solid var(--line); padding-left: 16px; }
 
-    .brand-logo img {
-      height: 50px;
-      filter: brightness(0) invert(1);
-    }
-
-    .title {
-      border-left: 1px solid var(--line);
-      padding-left: 16px;
-    }
-
-    h1 {
-      font-size: clamp(18px, 4vw, 24px);
-      font-weight: 800;
-    }
+    h1 { font-size: clamp(18px, 4vw, 24px); font-weight: 800; }
 
     .sub {
       color: var(--text-secondary);
@@ -122,12 +86,7 @@
       align-items: center;
     }
 
-    /* ===== KOMODITI SELECTOR ===== */
-    .commodity-selector {
-      display: flex;
-      gap: 10px;
-      margin: 10px 0;
-    }
+    .commodity-selector { display: flex; gap: 10px; margin: 10px 0; }
 
     .commodity-btn {
       background: rgba(15, 42, 71, 0.6);
@@ -150,29 +109,27 @@
     .commodity-btn.minyak.active { background: #e67e22; }
     .commodity-btn.semua.active { background: #3498db; }
 
-    /* ===== LIVE STATUS ===== */
     #liveStatus {
       transition: all 0.3s ease;
       padding: 2px 8px;
       border-radius: 12px;
       font-weight: 600;
     }
-    
+
     #liveStatus.connected {
       background: rgba(46, 204, 113, 0.2);
       animation: pulseGreen 2s infinite;
     }
-    
+
     @keyframes pulseGreen {
       0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
       70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
       100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
     }
-    
+
     #liveStatus.disconnected { background: rgba(231, 76, 60, 0.2); }
     #liveStatus.checking { background: rgba(241, 196, 15, 0.2); }
 
-    /* ===== CONTROLS ===== */
     .controls-container {
       flex: 1 1 auto;
       min-width: 380px;
@@ -250,11 +207,6 @@
       width: 100%;
     }
 
-    .btn-refresh:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(255, 176, 0, 0.3);
-    }
-
     .btn-display {
       background: linear-gradient(135deg, rgba(68, 156, 255, 0.9), rgba(68, 156, 255, 0.55));
       color: white;
@@ -271,7 +223,6 @@
       background: linear-gradient(135deg, rgba(46, 204, 113, 0.9), rgba(46, 204, 113, 0.55));
     }
 
-    /* ===== CARD MASTER ===== */
     .master-card {
       background: linear-gradient(135deg, rgba(255, 176, 0, 0.15), rgba(255, 176, 0, 0.05));
       border: 1px solid rgba(255, 176, 0, 0.3);
@@ -290,12 +241,7 @@
     .master-stat-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; }
     .master-stat-value { font-size: 28px; font-weight: 800; color: var(--accent-primary); }
 
-    /* ===== KPI CARDS ===== */
-    .kpis-top, .kpis-bottom {
-      display: grid;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
+    .kpis-top, .kpis-bottom { display: grid; gap: 16px; margin-bottom: 16px; }
     .kpis-top { grid-template-columns: repeat(3, 1fr); }
     .kpis-bottom { grid-template-columns: repeat(2, 1fr); }
 
@@ -305,7 +251,6 @@
       background: rgba(15, 42, 71, 0.55);
       border: 1px solid var(--line);
       border-top: 4px solid transparent;
-      transition: transform 0.2s;
       text-align: center;
     }
 
@@ -317,24 +262,10 @@
 
     .kpi.glow-active { animation: glowPulse 2s ease-in-out infinite; }
     .kpi.glow-inactive { opacity: 0.7; border-top-color: rgba(255,255,255,0.1) !important; }
-
     .kpi .main-value { font-size: clamp(32px, 5vw, 42px); font-weight: 900; }
     .kpi .qty-value { font-size: 18px; font-weight: 700; color: var(--accent-primary); }
-    .kpi .commodity-badge {
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.1);
-      display: inline-block;
-      margin-top: 5px;
-    }
 
-    /* ===== GRID UTAMA ===== */
-    .main, .bottom {
-      display: grid;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
+    .main, .bottom { display: grid; gap: 16px; margin-bottom: 16px; }
     .main { grid-template-columns: 1.2fr 1.6fr 1.6fr; }
     .bottom { grid-template-columns: 1.2fr 1.8fr 1.6fr; }
 
@@ -367,12 +298,7 @@
     }
 
     canvas { max-height: 260px; width: 100% !important; }
-
-    /* ===== TABEL ===== */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    table { width: 100%; border-collapse: collapse; }
 
     th {
       text-align: left;
@@ -395,7 +321,6 @@
     .status-cancel { color: var(--danger); }
     .status-partial { color: var(--partial); }
 
-    /* ===== BADGE ===== */
     .badge {
       padding: 2px 8px;
       border-radius: 12px;
@@ -403,6 +328,7 @@
       font-weight: 700;
       display: inline-block;
     }
+
     .badge-delivered { background: rgba(46, 204, 113, 0.2); color: var(--success); border: 1px solid rgba(46, 204, 113, 0.3); }
     .badge-progress { background: rgba(241, 196, 15, 0.2); color: var(--warning); border: 1px solid rgba(241, 196, 15, 0.3); }
     .badge-cancel { background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 1px solid rgba(231, 76, 60, 0.3); }
@@ -411,7 +337,6 @@
     .badge-gula { background: rgba(243, 156, 18, 0.2); color: #f39c12; border: 1px solid rgba(243, 156, 18, 0.3); }
     .badge-minyak { background: rgba(230, 126, 34, 0.2); color: #e67e22; border: 1px solid rgba(230, 126, 34, 0.3); }
 
-    /* ===== PARTIAL DETAIL ===== */
     .partial-detail {
       background: rgba(155, 89, 182, 0.1);
       border-left: 3px solid var(--partial);
@@ -419,12 +344,12 @@
       border-radius: var(--radius-sm);
     }
 
-    /* ===== SUMMARY CARDS ===== */
     .summary-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       margin-top: 10px;
+      margin-bottom: 16px;
     }
 
     .summary-card {
@@ -445,7 +370,6 @@
       gap: 5px;
     }
 
-    /* ===== FOOTER ===== */
     .footer {
       margin-top: 40px;
       padding: 20px 0;
@@ -474,7 +398,6 @@
 
     .note { color: var(--text-secondary); font-size: 12px; }
 
-    /* ===== REFRESH INDICATOR ===== */
     .refresh-indicator {
       position: fixed;
       top: 20px;
@@ -492,6 +415,7 @@
     }
 
     .refresh-indicator.show { display: flex; }
+
     .refresh-indicator .dot {
       width: 8px;
       height: 8px;
@@ -505,68 +429,28 @@
       50% { opacity: 0.5; transform: scale(0.8); }
     }
 
-    /* ===== DEBUG BUTTONS ===== */
-    .debug-buttons {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      z-index: 9999;
-      background: rgba(0,0,0,0.7);
-      padding: 8px;
-      border-radius: 30px;
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      max-width: 400px;
-    }
-
-    .debug-btn {
-      background: #333;
-      color: white;
-      border: none;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 10px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .debug-btn:hover { opacity: 0.8; }
-
-    /* ===== RESPONSIVE ===== */
     @media (max-width: 1200px) {
       .main, .bottom { grid-template-columns: 1fr; }
       .master-stats { grid-template-columns: repeat(2, 1fr); }
     }
+
     @media (max-width: 768px) {
       .kpis-top, .kpis-bottom { grid-template-columns: repeat(2, 1fr); }
-      .controls-row.inputs { grid-template-columns: 1fr; }
+      .controls-row.inputs, .controls-row.labels { grid-template-columns: 1fr; }
     }
+
     @media (max-width: 480px) {
-      .kpis-top, .kpis-bottom, .master-stats { grid-template-columns: 1fr; }
+      .kpis-top, .kpis-bottom, .master-stats, .summary-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <!-- Refresh Indicator -->
   <div id="refreshIndicator" class="refresh-indicator">
     <div class="dot"></div>
     <span>Mengupdate data...</span>
   </div>
 
-  <!-- Debug Buttons -->
-  <div class="debug-buttons">
-    <button class="debug-btn" onclick="toggleContainerInfo()">🔍 Show IDs</button>
-    <button class="debug-btn" style="background:#f1c40f" onclick="debugProgress()">📊 Progress</button>
-    <button class="debug-btn" style="background:#9b59b6" onclick="debugPartial()">⚡ Partial</button>
-    <button class="debug-btn" style="background:#2ecc71" onclick="debugDelivered()">✅ Delivered</button>
-    <button class="debug-btn" style="background:#e74c3c" onclick="debugCancel()">⛔ Cancel</button>
-    <button class="debug-btn" style="background:#3498db" onclick="debugStatusCategories()">🔍 Status</button>
-    <button class="debug-btn" style="background:#ffb000" onclick="testAllContainers()">🧪 Test</button>
-  </div>
-
   <div class="wrap">
-    <!-- HEADER -->
     <header class="header">
       <div class="brand-container">
         <div class="brand-logo">
@@ -577,7 +461,7 @@
           <p class="sub">
             <span>BGR Logistik</span>
             <span>•</span>
-            <span id="liveStatus" class="connected">🟢 Live</span>
+            <span id="liveStatus" class="checking">🟡 Menyiapkan...</span>
           </p>
         </div>
       </div>
@@ -593,7 +477,7 @@
           <div class="periode-group">
             <div class="date-inputs">
               <input type="date" id="fromDate" class="date-input" />
-              <span class="date-sep">s/d</span>
+              <span>s/d</span>
               <input type="date" id="toDate" class="date-input" />
             </div>
           </div>
@@ -609,23 +493,21 @@
             </select>
           </div>
 
-          <div style="display: flex; gap: 8px;">
+          <div style="display:flex; gap:8px;">
             <button id="btnRefresh" class="btn-refresh">↻ Refresh</button>
             <button id="btnDisplay" class="btn-display">📺 Display Mode</button>
           </div>
         </div>
-        
-        <!-- Commodity Selector -->
+
         <div class="commodity-selector">
-          <button id="btnSemua" class="commodity-btn semua active" onclick="filterKomoditi('semua')">📊 Semua</button>
-          <button id="btnGula" class="commodity-btn gula" onclick="filterKomoditi('GULA')">🍚 Gula</button>
-          <button id="btnMinyak" class="commodity-btn minyak" onclick="filterKomoditi('MINYAK')">🛢️ Minyak</button>
+          <button id="btnSemua" class="commodity-btn semua active">📊 Semua</button>
+          <button id="btnGula" class="commodity-btn gula">🍚 Gula</button>
+          <button id="btnMinyak" class="commodity-btn minyak">🛢️ Minyak</button>
         </div>
       </div>
     </header>
 
-    <!-- MASTER ORDER CARD -->
-    <div class="card master-card" id="containerMasterOrder">
+    <div class="card master-card">
       <div class="hd">
         <div class="t">📋 RINGKASAN MASTER ORDER (ORDER_ID_FOOD)</div>
         <div class="pill" id="masterPeriode">Memuat...</div>
@@ -650,46 +532,43 @@
       </div>
     </div>
 
-    <!-- SUMMARY KOMODITI -->
     <div class="summary-grid">
       <div class="summary-card gula">
         <div class="summary-title">
           <span>🍚 GULA</span>
           <span class="badge badge-gula" id="gulaOrderCount">0 order</span>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px;">
           <span>Total QTY:</span>
           <span id="gulaTotalQty">0</span>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 5px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:5px;">
           <span>Progress:</span>
           <span id="gulaProgress">0</span>
         </div>
       </div>
+
       <div class="summary-card minyak">
         <div class="summary-title">
           <span>🛢️ MINYAK</span>
           <span class="badge badge-minyak" id="minyakOrderCount">0 order</span>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px;">
           <span>Total QTY:</span>
           <span id="minyakTotalQty">0</span>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 5px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:5px;">
           <span>Progress:</span>
           <span id="minyakProgress">0</span>
         </div>
       </div>
     </div>
 
-    <!-- KPI CARDS -->
     <div id="kpiContainer" class="kpis-top"></div>
     <div id="kpiBottomContainer" class="kpis-bottom"></div>
 
-    <!-- MAIN GRID -->
     <div class="main">
-      <!-- Status Distribusi -->
-      <div class="card" id="containerStatusDistribusi">
+      <div class="card">
         <div class="hd">
           <div class="t">📊 Status Distribusi</div>
           <div class="pill" id="lastUpdate">Loading...</div>
@@ -700,8 +579,7 @@
         </div>
       </div>
 
-      <!-- Top Kota -->
-      <div class="card" id="containerTopKota">
+      <div class="card">
         <div class="hd">
           <div class="t">🏙️ Top 8 Kota Tujuan</div>
           <div class="pill">Berdasarkan QTY</div>
@@ -711,8 +589,7 @@
         </div>
       </div>
 
-      <!-- Top Pabrik -->
-      <div class="card" id="containerTopPabrik">
+      <div class="card">
         <div class="hd">
           <div class="t">🏭 Top 6 Pabrik</div>
           <div class="pill">Berdasarkan QTY</div>
@@ -723,10 +600,8 @@
       </div>
     </div>
 
-    <!-- BOTTOM GRID -->
     <div class="bottom">
-      <!-- Order PARTIAL -->
-      <div class="card" id="containerPartial">
+      <div class="card">
         <div class="hd">
           <div class="t">⚡ Order PARTIAL</div>
           <div class="pill" id="partialPill">-</div>
@@ -736,8 +611,7 @@
         </div>
       </div>
 
-      <!-- Real Time Delivery -->
-      <div class="card" id="containerRealTime">
+      <div class="card">
         <div class="hd">
           <div class="t">🚚 Real Time Delivery</div>
           <div class="pill">10 Data Terbaru</div>
@@ -761,8 +635,7 @@
         </div>
       </div>
 
-      <!-- Ringkasan Data -->
-      <div class="card" id="containerRingkasan">
+      <div class="card">
         <div class="hd">
           <div class="t">📋 Ringkasan Data</div>
           <div class="pill">Info Detail</div>
@@ -774,17 +647,16 @@
             <div>• Total Master: <span id="masterInfoDetail">-</span></div>
             <div>• Total QTY: <span id="totalQtyDetail">-</span></div>
             <div>• Rata-rata QTY: <span id="avgQtyDetail">-</span></div>
-            <div>• Auto Refresh: <span id="refreshStatus">30s</span></div>
+            <div>• Auto Refresh: <span id="refreshStatus">-</span></div>
             <div>• Status Data: <span id="dataStatus">Menyiapkan...</span></div>
             <div>• Last Update: <span id="lastUpdateTime">-</span></div>
           </div>
-          <div id="messageContainer"></div>
+          <div id="messageContainer" style="margin-top:10px;"></div>
           <div id="errorContainer" style="display:none"></div>
         </div>
       </div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="footer">
       <div class="footer-logo">
         <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
@@ -800,801 +672,149 @@
     (function() {
       'use strict';
 
-      // ========== KONFIGURASI ==========
       const CONFIG = {
-        API_KEY: 'AIzaSyAqButS46oQPT7KiLT1PrklrzueBQ9w-qk',
-        SHEET_ID: '1sSCdfPKQWBsgH6JUFzmUpIpuIi8T8FWbhzs0LDcKO2M',
-        
-        // 2 Sheet Realisasi
-        SHEETS: {
-          GULA: 'PELAKSANAAN PEKERJAAN GULA!A:T',
-          MINYAK: 'PELAKSANAAN PEKERJAAN MINYAK!A:T'
-        },
-        
-        // Master Order
-        MASTER_RANGE: 'ORDER_ID_FOOD!A:H',
-        
-        // Mapping kolom (sama untuk kedua sheet)
-        COLUMNS: {
-          tglOrder: 1,     // Kolom B
-          orderCode: 2,    // Kolom C
-          pabrik: 3,       // Kolom D
-          komoditi: 4,     // Kolom E
-          penerima: 5,     // Kolom F
-          kota: 6,         // Kolom G
-          qty: 7,          // Kolom H
-          noPolisi: 10,    // Kolom K
-          rencanaMuat: 15, // Kolom P
-          status: 16,      // Kolom Q
-          tglMuat: 19      // Kolom T
-        },
-        
-        CHART_COLORS: {
-          delivered: '#2ecc71',
-          onDelivery: '#3498db',
-          progress: '#f1c40f',
-          cancel: '#e74c3c',
-          partial: '#9b59b6'
-        }
+        WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzikbUH9ULVZ2A5kuY8Z157IyVcAXbBjtDdsqm168a3KkwYPQVe9-0wFPHoW5g_SIge1A/exec'
       };
 
-      // ========== STATE GLOBAL ==========
       const State = {
-        realisasiData: {
-          GULA: [],
-          MINYAK: [],
-          ALL: [] // Gabungan
-        },
-        masterData: [],
-        filteredRealisasi: [],
-        filteredMaster: [],
-        activeKomoditi: 'semua', // 'semua', 'GULA', 'MINYAK'
+        backendPayload: null,
+        activeKomoditi: 'semua',
         charts: {},
         refreshTimer: null,
         isRefreshing: false,
-        lastFetch: null,
-        dataStatus: { gula: false, minyak: false, master: false },
-        tvMode: false,
-        connectionStatus: 'checking'
+        tvMode: false
       };
 
-      // ========== HELPER DOM ==========
       const DOM = {
         get: (id) => document.getElementById(id),
-        showRefreshIndicator: (show) => {
-          const el = DOM.get('refreshIndicator');
-          if (el) show ? el.classList.add('show') : el.classList.remove('show');
+        updateText: (id, text) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = text;
         },
-        showMessage: (type, msg, duration = 2000) => {
-          const container = DOM.get('messageContainer');
-          const errorContainer = DOM.get('errorContainer');
-          if (!container) return;
+        showRefreshIndicator: (show) => {
+          const el = document.getElementById('refreshIndicator');
+          if (!el) return;
+          show ? el.classList.add('show') : el.classList.remove('show');
+        },
+        showMessage: (type, msg, duration = 2500) => {
+          const msgEl = document.getElementById('messageContainer');
+          const errEl = document.getElementById('errorContainer');
 
           if (type === 'error') {
-            if (errorContainer) {
-              errorContainer.style.display = 'block';
-              errorContainer.style.padding = '10px';
-              errorContainer.style.background = 'rgba(231,76,60,0.2)';
-              errorContainer.style.borderRadius = 'var(--radius-sm)';
-              errorContainer.style.color = 'var(--danger)';
-              errorContainer.textContent = `❌ ${msg}`;
-              setTimeout(() => { errorContainer.style.display = 'none'; }, duration);
-            }
+            if (!errEl) return;
+            errEl.style.display = 'block';
+            errEl.style.padding = '10px';
+            errEl.style.marginTop = '10px';
+            errEl.style.background = 'rgba(231,76,60,0.2)';
+            errEl.style.borderRadius = '10px';
+            errEl.style.color = '#e74c3c';
+            errEl.textContent = '❌ ' + msg;
+            setTimeout(() => { errEl.style.display = 'none'; }, duration);
           } else {
-            container.textContent = `✅ ${msg}`;
-            setTimeout(() => { container.textContent = ''; }, duration);
-          }
-        },
-        updateText: (id, text) => {
-          const el = DOM.get(id);
-          if (el) el.textContent = text;
-        }
-      };
-
-      // ========== FILTER KOMODITI ==========
-      window.filterKomoditi = (komoditi) => {
-        State.activeKomoditi = komoditi;
-        
-        // Update button active state
-        document.getElementById('btnSemua').classList.remove('active');
-        document.getElementById('btnGula').classList.remove('active');
-        document.getElementById('btnMinyak').classList.remove('active');
-        
-        if (komoditi === 'semua') {
-          document.getElementById('btnSemua').classList.add('active');
-          State.filteredRealisasi = [...State.realisasiData.ALL];
-        } else if (komoditi === 'GULA') {
-          document.getElementById('btnGula').classList.add('active');
-          State.filteredRealisasi = [...State.realisasiData.GULA];
-        } else if (komoditi === 'MINYAK') {
-          document.getElementById('btnMinyak').classList.add('active');
-          State.filteredRealisasi = [...State.realisasiData.MINYAK];
-        }
-        
-        // Terapkan filter tanggal
-        const from = DOM.get('fromDate')?.value;
-        const to = DOM.get('toDate')?.value;
-        State.filteredRealisasi = DataProcessor.filterByDate(State.filteredRealisasi, from, to, 'tglOrder');
-        
-        // Update tampilan
-        App.updateDisplay();
-      };
-
-      // ========== LIVE STATUS MANAGER ==========
-      const LiveStatusManager = {
-        init: () => {
-          setInterval(() => LiveStatusManager.checkConnection(), 30000);
-          LiveStatusManager.checkConnection();
-        },
-        
-        checkConnection: async () => {
-          const statusEl = document.getElementById('liveStatus');
-          if (!statusEl) return;
-          
-          State.connectionStatus = 'checking';
-          statusEl.innerHTML = '🟡 Checking...';
-          statusEl.className = 'checking';
-          
-          try {
-            await gapi.client.sheets.spreadsheets.values.get({
-              spreadsheetId: CONFIG.SHEET_ID,
-              range: 'A1:A1'
-            });
-            
-            State.connectionStatus = 'connected';
-            statusEl.innerHTML = '🟢 Live';
-            statusEl.className = 'connected';
-          } catch (error) {
-            State.connectionStatus = 'disconnected';
-            statusEl.innerHTML = '🔴 Offline';
-            statusEl.className = 'disconnected';
-          }
-        },
-        
-        updateFromFetch: (success) => {
-          const statusEl = document.getElementById('liveStatus');
-          if (!statusEl) return;
-          
-          if (success) {
-            statusEl.innerHTML = '🟢 Live';
-            statusEl.className = 'connected';
-          } else {
-            statusEl.innerHTML = '🟡 Last update mungkin stale';
-            statusEl.className = 'checking';
+            if (!msgEl) return;
+            msgEl.style.color = '#2ecc71';
+            msgEl.textContent = '✅ ' + msg;
+            setTimeout(() => { msgEl.textContent = ''; }, duration);
           }
         }
       };
 
-      // ========== GOOGLE SHEETS API ==========
-      const SheetsAPI = {
-        init: () => {
-          return new Promise((resolve, reject) => {
-            gapi.load('client', async () => {
-              try {
-                await gapi.client.init({
-                  apiKey: CONFIG.API_KEY,
-                  discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-                });
-                console.log('✅ Google Sheets API initialized');
-                resolve();
-              } catch (error) {
-                console.error('❌ Error initializing Google Sheets API:', error);
-                reject(error);
-              }
-            });
-          });
+      const Utils = {
+        formatNumber: (num) => new Intl.NumberFormat('id-ID').format(Math.round(Number(num || 0))),
+        formatDecimal: (num, dec = 1) => new Intl.NumberFormat('id-ID', {
+          minimumFractionDigits: dec,
+          maximumFractionDigits: dec
+        }).format(Number(num || 0)),
+        formatDate: (val) => {
+          if (!val) return '-';
+          const d = new Date(val);
+          if (isNaN(d)) return '-';
+          return new Intl.DateTimeFormat('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          }).format(d);
         },
-        
-        fetchData: async (range) => {
-          try {
-            const response = await gapi.client.sheets.spreadsheets.values.get({
-              spreadsheetId: CONFIG.SHEET_ID,
-              range: range,
-            });
-            return response.result.values || [];
-          } catch (error) {
-            console.error('Error fetching data:', error);
-            throw error;
-          }
+        formatDateTime: (val) => {
+          if (!val) return '-';
+          const d = new Date(val);
+          if (isNaN(d)) return '-';
+          return new Intl.DateTimeFormat('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          }).format(d);
+        },
+        getStatusClass: (status) => {
+          const s = String(status || '').toUpperCase();
+          if (s === 'DELIVERED') return 'status-delivered';
+          if (s === 'ON_DELIVERY') return 'status-ondelivery';
+          if (s === 'PROGRESS') return 'status-progress';
+          if (s === 'CANCEL') return 'status-cancel';
+          if (s === 'PARTIAL') return 'status-partial';
+          return '';
+        },
+        getBadgeClass: (status) => {
+          const s = String(status || '').toUpperCase();
+          if (s === 'DELIVERED') return 'badge-delivered';
+          if (s === 'ON_DELIVERY') return 'badge-ondelivery';
+          if (s === 'PROGRESS') return 'badge-progress';
+          if (s === 'CANCEL') return 'badge-cancel';
+          if (s === 'PARTIAL') return 'badge-partial';
+          return '';
         }
       };
 
-      // ========== TV MODE ==========
-      const TVMode = {
-        toggle: () => {
-          State.tvMode = !State.tvMode;
-          document.body.classList.toggle('tv-mode', State.tvMode);
-          const btn = DOM.get('btnDisplay');
-          if (btn) {
-            btn.textContent = State.tvMode ? '📺 TV Mode ON' : '📺 Display Mode';
-            btn.classList.toggle('active', State.tvMode);
-          }
+      const LiveStatus = {
+        setConnected() {
+          const el = DOM.get('liveStatus');
+          if (!el) return;
+          el.textContent = '🟢 Live';
+          el.className = 'connected';
         },
-        init: () => {
-          DOM.get('btnDisplay')?.addEventListener('click', TVMode.toggle);
+        setChecking() {
+          const el = DOM.get('liveStatus');
+          if (!el) return;
+          el.textContent = '🟡 Checking...';
+          el.className = 'checking';
+        },
+        setOffline() {
+          const el = DOM.get('liveStatus');
+          if (!el) return;
+          el.textContent = '🔴 Offline';
+          el.className = 'disconnected';
         }
       };
 
-      // ========== DATA PROCESSOR ==========
-      const DataProcessor = {
-        formatNumber: (num) => {
-          if (isNaN(num) || num === null) return '0';
-          return new Intl.NumberFormat('id-ID').format(Math.round(num));
-        },
-        formatNumberDecimal: (num, dec = 1) => {
-          if (isNaN(num) || num === null) return '0';
-          return new Intl.NumberFormat('id-ID', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(num);
-        },
-        formatDate: (date) => {
-          if (!date || !(date instanceof Date) || isNaN(date)) return '-';
-          return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
-        },
-        formatTime: (date) => {
-          if (!date || !(date instanceof Date) || isNaN(date)) return '-';
-          return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(date);
-        },
-        parseNumber: (val) => {
-          if (val == null || val === '') return 0;
-          try {
-            const str = val.toString().trim();
-            const cleaned = str.replace(/\./g, '').replace(',', '.');
-            const num = parseFloat(cleaned);
-            return isNaN(num) ? 0 : num;
-          } catch {
-            return 0;
-          }
-        },
-        parseDate: (val) => {
-          if (!val) return null;
-          try {
-            const str = val.toString().trim();
-            
-            // Excel serial number
-            const num = Number(str);
-            if (!isNaN(num) && num > 40000) {
-              return new Date((num - 25569) * 86400 * 1000);
-            }
-            
-            // Format DD/MM/YYYY atau DD-MM-YYYY
-            const dmy = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
-            if (dmy) {
-              return new Date(dmy[3], dmy[2] - 1, dmy[1]);
-            }
-            
-            // Format YYYY-MM-DD
-            const ymd = str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
-            if (ymd) {
-              return new Date(ymd[1], ymd[2] - 1, ymd[3]);
-            }
-            
-            const d = new Date(str);
-            return isNaN(d) ? null : d;
-          } catch {
-            return null;
-          }
-        },
-        
-        getStatusCategory: (status) => {
-          if (!status || status.toString().trim() === '') return 'UNKNOWN';
-          
-          const statusLower = status.toString().toLowerCase().trim();
-          
-          if (statusLower.includes('proses') || 
-              statusLower.includes('antrian') || 
-              statusLower.includes('pick up') || 
-              statusLower.includes('menunggu')) {
-            return 'PROGRESS';
-          }
-          
-          if (statusLower === 'delivery' || 
-              statusLower === 'on delivery' || 
-              (statusLower.includes('delivery') && !statusLower.includes('delivered'))) {
-            return 'ON_DELIVERY';
-          }
-          
-          if (statusLower.includes('delivered')) {
-            return 'DELIVERED';
-          }
-          
-          if (statusLower.includes('cancel')) {
-            return 'CANCEL';
-          }
-          
-          if (statusLower.includes('partial')) {
-            return 'PARTIAL';
-          }
-          
-          return 'UNKNOWN';
-        },
-        
-        processRealisasiRow: (row, komoditi) => {
-          if (!Array.isArray(row) || row.length < 17) return null;
-          
-          const orderCode = row[CONFIG.COLUMNS.orderCode] || '';
-          if (!orderCode || orderCode.toString().trim() === '') return null;
-          
-          let noPolisi = row[CONFIG.COLUMNS.noPolisi] || '-';
-          noPolisi = noPolisi.toString().trim().toUpperCase();
-          
-          return {
-            tglOrder: DataProcessor.parseDate(row[CONFIG.COLUMNS.tglOrder]),
-            orderCode: orderCode.toString().trim(),
-            pabrik: row[CONFIG.COLUMNS.pabrik] || 'Unknown',
-            komoditi: komoditi,
-            penerima: row[CONFIG.COLUMNS.penerima] || 'Unknown',
-            kota: row[CONFIG.COLUMNS.kota] || 'Unknown',
-            qty: DataProcessor.parseNumber(row[CONFIG.COLUMNS.qty]),
-            noPolisi: noPolisi,
-            rencanaMuat: DataProcessor.parseDate(row[CONFIG.COLUMNS.rencanaMuat]),
-            status: row[CONFIG.COLUMNS.status] || '',
-            statusCategory: DataProcessor.getStatusCategory(row[CONFIG.COLUMNS.status]),
-            tglMuat: DataProcessor.parseDate(row[CONFIG.COLUMNS.tglMuat])
-          };
-        },
-        
-        processMasterRow: (row) => {
-          if (!Array.isArray(row) || row.length < 7) return null;
-
-          const orderCodeRaw = row[2];
-          if (!orderCodeRaw || orderCodeRaw.toString().trim() === '') return null;
-
-          return {
-            tglOrder: DataProcessor.parseDate(row[1]),
-            orderCode: orderCodeRaw.toString().trim(),
-            pabrik: (row[3] || '').toString().trim() || 'Unknown',
-            penerima: (row[4] || '').toString().trim() || 'Unknown',
-            tujuan: (row[5] || '').toString().trim() || 'Unknown',
-            qtyOrder: DataProcessor.parseNumber(row[6])
-          };
-        },
-        
-        filterByDate: (data, from, to, field) => {
-          if (!from && !to) return data;
-          return data.filter(item => {
-            const d = item[field];
-            if (!d) return true;
-            if (from) { 
-              const f = new Date(from); 
-              f.setHours(0,0,0,0); 
-              if (d < f) return false; 
-            }
-            if (to) { 
-              const t = new Date(to); 
-              t.setHours(23,59,59,999); 
-              if (d > t) return false; 
-            }
-            return true;
-          });
-        },
-        
-        calculateMasterStats: (data) => {
-          if (!data || data.length === 0) return { totalOrders: 0, totalQty: 0, avgQty: 0, periode: '-', totalKomoditi: 0 };
-          
-          const uniqueOrders = new Map();
-          data.forEach(o => {
-            if (o.orderCode && o.qtyOrder > 0) {
-              uniqueOrders.set(o.orderCode, o);
-            }
-          });
-          
-          const orders = Array.from(uniqueOrders.values());
-          const totalOrders = orders.length;
-          const totalQty = orders.reduce((sum, o) => sum + (o.qtyOrder || 0), 0);
-          const avgQty = totalOrders ? totalQty / totalOrders : 0;
-          
-          const dates = orders.map(o => o.tglOrder).filter(d => d && d instanceof Date);
-          let periode = '-';
-          if (dates.length) {
-            const first = new Date(Math.min(...dates));
-            const last = new Date(Math.max(...dates));
-            periode = `${DataProcessor.formatDate(first)} - ${DataProcessor.formatDate(last)}`;
-          }
-          
-          return { totalOrders, totalQty, avgQty, periode, totalKomoditi: 2 };
-        },
-        
-        calculateKomoditiSummary: (dataGula, dataMinyak) => {
-          const gulaOrders = new Set(dataGula.map(d => d.orderCode)).size;
-          const minyakOrders = new Set(dataMinyak.map(d => d.orderCode)).size;
-          
-          const gulaQty = dataGula.reduce((sum, d) => sum + (d.qty || 0), 0);
-          const minyakQty = dataMinyak.reduce((sum, d) => sum + (d.qty || 0), 0);
-          
-          const gulaProgress = dataGula.filter(d => d.statusCategory === 'PROGRESS').length;
-          const minyakProgress = dataMinyak.filter(d => d.statusCategory === 'PROGRESS').length;
-          
-          return {
-            gula: { orders: gulaOrders, qty: gulaQty, progress: gulaProgress },
-            minyak: { orders: minyakOrders, qty: minyakQty, progress: minyakProgress }
-          };
-        },
-        
-        calculateRealisasiStats: (data) => {
-          const orderMap = new Map();
-          
-          data.forEach(item => {
-            if (!item.orderCode) return;
-            
-            if (!orderMap.has(item.orderCode)) {
-              orderMap.set(item.orderCode, {
-                statuses: new Set(),
-                totalQty: 0,
-                komoditi: item.komoditi
-              });
-            }
-            
-            const order = orderMap.get(item.orderCode);
-            order.statuses.add(item.statusCategory);
-            order.totalQty += item.qty || 0;
-          });
-
-          const stats = {
-            progress: { count: 0, qty: 0 },
-            onDelivery: { count: 0, qty: 0 },
-            delivered: { count: 0, qty: 0 },
-            cancel: { count: 0, qty: 0 },
-            partial: { count: 0, qty: 0 },
-            unknown: { count: 0, qty: 0 },
-            totalOrders: orderMap.size,
-            totalQty: data.reduce((sum, i) => sum + (i.qty || 0), 0),
-            totalRows: data.length
-          };
-
-          orderMap.forEach((order, orderCode) => {
-            const statuses = Array.from(order.statuses);
-            const isPartial = statuses.length > 1 || statuses.includes('PARTIAL');
-            
-            if (isPartial) {
-              stats.partial.count++;
-              stats.partial.qty += order.totalQty;
-            } else {
-              const mainStatus = statuses[0];
-              if (mainStatus === 'PROGRESS') {
-                stats.progress.count++;
-                stats.progress.qty += order.totalQty;
-              } else if (mainStatus === 'ON_DELIVERY') {
-                stats.onDelivery.count++;
-                stats.onDelivery.qty += order.totalQty;
-              } else if (mainStatus === 'DELIVERED') {
-                stats.delivered.count++;
-                stats.delivered.qty += order.totalQty;
-              } else if (mainStatus === 'CANCEL') {
-                stats.cancel.count++;
-                stats.cancel.qty += order.totalQty;
-              } else {
-                stats.unknown.count++;
-                stats.unknown.qty += order.totalQty;
-              }
-            }
-          });
-
-          const total = stats.totalOrders;
-          stats.progress.percentage = total ? (stats.progress.count / total) * 100 : 0;
-          stats.onDelivery.percentage = total ? (stats.onDelivery.count / total) * 100 : 0;
-          stats.delivered.percentage = total ? (stats.delivered.count / total) * 100 : 0;
-          stats.cancel.percentage = total ? (stats.cancel.count / total) * 100 : 0;
-          stats.partial.percentage = total ? (stats.partial.count / total) * 100 : 0;
-          stats.avgQtyPerOrder = total ? stats.totalQty / total : 0;
-
-          return stats;
-        },
-        
-        calculateProgressStats: (data) => {
-          const orderMap = new Map();
-          
-          data.forEach(item => {
-            if (!item.orderCode) return;
-            
-            if (!orderMap.has(item.orderCode)) {
-              orderMap.set(item.orderCode, {
-                statuses: new Set(),
-                totalQty: 0,
-                firstSeen: item.tglOrder,
-                items: []
-              });
-            }
-            
-            const order = orderMap.get(item.orderCode);
-            order.statuses.add(item.statusCategory);
-            order.totalQty += item.qty || 0;
-            order.items.push(item);
-          });
-
-          const progressStats = {
-            count: 0,
-            qty: 0,
-            orders: [],
-            dailyBreakdown: {},
-            avgProcessingTime: 0
-          };
-
-          orderMap.forEach((orderData, orderCode) => {
-            const statuses = Array.from(orderData.statuses);
-            const hasProgress = statuses.includes('PROGRESS');
-            const hasDeliveredOrCancel = statuses.includes('DELIVERED') || statuses.includes('CANCEL');
-            
-            if (hasProgress && !hasDeliveredOrCancel) {
-              progressStats.count++;
-              progressStats.qty += orderData.totalQty;
-              progressStats.orders.push({
-                orderCode,
-                totalQty: orderData.totalQty,
-                statuses: statuses,
-                firstSeen: orderData.firstSeen
-              });
-              
-              if (orderData.firstSeen) {
-                const dateKey = new Date(orderData.firstSeen).toISOString().split('T')[0];
-                progressStats.dailyBreakdown[dateKey] = (progressStats.dailyBreakdown[dateKey] || 0) + 1;
-              }
-            }
-          });
-
-          const ordersWithAge = progressStats.orders.filter(o => o.firstSeen);
-          if (ordersWithAge.length > 0) {
-            const totalAge = ordersWithAge.reduce((sum, o) => {
-              const age = (new Date() - new Date(o.firstSeen)) / (1000 * 60 * 60 * 24);
-              return sum + age;
-            }, 0);
-            progressStats.avgProcessingTime = totalAge / ordersWithAge.length;
-          }
-
-          return progressStats;
-        },
-        
-        calculatePartialStats: (data) => {
-          const orderMap = new Map();
-          
-          data.forEach(item => {
-            if (!item.orderCode) return;
-            
-            if (!orderMap.has(item.orderCode)) {
-              orderMap.set(item.orderCode, {
-                statuses: new Set(),
-                totalQty: 0,
-                items: []
-              });
-            }
-            
-            const order = orderMap.get(item.orderCode);
-            order.statuses.add(item.statusCategory);
-            order.totalQty += item.qty || 0;
-            order.items.push(item);
-          });
-
-          const partialStats = {
-            count: 0,
-            qty: 0,
-            details: [],
-            statusBreakdown: {}
-          };
-
-          orderMap.forEach((orderData, orderCode) => {
-            const statuses = Array.from(orderData.statuses);
-            const isPartial = statuses.length > 1 || statuses.includes('PARTIAL');
-            
-            if (isPartial) {
-              partialStats.count++;
-              partialStats.qty += orderData.totalQty;
-              
-              const breakdown = [];
-              const statusQty = new Map();
-              
-              orderData.items.forEach(item => {
-                const status = item.statusCategory;
-                statusQty.set(status, (statusQty.get(status) || 0) + (item.qty || 0));
-              });
-              
-              statusQty.forEach((qty, status) => {
-                breakdown.push({ status, qty });
-              });
-              
-              partialStats.details.push({
-                orderCode,
-                breakdown,
-                totalQty: orderData.totalQty,
-                statusCount: statuses.length
-              });
-              
-              statuses.forEach(status => {
-                partialStats.statusBreakdown[status] = (partialStats.statusBreakdown[status] || 0) + 1;
-              });
-            }
-          });
-
-          return partialStats;
-        },
-        
-        calculateDeliveredStats: (data) => {
-          const orderMap = new Map();
-          
-          data.forEach(item => {
-            if (!item.orderCode) return;
-            
-            if (!orderMap.has(item.orderCode)) {
-              orderMap.set(item.orderCode, {
-                statuses: new Set(),
-                deliveredQty: 0,
-                otherQty: 0,
-                totalQty: 0,
-                items: []
-              });
-            }
-            
-            const order = orderMap.get(item.orderCode);
-            order.statuses.add(item.statusCategory);
-            order.totalQty += item.qty || 0;
-            
-            if (item.statusCategory === 'DELIVERED') {
-              order.deliveredQty += item.qty || 0;
-            } else {
-              order.otherQty += item.qty || 0;
-            }
-            
-            order.items.push(item);
-          });
-
-          const deliveredStats = {
-            totalDeliveredQty: 0,
-            totalOrdersWithDelivered: 0,
-            pureDelivered: { count: 0, qty: 0 },
-            mixedDelivered: { count: 0, deliveredQty: 0, otherQty: 0, details: [] }
-          };
-
-          orderMap.forEach((orderData, orderCode) => {
-            const statuses = Array.from(orderData.statuses);
-            const hasDelivered = statuses.includes('DELIVERED');
-            
-            if (hasDelivered) {
-              deliveredStats.totalOrdersWithDelivered++;
-              deliveredStats.totalDeliveredQty += orderData.deliveredQty;
-              
-              if (statuses.length === 1 && statuses[0] === 'DELIVERED') {
-                deliveredStats.pureDelivered.count++;
-                deliveredStats.pureDelivered.qty += orderData.deliveredQty;
-              } else {
-                deliveredStats.mixedDelivered.count++;
-                deliveredStats.mixedDelivered.deliveredQty += orderData.deliveredQty;
-                deliveredStats.mixedDelivered.otherQty += orderData.otherQty;
-                
-                const breakdown = [];
-                orderData.items.forEach(item => {
-                  const existing = breakdown.find(b => b.status === item.statusCategory);
-                  if (existing) {
-                    existing.qty += item.qty;
-                  } else {
-                    breakdown.push({ status: item.statusCategory, qty: item.qty });
-                  }
-                });
-                
-                deliveredStats.mixedDelivered.details.push({
-                  orderCode,
-                  deliveredQty: orderData.deliveredQty,
-                  otherQty: orderData.otherQty,
-                  breakdown
-                });
-              }
-            }
-          });
-
-          return deliveredStats;
-        },
-        
-        calculateCancelStats: (data) => {
-          const orderMap = new Map();
-          
-          data.forEach(item => {
-            if (!item.orderCode) return;
-            
-            if (!orderMap.has(item.orderCode)) {
-              orderMap.set(item.orderCode, {
-                statuses: new Set(),
-                cancelQty: 0,
-                otherQty: 0,
-                totalQty: 0,
-                items: []
-              });
-            }
-            
-            const order = orderMap.get(item.orderCode);
-            order.statuses.add(item.statusCategory);
-            order.totalQty += item.qty || 0;
-            
-            if (item.statusCategory === 'CANCEL') {
-              order.cancelQty += item.qty || 0;
-            } else {
-              order.otherQty += item.qty || 0;
-            }
-            
-            order.items.push(item);
-          });
-
-          const cancelStats = {
-            totalCancelQty: 0,
-            totalOrdersWithCancel: 0,
-            pureCancel: { count: 0, qty: 0 },
-            mixedCancel: { count: 0, cancelQty: 0, otherQty: 0, details: [] }
-          };
-
-          orderMap.forEach((orderData, orderCode) => {
-            const statuses = Array.from(orderData.statuses);
-            const hasCancel = statuses.includes('CANCEL');
-            
-            if (hasCancel) {
-              cancelStats.totalOrdersWithCancel++;
-              cancelStats.totalCancelQty += orderData.cancelQty;
-              
-              if (statuses.length === 1 && statuses[0] === 'CANCEL') {
-                cancelStats.pureCancel.count++;
-                cancelStats.pureCancel.qty += orderData.cancelQty;
-              } else {
-                cancelStats.mixedCancel.count++;
-                cancelStats.mixedCancel.cancelQty += orderData.cancelQty;
-                cancelStats.mixedCancel.otherQty += orderData.otherQty;
-                
-                const breakdown = [];
-                orderData.items.forEach(item => {
-                  const existing = breakdown.find(b => b.status === item.statusCategory);
-                  if (existing) {
-                    existing.qty += item.qty;
-                  } else {
-                    breakdown.push({ status: item.statusCategory, qty: item.qty });
-                  }
-                });
-                
-                cancelStats.mixedCancel.details.push({
-                  orderCode,
-                  cancelQty: orderData.cancelQty,
-                  otherQty: orderData.otherQty,
-                  breakdown
-                });
-              }
-            }
-          });
-
-          return cancelStats;
-        },
-        
-        groupAndSum: (data, keyFn, limit = 10) => {
-          const map = new Map();
-          data.forEach(i => {
-            const key = keyFn(i);
-            if (key && key !== 'Unknown' && key !== '-') {
-              map.set(key, (map.get(key) || 0) + (i.qty || 0));
-            }
-          });
-          return Array.from(map.entries())
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, limit);
-        }
-      };
-
-      // ========== RENDERER ==========
       const Renderer = {
-        masterSummary: (stats) => {
-          DOM.updateText('masterTotalOrders', DataProcessor.formatNumber(stats.totalOrders));
-          DOM.updateText('masterTotalQty', DataProcessor.formatNumber(stats.totalQty));
-          DOM.updateText('masterAvgQty', DataProcessor.formatNumberDecimal(stats.avgQty, 1));
-          DOM.updateText('masterPeriode', stats.periode);
-          DOM.updateText('masterTotalKomoditi', '2 (Gula & Minyak)');
+        masterSummary(masterStats, filters) {
+          DOM.updateText('masterTotalOrders', Utils.formatNumber(masterStats.totalOrders));
+          DOM.updateText('masterTotalQty', Utils.formatNumber(masterStats.totalQty));
+          DOM.updateText('masterAvgQty', Utils.formatDecimal(masterStats.avgQty, 1));
+          DOM.updateText('masterTotalKomoditi', String(masterStats.totalKomoditi || 2));
+
+          const from = filters?.from ? Utils.formatDate(filters.from) : '-';
+          const to = filters?.to ? Utils.formatDate(filters.to) : '-';
+          DOM.updateText('masterPeriode', `${from} - ${to}`);
         },
-        
-        komoditiSummary: (summary) => {
-          DOM.updateText('gulaOrderCount', `${summary.gula.orders} order`);
-          DOM.updateText('gulaTotalQty', DataProcessor.formatNumber(summary.gula.qty));
-          DOM.updateText('gulaProgress', `${summary.gula.progress} order`);
-          
-          DOM.updateText('minyakOrderCount', `${summary.minyak.orders} order`);
-          DOM.updateText('minyakTotalQty', DataProcessor.formatNumber(summary.minyak.qty));
-          DOM.updateText('minyakProgress', `${summary.minyak.progress} order`);
+
+        komoditiSummary(summary) {
+          DOM.updateText('gulaOrderCount', `${Utils.formatNumber(summary?.gula?.orders || 0)} order`);
+          DOM.updateText('gulaTotalQty', Utils.formatNumber(summary?.gula?.qty || 0));
+          DOM.updateText('gulaProgress', `${Utils.formatNumber(summary?.gula?.progress || 0)} order`);
+          DOM.updateText('minyakOrderCount', `${Utils.formatNumber(summary?.minyak?.orders || 0)} order`);
+          DOM.updateText('minyakTotalQty', Utils.formatNumber(summary?.minyak?.qty || 0));
+          DOM.updateText('minyakProgress', `${Utils.formatNumber(summary?.minyak?.progress || 0)} order`);
         },
-        
-        renderProgressContainer: (progressStats) => {
+
+        renderProgressContainer(progressStats, totalOrders) {
           const kpiContainer = DOM.get('kpiContainer');
           if (!kpiContainer) return;
 
           let progressCard = document.getElementById('containerProgress');
-          
           if (!progressCard) {
             progressCard = document.createElement('div');
             progressCard.id = 'containerProgress';
@@ -1602,170 +822,138 @@
             kpiContainer.prepend(progressCard);
           }
 
-          const totalOrders = State.filteredRealisasi.length ? 
-            new Set(State.filteredRealisasi.map(i => i.orderCode)).size : 0;
-          const percentage = totalOrders ? (progressStats.count / totalOrders * 100) : 0;
-
-          progressCard.className = `kpi ${progressStats.count > 0 ? 'glow-active' : 'glow-inactive'}`;
+          const percentage = totalOrders ? ((Number(progressStats.count || 0) / Number(totalOrders)) * 100) : 0;
+          progressCard.className = `kpi ${(progressStats.count || 0) > 0 ? 'glow-active' : 'glow-inactive'}`;
           progressCard.style.borderTop = '4px solid #f1c40f';
           progressCard.style.setProperty('--glow-color', '#f1c40f80');
 
           progressCard.innerHTML = `
-            <div class="header">
-              <span class="status-label">PROGRESS</span>
-              <span class="status-icon">⏳</span>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <span style="font-weight:700;">PROGRESS</span>
+              <span>⏳</span>
             </div>
-            <div class="main-value">${DataProcessor.formatNumber(progressStats.count)}</div>
-            <div class="qty-value">${DataProcessor.formatNumber(progressStats.qty)} Qty</div>
-            <div class="percentage">${DataProcessor.formatNumberDecimal(percentage, 1)}% dari total</div>
-            <div class="progress-detail">
-              <div style="font-size: 11px; color: var(--text-secondary);">
-                Rata-rata: ${DataProcessor.formatNumberDecimal(progressStats.avgProcessingTime, 1)} hari
-              </div>
-              <div style="margin-top: 4px; font-size: 8px;">
-                Update: ${new Date().toLocaleTimeString('id-ID')}
-              </div>
+            <div class="main-value">${Utils.formatNumber(progressStats.count || 0)}</div>
+            <div class="qty-value">${Utils.formatNumber(progressStats.qty || 0)} Qty</div>
+            <div>${Utils.formatDecimal(percentage, 1)}% dari total</div>
+            <div style="margin-top:8px; font-size:11px; color:var(--text-secondary);">
+              Rata-rata: ${Utils.formatDecimal(progressStats.avgProcessingTime || 0, 1)} hari
             </div>
           `;
         },
-        
-        renderPartialContainer: (partialStats) => {
-          const container = document.getElementById('partialContainer');
-          const pill = document.getElementById('partialPill');
-          
+
+        renderPartialContainer(partialStats) {
+          const container = DOM.get('partialContainer');
+          const pill = DOM.get('partialPill');
           if (!container || !pill) return;
-          
-          pill.textContent = partialStats.count === 0 ? 'Tidak ada' : `${partialStats.count} order`;
-          
-          if (partialStats.count === 0) {
+
+          const count = partialStats?.count || 0;
+          pill.textContent = count === 0 ? 'Tidak ada' : `${Utils.formatNumber(count)} order`;
+
+          if (count === 0) {
             container.innerHTML = '<p class="note">✨ Semua order memiliki status tunggal</p>';
             return;
           }
-          
+
           let html = `
             <div class="partial-detail">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                <p style="font-weight: 700; color: #9b59b6;">
-                  ⚡ ${partialStats.count} Order dengan Status Campuran
-                </p>
-                <span class="badge badge-partial">
-                  Total: ${DataProcessor.formatNumber(partialStats.qty)} Qty
-                </span>
+              <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                <p style="font-weight:700; color:#9b59b6;">⚡ ${Utils.formatNumber(count)} Order dengan Status Campuran</p>
+                <span class="badge badge-partial">Total: ${Utils.formatNumber(partialStats.qty || 0)} Qty</span>
               </div>
           `;
-          
-          partialStats.details.slice(0, 5).forEach(detail => {
+
+          (partialStats.details || []).slice(0, 5).forEach(detail => {
             html += `
-              <div style="margin-top: 12px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
-                <div style="font-weight: 700; margin-bottom: 8px;">📋 ${detail.orderCode}</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+              <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:8px;">
+                <div style="font-weight:700; margin-bottom:8px;">📋 ${detail.orderCode || '-'}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:12px;">
             `;
-            
-            detail.breakdown.forEach(b => {
-              const cls = {
-                PROGRESS: 'badge-progress',
-                ON_DELIVERY: 'badge-ondelivery',
-                DELIVERED: 'badge-delivered',
-                CANCEL: 'badge-cancel',
-                PARTIAL: 'badge-partial'
-              }[b.status] || '';
-              
+
+            (detail.breakdown || []).forEach(b => {
               html += `
                 <div>
-                  <span class="badge ${cls}">${b.status}</span>
-                  <span style="font-size: 11px;">${DataProcessor.formatNumber(b.qty)} Qty</span>
+                  <span class="badge ${Utils.getBadgeClass(b.status)}">${b.status}</span>
+                  <span style="font-size:11px;">${Utils.formatNumber(b.qty)} Qty</span>
                 </div>
               `;
             });
-            
+
             html += `</div></div>`;
           });
-          
-          if (partialStats.details.length > 5) {
-            html += `<div class="note" style="margin-top: 8px;">... dan ${partialStats.details.length - 5} lainnya</div>`;
+
+          if ((partialStats.details || []).length > 5) {
+            html += `<div class="note" style="margin-top:8px;">... dan ${(partialStats.details || []).length - 5} lainnya</div>`;
           }
-          
-          html += '</div>';
+
+          html += `</div>`;
           container.innerHTML = html;
         },
-        
-        renderDeliveredContainer: (deliveredStats) => {
-          const bottomContainer = document.getElementById('kpiBottomContainer');
-          if (!bottomContainer) return null;
 
-          let deliveredCard = document.getElementById('containerDelivered');
-          
-          if (!deliveredCard) {
-            deliveredCard = document.createElement('div');
-            deliveredCard.id = 'containerDelivered';
-            deliveredCard.className = 'kpi';
+        renderDeliveredCard(deliveredStats, totalOrders) {
+          let card = document.getElementById('containerDelivered');
+          if (!card) {
+            card = document.createElement('div');
+            card.id = 'containerDelivered';
+            card.className = 'kpi';
           }
 
-          const totalOrders = State.filteredRealisasi.length ? 
-            new Set(State.filteredRealisasi.map(i => i.orderCode)).size : 0;
-          const percentage = totalOrders ? (deliveredStats.totalOrdersWithDelivered / totalOrders * 100) : 0;
+          const count = deliveredStats?.totalOrdersWithDelivered || 0;
+          const qty = deliveredStats?.totalDeliveredQty || 0;
+          const pure = deliveredStats?.pureDelivered?.count || 0;
+          const mixed = deliveredStats?.mixedDelivered?.count || 0;
+          const percentage = totalOrders ? (count / totalOrders) * 100 : 0;
 
-          deliveredCard.className = `kpi ${deliveredStats.totalOrdersWithDelivered > 0 ? 'glow-active' : 'glow-inactive'}`;
-          deliveredCard.style.borderTop = '4px solid #2ecc71';
-          deliveredCard.style.setProperty('--glow-color', '#2ecc7180');
+          card.className = `kpi ${count > 0 ? 'glow-active' : 'glow-inactive'}`;
+          card.style.borderTop = '4px solid #2ecc71';
+          card.style.setProperty('--glow-color', '#2ecc7180');
 
-          deliveredCard.innerHTML = `
-            <div class="header">
-              <span class="status-label">DELIVERED</span>
-              <span class="status-icon">✅</span>
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <span style="font-weight:700;">DELIVERED</span>
+              <span>✅</span>
             </div>
-            <div class="main-value">${DataProcessor.formatNumber(deliveredStats.totalOrdersWithDelivered)}</div>
-            <div class="qty-value">${DataProcessor.formatNumber(deliveredStats.totalDeliveredQty)} Qty</div>
-            <div class="percentage">${DataProcessor.formatNumberDecimal(percentage, 1)}% dari total</div>
-            <div class="delivered-detail">
-              <div style="font-size: 11px; color: #2ecc71;">✅ Murni: ${deliveredStats.pureDelivered.count} order</div>
-              ${deliveredStats.mixedDelivered.count > 0 ? 
-                `<div style="font-size: 11px; color: #f1c40f;">🔄 Campuran: ${deliveredStats.mixedDelivered.count} order</div>` : ''}
-            </div>
+            <div class="main-value">${Utils.formatNumber(count)}</div>
+            <div class="qty-value">${Utils.formatNumber(qty)} Qty</div>
+            <div>${Utils.formatDecimal(percentage, 1)}% dari total</div>
+            <div style="margin-top:8px; font-size:11px; color:#2ecc71;">✅ Murni: ${Utils.formatNumber(pure)} order</div>
+            ${mixed > 0 ? `<div style="font-size:11px; color:#f1c40f;">🔄 Campuran: ${Utils.formatNumber(mixed)} order</div>` : ''}
           `;
-
-          return deliveredCard;
+          return card;
         },
-        
-        renderCancelContainer: (cancelStats) => {
-          const bottomContainer = document.getElementById('kpiBottomContainer');
-          if (!bottomContainer) return null;
 
-          let cancelCard = document.getElementById('containerCancel');
-          
-          if (!cancelCard) {
-            cancelCard = document.createElement('div');
-            cancelCard.id = 'containerCancel';
-            cancelCard.className = 'kpi';
+        renderCancelCard(cancelStats, totalOrders) {
+          let card = document.getElementById('containerCancel');
+          if (!card) {
+            card = document.createElement('div');
+            card.id = 'containerCancel';
+            card.className = 'kpi';
           }
 
-          const totalOrders = State.filteredRealisasi.length ? 
-            new Set(State.filteredRealisasi.map(i => i.orderCode)).size : 0;
-          const percentage = totalOrders ? (cancelStats.totalOrdersWithCancel / totalOrders * 100) : 0;
+          const count = cancelStats?.totalOrdersWithCancel || 0;
+          const qty = cancelStats?.totalCancelQty || 0;
+          const pure = cancelStats?.pureCancel?.count || 0;
+          const mixed = cancelStats?.mixedCancel?.count || 0;
+          const percentage = totalOrders ? (count / totalOrders) * 100 : 0;
 
-          cancelCard.className = `kpi ${cancelStats.totalOrdersWithCancel > 0 ? 'glow-active' : 'glow-inactive'}`;
-          cancelCard.style.borderTop = '4px solid #e74c3c';
-          cancelCard.style.setProperty('--glow-color', '#e74c3c80');
+          card.className = `kpi ${count > 0 ? 'glow-active' : 'glow-inactive'}`;
+          card.style.borderTop = '4px solid #e74c3c';
+          card.style.setProperty('--glow-color', '#e74c3c80');
 
-          cancelCard.innerHTML = `
-            <div class="header">
-              <span class="status-label">CANCEL</span>
-              <span class="status-icon">⛔</span>
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <span style="font-weight:700;">CANCEL</span>
+              <span>⛔</span>
             </div>
-            <div class="main-value">${DataProcessor.formatNumber(cancelStats.totalOrdersWithCancel)}</div>
-            <div class="qty-value">${DataProcessor.formatNumber(cancelStats.totalCancelQty)} Qty</div>
-            <div class="percentage">${DataProcessor.formatNumberDecimal(percentage, 1)}% dari total</div>
-            <div class="cancel-detail">
-              <div style="font-size: 11px; color: #e74c3c;">⛔ Murni: ${cancelStats.pureCancel.count} order</div>
-              ${cancelStats.mixedCancel.count > 0 ? 
-                `<div style="font-size: 11px; color: #f1c40f;">🔄 Campuran: ${cancelStats.mixedCancel.count} order</div>` : ''}
-            </div>
+            <div class="main-value">${Utils.formatNumber(count)}</div>
+            <div class="qty-value">${Utils.formatNumber(qty)} Qty</div>
+            <div>${Utils.formatDecimal(percentage, 1)}% dari total</div>
+            <div style="margin-top:8px; font-size:11px; color:#e74c3c;">⛔ Murni: ${Utils.formatNumber(pure)} order</div>
+            ${mixed > 0 ? `<div style="font-size:11px; color:#f1c40f;">🔄 Campuran: ${Utils.formatNumber(mixed)} order</div>` : ''}
           `;
-
-          return cancelCard;
+          return card;
         },
-        
-        kpi: (stats, deliveredStats, cancelStats) => {
+
+        kpi(stats, deliveredStats, cancelStats) {
           const topContainer = DOM.get('kpiContainer');
           const bottomContainer = DOM.get('kpiBottomContainer');
           if (!topContainer || !bottomContainer) return;
@@ -1775,217 +963,194 @@
           if (progressCard) topContainer.appendChild(progressCard);
 
           const topList = [
-            { key: 'onDelivery', label: 'ON DELIVERY', icon: '🚚', color: '#3498db', data: stats.onDelivery },
-            { key: 'partial', label: 'PARSIAL', icon: '⚡', color: '#9b59b6', data: stats.partial }
+            { label: 'ON DELIVERY', icon: '🚚', color: '#3498db', data: stats?.onDelivery || {} },
+            { label: 'PARSIAL', icon: '⚡', color: '#9b59b6', data: stats?.partial || {} }
           ];
-          
-          topList.forEach(s => {
+
+          topList.forEach(item => {
+            const count = item.data.count || 0;
+            const qty = item.data.qty || 0;
+            const percentage = item.data.percentage || 0;
+
             const card = document.createElement('div');
-            card.className = `kpi ${s.data.count > 0 ? 'glow-active' : 'glow-inactive'}`;
-            card.style.borderTop = `4px solid ${s.color}`;
-            card.style.setProperty('--glow-color', `${s.color}80`);
+            card.className = `kpi ${count > 0 ? 'glow-active' : 'glow-inactive'}`;
+            card.style.borderTop = `4px solid ${item.color}`;
+            card.style.setProperty('--glow-color', `${item.color}80`);
+
             card.innerHTML = `
-              <div class="header">
-                <span class="status-label">${s.label}</span>
-                <span class="status-icon">${s.icon}</span>
+              <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span style="font-weight:700;">${item.label}</span>
+                <span>${item.icon}</span>
               </div>
-              <div class="main-value">${DataProcessor.formatNumber(s.data.count)}</div>
-              <div class="qty-value">${DataProcessor.formatNumber(s.data.qty)} Qty</div>
-              <div class="percentage">${DataProcessor.formatNumberDecimal(s.data.percentage,1)}%</div>
+              <div class="main-value">${Utils.formatNumber(count)}</div>
+              <div class="qty-value">${Utils.formatNumber(qty)} Qty</div>
+              <div>${Utils.formatDecimal(percentage, 1)}%</div>
             `;
             topContainer.appendChild(card);
           });
 
-          const deliveredCard = Renderer.renderDeliveredContainer(deliveredStats);
-          const cancelCard = Renderer.renderCancelContainer(cancelStats);
-
           bottomContainer.innerHTML = '';
-          if (deliveredCard) bottomContainer.appendChild(deliveredCard);
-          if (cancelCard) bottomContainer.appendChild(cancelCard);
+          bottomContainer.appendChild(Renderer.renderDeliveredCard(deliveredStats, stats?.totalOrders || 0));
+          bottomContainer.appendChild(Renderer.renderCancelCard(cancelStats, stats?.totalOrders || 0));
         },
-        
-        charts: (data, stats) => {
+
+        chartsFromBackend(charts, stats) {
           Object.values(State.charts).forEach(c => c && c.destroy());
           State.charts = {};
 
-          // Chart Status
           const ctxStatus = DOM.get('chartStatus')?.getContext('2d');
-          if (ctxStatus && stats.totalOrders) {
+          if (ctxStatus) {
             State.charts.status = new Chart(ctxStatus, {
               type: 'doughnut',
               data: {
-                labels: ['Progress', 'On Delivery', 'Delivered', 'Cancel', 'Parsial'],
+                labels: (charts?.status || []).map(i => i.label),
                 datasets: [{
-                  data: [
-                    stats.progress.count, 
-                    stats.onDelivery.count, 
-                    stats.delivered.count, 
-                    stats.cancel.count, 
-                    stats.partial.count
-                  ],
+                  data: (charts?.status || []).map(i => i.value),
                   backgroundColor: ['#f1c40f', '#3498db', '#2ecc71', '#e74c3c', '#9b59b6'],
                   borderWidth: 0
                 }]
               },
-              options: { 
-                responsive: true, 
-                plugins: { 
-                  legend: { position: 'right', labels: { color: '#e9f1fb', font: { size:11 } } } 
-                }, 
-                cutout: '70%' 
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'right',
+                    labels: { color: '#e9f1fb', font: { size: 11 } }
+                  }
+                },
+                cutout: '70%'
               }
             });
           }
 
-          const statusNote = DOM.get('statusNote');
-          if (statusNote) {
-            statusNote.innerHTML = `Total ${stats.totalOrders} order • Total QTY: ${DataProcessor.formatNumber(stats.totalQty)}`;
-          }
+          DOM.updateText('statusNote', `Total ${Utils.formatNumber(stats?.totalOrders || 0)} order • Total QTY: ${Utils.formatNumber(stats?.totalQty || 0)}`);
 
-          // Chart Kota
-          const cityData = DataProcessor.groupAndSum(data, i => i.kota, 8);
           const ctxCity = DOM.get('chartCity')?.getContext('2d');
-          if (ctxCity && cityData.length) {
+          if (ctxCity && (charts?.kota || []).length) {
             State.charts.city = new Chart(ctxCity, {
               type: 'bar',
-              data: { 
-                labels: cityData.map(d=>d[0]), 
-                datasets: [{ 
-                  label: 'QTY', 
-                  data: cityData.map(d=>Math.round(d[1])), 
-                  backgroundColor: 'rgba(52,152,219,0.7)', 
-                  borderRadius:6 
-                }] 
+              data: {
+                labels: charts.kota.map(i => i.label),
+                datasets: [{
+                  label: 'QTY',
+                  data: charts.kota.map(i => i.value),
+                  backgroundColor: 'rgba(52,152,219,0.7)',
+                  borderRadius: 6
+                }]
               },
-              options: { 
+              options: {
                 responsive: true,
-                plugins: { legend: { display: false } }, 
-                scales: { 
-                  x: { ticks: { color:'#e9f1fb', maxRotation:45 } }, 
-                  y: { ticks: { color:'#e9f1fb' } } 
-                } 
+                plugins: { legend: { display: false } },
+                scales: {
+                  x: { ticks: { color: '#e9f1fb', maxRotation: 45 } },
+                  y: { ticks: { color: '#e9f1fb' } }
+                }
               }
             });
           }
 
-          // Chart Pabrik
-          const factoryData = DataProcessor.groupAndSum(data, i => i.pabrik, 6);
           const ctxFactory = DOM.get('chartFactory')?.getContext('2d');
-          if (ctxFactory && factoryData.length) {
+          if (ctxFactory && (charts?.pabrik || []).length) {
             State.charts.factory = new Chart(ctxFactory, {
               type: 'bar',
-              data: { 
-                labels: factoryData.map(d=>d[0]), 
-                datasets: [{ 
-                  label: 'QTY', 
-                  data: factoryData.map(d=>Math.round(d[1])), 
-                  backgroundColor: 'rgba(255,176,0,0.7)', 
-                  borderRadius:6 
-                }] 
+              data: {
+                labels: charts.pabrik.map(i => i.label),
+                datasets: [{
+                  label: 'QTY',
+                  data: charts.pabrik.map(i => i.value),
+                  backgroundColor: 'rgba(255,176,0,0.7)',
+                  borderRadius: 6
+                }]
               },
-              options: { 
+              options: {
                 responsive: true,
-                plugins: { legend: { display: false } }, 
-                scales: { 
-                  x: { ticks: { color:'#e9f1fb', maxRotation:45 } }, 
-                  y: { ticks: { color:'#e9f1fb' } } 
-                } 
+                plugins: { legend: { display: false } },
+                scales: {
+                  x: { ticks: { color: '#e9f1fb', maxRotation: 45 } },
+                  y: { ticks: { color: '#e9f1fb' } }
+                }
               }
             });
           }
         },
-        
-        realTimeTable: (data) => {
+
+        realTimeTable(data) {
           const tbody = DOM.get('rtBody');
           if (!tbody) return;
-          
-          const sorted = [...data]
-            .sort((a,b) => {
-              const dateA = b.tglMuat || b.rencanaMuat || 0;
-              const dateB = a.tglMuat || a.rencanaMuat || 0;
-              return dateA - dateB;
-            })
-            .slice(0,10);
-            
+
           tbody.innerHTML = '';
-          if (sorted.length === 0) {
+          if (!data || !data.length) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">Tidak ada data</td></tr>';
             return;
           }
-          
-          sorted.forEach(item => {
+
+          data.forEach(item => {
             const row = tbody.insertRow();
-            
-            // Komoditi
-            const komoditiCell = row.insertCell();
-            komoditiCell.innerHTML = `<span class="badge ${item.komoditi === 'GULA' ? 'badge-gula' : 'badge-minyak'}">${item.komoditi}</span>`;
-            
-            // No Polisi
-            const np = item.noPolisi || '-';
-            const npCell = row.insertCell();
-            npCell.textContent = np;
-            if (np !== '-' && np.length > 2) npCell.style.color = '#ffb000';
-            
-            // Tujuan
+            row.insertCell().innerHTML = `<span class="badge ${item.komoditi === 'GULA' ? 'badge-gula' : 'badge-minyak'}">${item.komoditi || '-'}</span>`;
+            row.insertCell().textContent = item.noPolisi || '-';
             row.insertCell().textContent = item.kota || '-';
-            
-            // Status
-            const stCell = row.insertCell(); 
-            stCell.textContent = item.status || '-';
-            const statusClass = item.statusCategory ? 
-              `status-${item.statusCategory.toLowerCase().replace('_','')}` : '';
-            if (statusClass) stCell.className = statusClass;
-            
-            // QTY
-            row.insertCell().textContent = DataProcessor.formatNumber(item.qty);
-            
-            // Tanggal
-            const tgl = item.tglMuat ? DataProcessor.formatDate(item.tglMuat) : 
-                       (item.rencanaMuat ? DataProcessor.formatDate(item.rencanaMuat) : '-');
-            row.insertCell().textContent = tgl;
+
+            const st = row.insertCell();
+            st.textContent = item.status || item.statusCategory || '-';
+            st.className = Utils.getStatusClass(item.statusCategory);
+
+            row.insertCell().textContent = Utils.formatNumber(item.qty || 0);
+            row.insertCell().textContent = Utils.formatDate(item.tglMuat || item.rencanaMuat || item.tglOrder);
           });
         },
-        
-        ringkasanData: (realStats, masterStats) => {
-          DOM.updateText('totalRowsDetail', `${realStats.totalRows} baris`);
-          DOM.updateText('totalOrdersDetail', `${realStats.totalOrders} order`);
-          DOM.updateText('totalQtyDetail', DataProcessor.formatNumber(realStats.totalQty));
-          DOM.updateText('avgQtyDetail', DataProcessor.formatNumberDecimal(realStats.avgQtyPerOrder,1));
-          DOM.updateText('masterInfoDetail', `${DataProcessor.formatNumber(masterStats.totalOrders)} order (${DataProcessor.formatNumber(masterStats.totalQty)} QTY)`);
-          
-          const refreshSec = DOM.get('refreshSec')?.value;
-          DOM.updateText('refreshStatus', refreshSec === '0' ? 'Off' : `${refreshSec||30}s`);
-          
-          const statusArr = [
-            State.dataStatus.gula ? '✅ Gula' : '❌ Gula',
-            State.dataStatus.minyak ? '✅ Minyak' : '❌ Minyak',
-            State.dataStatus.master ? '✅ Master' : '❌ Master'
-          ];
-          DOM.updateText('dataStatus', statusArr.join(' • '));
-          
-          if (State.lastFetch) {
-            DOM.updateText('lastUpdateTime', `${DataProcessor.formatDate(State.lastFetch)} ${DataProcessor.formatTime(State.lastFetch)}`);
-          }
-        },
-        
-        verifyAllContainers: () => {
-          const containerIds = [
-            'containerMasterOrder', 'containerProgress', 'container-onDelivery',
-            'container-partial', 'containerDelivered', 'containerCancel',
-            'containerStatusDistribusi', 'containerTopKota', 'containerTopPabrik',
-            'containerPartial', 'containerRealTime', 'containerRingkasan'
-          ];
-          
-          containerIds.forEach(id => {
-            const el = document.getElementById(id) || document.querySelector(`[data-container-id="${id}"]`);
-            console.log(`${el ? '✅' : '❌'} ${id}`);
-          });
+
+        ringkasanData(stats, masterStats, payload) {
+          DOM.updateText('totalRowsDetail', `${Utils.formatNumber(stats?.totalRows || 0)} baris`);
+          DOM.updateText('totalOrdersDetail', `${Utils.formatNumber(stats?.totalOrders || 0)} order`);
+          DOM.updateText('masterInfoDetail', `${Utils.formatNumber(masterStats?.totalOrders || 0)} order (${Utils.formatNumber(masterStats?.totalQty || 0)} QTY)`);
+          DOM.updateText('totalQtyDetail', Utils.formatNumber(stats?.totalQty || 0));
+          DOM.updateText('avgQtyDetail', Utils.formatDecimal(stats?.avgQtyPerOrder || 0, 1));
+
+          const refreshSec = DOM.get('refreshSec')?.value || '0';
+          DOM.updateText('refreshStatus', refreshSec === '0' ? 'Off' : `${refreshSec}s`);
+          DOM.updateText('dataStatus', '✅ Backend Apps Script • ✅ Frontend HTML');
+          DOM.updateText('lastUpdateTime', Utils.formatDateTime(payload?.generatedAt || new Date()));
+          DOM.updateText('lastUpdate', Utils.formatDateTime(payload?.generatedAt || new Date()));
         }
       };
 
-      // ========== AUTO REFRESH ==========
+      const DataFetcher = {
+        async fetchAllData() {
+          if (State.isRefreshing) return null;
+
+          State.isRefreshing = true;
+          DOM.showRefreshIndicator(true);
+          LiveStatus.setChecking();
+
+          try {
+            const from = DOM.get('fromDate')?.value || '';
+            const to = DOM.get('toDate')?.value || '';
+            const komoditi = State.activeKomoditi || 'semua';
+            const url = `${CONFIG.WEB_APP_URL}?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&komoditi=${encodeURIComponent(komoditi)}`;
+
+            const res = await fetch(url, { method: 'GET', cache: 'no-store' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const json = await res.json();
+            if (!json.success) throw new Error(json.message || 'Backend error');
+
+            State.backendPayload = json;
+            LiveStatus.setConnected();
+            return json;
+          } catch (err) {
+            console.error(err);
+            LiveStatus.setOffline();
+            DOM.showMessage('error', 'Gagal mengambil data dari Apps Script');
+            return null;
+          } finally {
+            DOM.showRefreshIndicator(false);
+            State.isRefreshing = false;
+          }
+        }
+      };
+
       const AutoRefresh = {
-        setup: () => {
+        setup() {
           if (State.refreshTimer) clearInterval(State.refreshTimer);
           const sec = Number(DOM.get('refreshSec')?.value || 0);
           if (sec > 0) {
@@ -1994,232 +1159,77 @@
         }
       };
 
-      // ========== DATA FETCHER ==========
-      const DataFetcher = {
-        fetchAllData: async () => {
-          if (State.isRefreshing) return;
-          DOM.showRefreshIndicator(true);
-          State.isRefreshing = true;
-          
-          try {
-            LiveStatusManager.updateFromFetch(false);
-            
-            // Fetch semua sheet
-            const [gulaRes, minyakRes, masterRes] = await Promise.allSettled([
-              SheetsAPI.fetchData(CONFIG.SHEETS.GULA),
-              SheetsAPI.fetchData(CONFIG.SHEETS.MINYAK),
-              SheetsAPI.fetchData(CONFIG.MASTER_RANGE)
-            ]);
-
-            // Proses data GULA
-            let gulaData = [];
-            if (gulaRes.status === 'fulfilled') {
-              const rows = gulaRes.value;
-              for (let i = 1; i < rows.length; i++) {
-                const item = DataProcessor.processRealisasiRow(rows[i], 'GULA');
-                if (item && item.orderCode) gulaData.push(item);
-              }
-              State.dataStatus.gula = gulaData.length > 0;
-              console.log(`✅ Loaded ${gulaData.length} GULA records`);
-            }
-
-            // Proses data MINYAK
-            let minyakData = [];
-            if (minyakRes.status === 'fulfilled') {
-              const rows = minyakRes.value;
-              for (let i = 1; i < rows.length; i++) {
-                const item = DataProcessor.processRealisasiRow(rows[i], 'MINYAK');
-                if (item && item.orderCode) minyakData.push(item);
-              }
-              State.dataStatus.minyak = minyakData.length > 0;
-              console.log(`✅ Loaded ${minyakData.length} MINYAK records`);
-            }
-
-            // Proses data MASTER
-            let masterData = [];
-            if (masterRes.status === 'fulfilled') {
-              const rows = masterRes.value;
-              for (let i = 1; i < rows.length; i++) {
-                const item = DataProcessor.processMasterRow(rows[i]);
-                if (item) masterData.push(item);
-              }
-              State.dataStatus.master = masterData.length > 0;
-              console.log(`✅ Loaded ${masterData.length} master records`);
-            }
-
-            // Simpan ke state
-            State.realisasiData.GULA = gulaData;
-            State.realisasiData.MINYAK = minyakData;
-            State.realisasiData.ALL = [...gulaData, ...minyakData];
-            State.masterData = masterData;
-            State.lastFetch = new Date();
-            
-            // Set filtered data sesuai active komoditi
-            if (State.activeKomoditi === 'semua') {
-              State.filteredRealisasi = [...State.realisasiData.ALL];
-            } else if (State.activeKomoditi === 'GULA') {
-              State.filteredRealisasi = [...State.realisasiData.GULA];
-            } else {
-              State.filteredRealisasi = [...State.realisasiData.MINYAK];
-            }
-            
-            // Terapkan filter tanggal
-            const from = DOM.get('fromDate')?.value;
-            const to = DOM.get('toDate')?.value;
-            State.filteredRealisasi = DataProcessor.filterByDate(State.filteredRealisasi, from, to, 'tglOrder');
-            State.filteredMaster = DataProcessor.filterByDate(masterData, from, to, 'tglOrder');
-            
-            LiveStatusManager.updateFromFetch(gulaData.length > 0 || minyakData.length > 0);
-            
-            return { gulaData, minyakData, masterData };
-            
-          } catch (err) {
-            console.error('❌ Fetch error:', err);
-            LiveStatusManager.updateFromFetch(false);
-            DOM.showMessage('error', 'Gagal mengambil data');
-            return { gulaData: [], minyakData: [], masterData: [] };
-          } finally {
-            DOM.showRefreshIndicator(false);
-            State.isRefreshing = false;
+      const TVMode = {
+        toggle() {
+          State.tvMode = !State.tvMode;
+          document.body.classList.toggle('tv-mode', State.tvMode);
+          const btn = DOM.get('btnDisplay');
+          if (btn) {
+            btn.textContent = State.tvMode ? '📺 TV Mode ON' : '📺 Display Mode';
+            btn.classList.toggle('active', State.tvMode);
           }
         }
       };
 
-      // ========== APP UPDATE DISPLAY ==========
-      App.updateDisplay = () => {
-        const progressStats = DataProcessor.calculateProgressStats(State.filteredRealisasi);
-        const partialStats = DataProcessor.calculatePartialStats(State.filteredRealisasi);
-        const deliveredStats = DataProcessor.calculateDeliveredStats(State.filteredRealisasi);
-        const cancelStats = DataProcessor.calculateCancelStats(State.filteredRealisasi);
-        const realStats = DataProcessor.calculateRealisasiStats(State.filteredRealisasi);
-        const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
-        const komoditiSummary = DataProcessor.calculateKomoditiSummary(
-          State.realisasiData.GULA, 
-          State.realisasiData.MINYAK
-        );
+      function setKomoditi(active) {
+        State.activeKomoditi = active;
+        DOM.get('btnSemua')?.classList.remove('active');
+        DOM.get('btnGula')?.classList.remove('active');
+        DOM.get('btnMinyak')?.classList.remove('active');
 
-        Renderer.renderProgressContainer(progressStats);
-        Renderer.renderPartialContainer(partialStats);
-        Renderer.masterSummary(masterStats);
-        Renderer.komoditiSummary(komoditiSummary);
-        Renderer.kpi(realStats, deliveredStats, cancelStats);
-        Renderer.charts(State.filteredRealisasi, realStats);
-        Renderer.realTimeTable(State.filteredRealisasi);
-        Renderer.ringkasanData(realStats, masterStats);
-      };
+        if (active === 'semua') DOM.get('btnSemua')?.classList.add('active');
+        if (active === 'GULA') DOM.get('btnGula')?.classList.add('active');
+        if (active === 'MINYAK') DOM.get('btnMinyak')?.classList.add('active');
 
-      // ========== GLOBAL DEBUG FUNCTIONS ==========
-      window.toggleContainerInfo = () => {
-        document.body.classList.toggle('show-container-info');
-      };
-      
-      window.debugProgress = () => {
-        const stats = DataProcessor.calculateProgressStats(State.filteredRealisasi);
-        console.group('📊 PROGRESS DETAIL');
-        console.log('Total:', stats.count);
-        console.log('QTY:', DataProcessor.formatNumber(stats.qty));
-        console.log('Orders:', stats.orders.slice(0, 5));
-        console.groupEnd();
-        return stats;
-      };
-      
-      window.debugPartial = () => {
-        const stats = DataProcessor.calculatePartialStats(State.filteredRealisasi);
-        console.group('⚡ PARTIAL DETAIL');
-        console.log('Total:', stats.count);
-        console.log('QTY:', DataProcessor.formatNumber(stats.qty));
-        console.log('Details:', stats.details);
-        console.groupEnd();
-        return stats;
-      };
-      
-      window.debugDelivered = () => {
-        const stats = DataProcessor.calculateDeliveredStats(State.filteredRealisasi);
-        console.group('✅ DELIVERED DETAIL');
-        console.log('Total:', stats.totalOrdersWithDelivered);
-        console.log('Pure:', stats.pureDelivered);
-        console.log('Mixed:', stats.mixedDelivered);
-        console.groupEnd();
-        return stats;
-      };
-      
-      window.debugCancel = () => {
-        const stats = DataProcessor.calculateCancelStats(State.filteredRealisasi);
-        console.group('⛔ CANCEL DETAIL');
-        console.log('Total:', stats.totalOrdersWithCancel);
-        console.log('Pure:', stats.pureCancel);
-        console.log('Mixed:', stats.mixedCancel);
-        console.groupEnd();
-        return stats;
-      };
-      
-      window.debugStatusCategories = () => {
-        if (!State.realisasiData.ALL.length) return console.log('Data belum ada');
-        const unique = [...new Set(State.realisasiData.ALL.map(d => d.status))];
-        console.group('🔍 STATUS CATEGORIES');
-        unique.forEach(s => {
-          console.log(`"${s}" → ${DataProcessor.getStatusCategory(s)}`);
-        });
-        console.groupEnd();
-      };
-      
-      window.testAllContainers = () => {
-        Renderer.verifyAllContainers();
-      };
+        App.refresh();
+      }
 
-      // ========== APP ==========
       const App = {
-        refresh: async () => {
-          if (State.isRefreshing) return;
-          await DataFetcher.fetchAllData();
-          App.updateDisplay();
-          DOM.showMessage('success', `Update: ${State.filteredRealisasi.length} realisasi`);
+        updateDisplay() {
+          const payload = State.backendPayload;
+          if (!payload) return;
+
+          Renderer.masterSummary(payload.masterStats || {}, payload.filters || {});
+          Renderer.komoditiSummary(payload.komoditiSummary || {});
+          Renderer.renderProgressContainer(payload.progressStats || {}, payload.stats?.totalOrders || 0);
+          Renderer.renderPartialContainer(payload.partialStats || {});
+          Renderer.kpi(payload.stats || {}, payload.deliveredStats || {}, payload.cancelStats || {});
+          Renderer.chartsFromBackend(payload.charts || {}, payload.stats || {});
+          Renderer.realTimeTable(payload.realtime || []);
+          Renderer.ringkasanData(payload.stats || {}, payload.masterStats || {}, payload);
         },
-        
-        init: async () => {
+
+        async refresh() {
+          const data = await DataFetcher.fetchAllData();
+          if (data) {
+            App.updateDisplay();
+            DOM.showMessage('success', 'Data dashboard berhasil diperbarui');
+          }
+        },
+
+        initDefaultDate() {
           const today = new Date();
           const janFirst = new Date(today.getFullYear(), 0, 1);
-          
           DOM.get('fromDate').value = janFirst.toISOString().split('T')[0];
           DOM.get('toDate').value = today.toISOString().split('T')[0];
+        },
 
-          try {
-            await SheetsAPI.init();
-            LiveStatusManager.init();
+        bindEvents() {
+          DOM.get('btnRefresh')?.addEventListener('click', () => App.refresh());
+          DOM.get('btnDisplay')?.addEventListener('click', TVMode.toggle);
+          DOM.get('refreshSec')?.addEventListener('change', AutoRefresh.setup);
+          DOM.get('fromDate')?.addEventListener('change', () => App.refresh());
+          DOM.get('toDate')?.addEventListener('change', () => App.refresh());
+          DOM.get('btnSemua')?.addEventListener('click', () => setKomoditi('semua'));
+          DOM.get('btnGula')?.addEventListener('click', () => setKomoditi('GULA'));
+          DOM.get('btnMinyak')?.addEventListener('click', () => setKomoditi('MINYAK'));
+        },
 
-            DOM.get('btnRefresh').addEventListener('click', () => App.refresh());
-            DOM.get('refreshSec').addEventListener('change', AutoRefresh.setup);
-            DOM.get('fromDate').addEventListener('change', () => {
-              State.filteredRealisasi = DataProcessor.filterByDate(
-                State.activeKomoditi === 'semua' ? State.realisasiData.ALL :
-                State.activeKomoditi === 'GULA' ? State.realisasiData.GULA : State.realisasiData.MINYAK,
-                DOM.get('fromDate')?.value,
-                DOM.get('toDate')?.value,
-                'tglOrder'
-              );
-              App.updateDisplay();
-            });
-            DOM.get('toDate').addEventListener('change', () => {
-              State.filteredRealisasi = DataProcessor.filterByDate(
-                State.activeKomoditi === 'semua' ? State.realisasiData.ALL :
-                State.activeKomoditi === 'GULA' ? State.realisasiData.GULA : State.realisasiData.MINYAK,
-                DOM.get('fromDate')?.value,
-                DOM.get('toDate')?.value,
-                'tglOrder'
-              );
-              App.updateDisplay();
-            });
-
-            TVMode.init();
-            await App.refresh();
-            AutoRefresh.setup();
-            
-            setTimeout(Renderer.verifyAllContainers, 1000);
-            
-          } catch (error) {
-            console.error('Failed to initialize:', error);
-            DOM.showMessage('error', 'Gagal menginisialisasi');
-          }
+        async init() {
+          App.initDefaultDate();
+          App.bindEvents();
+          await App.refresh();
+          AutoRefresh.setup();
         }
       };
 
