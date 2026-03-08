@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Distribusi Minyak - BGR Logistik</title>
-  <meta name="description" content="Dashboard distribusi minyak dengan integrasi Google Sheets" />
+  <title>Dashboard Distribusi - BGR Logistik</title>
+  <meta name="description" content="Dashboard distribusi Gula & Minyak dengan integrasi Google Sheets" />
   <meta name="theme-color" content="#071424" />
 
   <!-- Font Inter -->
@@ -39,6 +39,8 @@
       --danger: #e74c3c;
       --info: #3498db;
       --partial: #9b59b6;
+      --gula: #f39c12;
+      --minyak: #e67e22;
       --line: rgba(255, 255, 255, 0.08);
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
       --radius-sm: 10px;
@@ -119,6 +121,34 @@
       gap: 8px;
       align-items: center;
     }
+
+    /* ===== KOMODITI SELECTOR ===== */
+    .commodity-selector {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .commodity-btn {
+      background: rgba(15, 42, 71, 0.6);
+      border: 1px solid var(--line);
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .commodity-btn.active {
+      background: var(--accent-primary);
+      color: #071424;
+      border-color: var(--accent-primary);
+    }
+
+    .commodity-btn.gula.active { background: #f39c12; }
+    .commodity-btn.minyak.active { background: #e67e22; }
+    .commodity-btn.semua.active { background: #3498db; }
 
     /* ===== LIVE STATUS ===== */
     #liveStatus {
@@ -241,7 +271,7 @@
       background: linear-gradient(135deg, rgba(46, 204, 113, 0.9), rgba(46, 204, 113, 0.55));
     }
 
-    /* ===== CARDS ===== */
+    /* ===== CARD MASTER ===== */
     .master-card {
       background: linear-gradient(135deg, rgba(255, 176, 0, 0.15), rgba(255, 176, 0, 0.05));
       border: 1px solid rgba(255, 176, 0, 0.3);
@@ -251,7 +281,7 @@
 
     .master-stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       padding: 16px;
     }
@@ -290,6 +320,14 @@
 
     .kpi .main-value { font-size: clamp(32px, 5vw, 42px); font-weight: 900; }
     .kpi .qty-value { font-size: 18px; font-weight: 700; color: var(--accent-primary); }
+    .kpi .commodity-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      display: inline-block;
+      margin-top: 5px;
+    }
 
     /* ===== GRID UTAMA ===== */
     .main, .bottom {
@@ -370,6 +408,8 @@
     .badge-cancel { background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 1px solid rgba(231, 76, 60, 0.3); }
     .badge-ondelivery { background: rgba(52, 152, 219, 0.2); color: var(--info); border: 1px solid rgba(52, 152, 219, 0.3); }
     .badge-partial { background: rgba(155, 89, 182, 0.2); color: var(--partial); border: 1px solid rgba(155, 89, 182, 0.3); }
+    .badge-gula { background: rgba(243, 156, 18, 0.2); color: #f39c12; border: 1px solid rgba(243, 156, 18, 0.3); }
+    .badge-minyak { background: rgba(230, 126, 34, 0.2); color: #e67e22; border: 1px solid rgba(230, 126, 34, 0.3); }
 
     /* ===== PARTIAL DETAIL ===== */
     .partial-detail {
@@ -377,6 +417,32 @@
       border-left: 3px solid var(--partial);
       padding: 12px;
       border-radius: var(--radius-sm);
+    }
+
+    /* ===== SUMMARY CARDS ===== */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .summary-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      border-left: 3px solid;
+    }
+
+    .summary-card.gula { border-color: #f39c12; }
+    .summary-card.minyak { border-color: #e67e22; }
+
+    .summary-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
 
     /* ===== FOOTER ===== */
@@ -470,6 +536,7 @@
     /* ===== RESPONSIVE ===== */
     @media (max-width: 1200px) {
       .main, .bottom { grid-template-columns: 1fr; }
+      .master-stats { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 768px) {
       .kpis-top, .kpis-bottom { grid-template-columns: repeat(2, 1fr); }
@@ -506,7 +573,7 @@
           <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="PT BGR Logistik Indonesia">
         </div>
         <div class="title">
-          <h1>Dashboard Distribusi Minyak</h1>
+          <h1>Dashboard Distribusi Gula & Minyak</h1>
           <p class="sub">
             <span>BGR Logistik</span>
             <span>•</span>
@@ -547,13 +614,20 @@
             <button id="btnDisplay" class="btn-display">📺 Display Mode</button>
           </div>
         </div>
+        
+        <!-- Commodity Selector -->
+        <div class="commodity-selector">
+          <button id="btnSemua" class="commodity-btn semua active" onclick="filterKomoditi('semua')">📊 Semua</button>
+          <button id="btnGula" class="commodity-btn gula" onclick="filterKomoditi('GULA')">🍚 Gula</button>
+          <button id="btnMinyak" class="commodity-btn minyak" onclick="filterKomoditi('MINYAK')">🛢️ Minyak</button>
+        </div>
       </div>
     </header>
 
     <!-- MASTER ORDER CARD -->
     <div class="card master-card" id="containerMasterOrder">
       <div class="hd">
-        <div class="t">📋 RINGKASAN MASTER ORDER</div>
+        <div class="t">📋 RINGKASAN MASTER ORDER (ORDER_ID_FOOD)</div>
         <div class="pill" id="masterPeriode">Memuat...</div>
       </div>
       <div class="master-stats">
@@ -568,6 +642,42 @@
         <div class="master-stat-item">
           <div class="master-stat-label">Rata-rata QTY/Order</div>
           <div class="master-stat-value" id="masterAvgQty">0</div>
+        </div>
+        <div class="master-stat-item">
+          <div class="master-stat-label">Total Komoditi</div>
+          <div class="master-stat-value" id="masterTotalKomoditi">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY KOMODITI -->
+    <div class="summary-grid">
+      <div class="summary-card gula">
+        <div class="summary-title">
+          <span>🍚 GULA</span>
+          <span class="badge badge-gula" id="gulaOrderCount">0 order</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+          <span>Total QTY:</span>
+          <span id="gulaTotalQty">0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 5px;">
+          <span>Progress:</span>
+          <span id="gulaProgress">0</span>
+        </div>
+      </div>
+      <div class="summary-card minyak">
+        <div class="summary-title">
+          <span>🛢️ MINYAK</span>
+          <span class="badge badge-minyak" id="minyakOrderCount">0 order</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+          <span>Total QTY:</span>
+          <span id="minyakTotalQty">0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 5px;">
+          <span>Progress:</span>
+          <span id="minyakProgress">0</span>
         </div>
       </div>
     </div>
@@ -637,11 +747,12 @@
             <table>
               <thead>
                 <tr>
+                  <th>Komoditi</th>
                   <th>No Polisi</th>
                   <th>Tujuan</th>
                   <th>Status</th>
                   <th>QTY</th>
-                  <th>Tanggal Muat</th>
+                  <th>Tgl Muat</th>
                 </tr>
               </thead>
               <tbody id="rtBody"></tbody>
@@ -679,7 +790,7 @@
         <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
       </div>
       <div class="footer-info">
-        <span>📊 Integrasi Google Sheets - Real-time Dashboard</span>
+        <span>📊 Integrasi 2 Sheet Realisasi (Gula & Minyak) + Master Order</span>
       </div>
       <div class="copyright">copyright © 2026 By RH</div>
     </footer>
@@ -689,17 +800,34 @@
     (function() {
       'use strict';
 
-      // ========== KONFIGURASI - GANTI DENGAN DATA ANDA ==========
+      // ========== KONFIGURASI ==========
       const CONFIG = {
-        // ISI DENGAN API KEY ANDA
         API_KEY: 'AIzaSyAqButS46oQPT7KiLT1PrklrzueBQ9w-qk',
-        
-        // ISI DENGAN SHEET ID ANDA
         SHEET_ID: '1sSCdfPKQWBsgH6JUFzmUpIpuIi8T8FWbhzs0LDcKO2M',
         
-        // SESUAIKAN NAMA SHEET
-        REALISASI_RANGE: 'PELAKSANAAN PEKERJAAN MINYAK!A:Q',  // Sheet untuk data realisasi
-        MASTER_RANGE: 'ORDER_ID_FOOD!A:h',        // Sheet untuk data master
+        // 2 Sheet Realisasi
+        SHEETS: {
+          GULA: 'PELAKSANAAN PEKERJAAN GULA!A:T',
+          MINYAK: 'PELAKSANAAN PEKERJAAN MINYAK!A:T'
+        },
+        
+        // Master Order
+        MASTER_RANGE: 'ORDER_ID_FOOD!A:H',
+        
+        // Mapping kolom (sama untuk kedua sheet)
+        COLUMNS: {
+          tglOrder: 1,     // Kolom B
+          orderCode: 2,    // Kolom C
+          pabrik: 3,       // Kolom D
+          komoditi: 4,     // Kolom E
+          penerima: 5,     // Kolom F
+          kota: 6,         // Kolom G
+          qty: 7,          // Kolom H
+          noPolisi: 10,    // Kolom K
+          rencanaMuat: 15, // Kolom P
+          status: 16,      // Kolom Q
+          tglMuat: 19      // Kolom T
+        },
         
         CHART_COLORS: {
           delivered: '#2ecc71',
@@ -710,32 +838,22 @@
         }
       };
 
-      // ========== KOLOM REALISASI (INDEX BERBASIS 0) ==========
-      const REALISASI_COLUMNS = {
-        tglOrder: 1,    // Kolom B (index 1)
-        orderCode: 2,   // Kolom C
-        pabrik: 3,      // Kolom D
-        Komoditi:4,     // Kolom E
-        penerima: 5,    // Kolom F
-        kota: 6,        // Kolom G
-        qty: 7,         // Kolom H
-        noPolisi: 10,    // Kolom K
-        rencanaMuat: 14, // Kolom p
-        status: 16,     // Kolom q
-        tglMuat: 19     // Kolom t
-      };
-
       // ========== STATE GLOBAL ==========
       const State = {
-        realisasiData: [],
+        realisasiData: {
+          GULA: [],
+          MINYAK: [],
+          ALL: [] // Gabungan
+        },
         masterData: [],
         filteredRealisasi: [],
         filteredMaster: [],
+        activeKomoditi: 'semua', // 'semua', 'GULA', 'MINYAK'
         charts: {},
         refreshTimer: null,
         isRefreshing: false,
         lastFetch: null,
-        dataStatus: { realisasi: false, master: false },
+        dataStatus: { gula: false, minyak: false, master: false },
         tvMode: false,
         connectionStatus: 'checking'
       };
@@ -773,11 +891,40 @@
         }
       };
 
+      // ========== FILTER KOMODITI ==========
+      window.filterKomoditi = (komoditi) => {
+        State.activeKomoditi = komoditi;
+        
+        // Update button active state
+        document.getElementById('btnSemua').classList.remove('active');
+        document.getElementById('btnGula').classList.remove('active');
+        document.getElementById('btnMinyak').classList.remove('active');
+        
+        if (komoditi === 'semua') {
+          document.getElementById('btnSemua').classList.add('active');
+          State.filteredRealisasi = [...State.realisasiData.ALL];
+        } else if (komoditi === 'GULA') {
+          document.getElementById('btnGula').classList.add('active');
+          State.filteredRealisasi = [...State.realisasiData.GULA];
+        } else if (komoditi === 'MINYAK') {
+          document.getElementById('btnMinyak').classList.add('active');
+          State.filteredRealisasi = [...State.realisasiData.MINYAK];
+        }
+        
+        // Terapkan filter tanggal
+        const from = DOM.get('fromDate')?.value;
+        const to = DOM.get('toDate')?.value;
+        State.filteredRealisasi = DataProcessor.filterByDate(State.filteredRealisasi, from, to, 'tglOrder');
+        
+        // Update tampilan
+        App.updateDisplay();
+      };
+
       // ========== LIVE STATUS MANAGER ==========
       const LiveStatusManager = {
         init: () => {
-          setInterval(() => this.checkConnection(), 30000);
-          this.checkConnection();
+          setInterval(() => LiveStatusManager.checkConnection(), 30000);
+          LiveStatusManager.checkConnection();
         },
         
         checkConnection: async () => {
@@ -932,7 +1079,6 @@
           
           const statusLower = status.toString().toLowerCase().trim();
           
-          // PROGRESS
           if (statusLower.includes('proses') || 
               statusLower.includes('antrian') || 
               statusLower.includes('pick up') || 
@@ -940,24 +1086,20 @@
             return 'PROGRESS';
           }
           
-          // ON DELIVERY
           if (statusLower === 'delivery' || 
               statusLower === 'on delivery' || 
               (statusLower.includes('delivery') && !statusLower.includes('delivered'))) {
             return 'ON_DELIVERY';
           }
           
-          // DELIVERED
           if (statusLower.includes('delivered')) {
             return 'DELIVERED';
           }
           
-          // CANCEL
           if (statusLower.includes('cancel')) {
             return 'CANCEL';
           }
           
-          // PARTIAL
           if (statusLower.includes('partial')) {
             return 'PARTIAL';
           }
@@ -965,27 +1107,28 @@
           return 'UNKNOWN';
         },
         
-        processRealisasiRow: (row) => {
+        processRealisasiRow: (row, komoditi) => {
           if (!Array.isArray(row) || row.length < 17) return null;
           
-          const orderCode = row[REALISASI_COLUMNS.orderCode] || '';
+          const orderCode = row[CONFIG.COLUMNS.orderCode] || '';
           if (!orderCode || orderCode.toString().trim() === '') return null;
           
-          let noPolisi = row[REALISASI_COLUMNS.noPolisi] || '-';
+          let noPolisi = row[CONFIG.COLUMNS.noPolisi] || '-';
           noPolisi = noPolisi.toString().trim().toUpperCase();
           
           return {
-            tglOrder: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglOrder]),
+            tglOrder: DataProcessor.parseDate(row[CONFIG.COLUMNS.tglOrder]),
             orderCode: orderCode.toString().trim(),
-            pabrik: row[REALISASI_COLUMNS.pabrik] || 'Unknown',
-            penerima: row[REALISASI_COLUMNS.penerima] || 'Unknown',
-            kota: row[REALISASI_COLUMNS.kota] || 'Unknown',
-            qty: DataProcessor.parseNumber(row[REALISASI_COLUMNS.qty]),
+            pabrik: row[CONFIG.COLUMNS.pabrik] || 'Unknown',
+            komoditi: komoditi,
+            penerima: row[CONFIG.COLUMNS.penerima] || 'Unknown',
+            kota: row[CONFIG.COLUMNS.kota] || 'Unknown',
+            qty: DataProcessor.parseNumber(row[CONFIG.COLUMNS.qty]),
             noPolisi: noPolisi,
-            rencanaMuat: DataProcessor.parseDate(row[REALISASI_COLUMNS.rencanaMuat]),
-            status: row[REALISASI_COLUMNS.status] || '',
-            statusCategory: DataProcessor.getStatusCategory(row[REALISASI_COLUMNS.status]),
-            tglMuat: DataProcessor.parseDate(row[REALISASI_COLUMNS.tglMuat])
+            rencanaMuat: DataProcessor.parseDate(row[CONFIG.COLUMNS.rencanaMuat]),
+            status: row[CONFIG.COLUMNS.status] || '',
+            statusCategory: DataProcessor.getStatusCategory(row[CONFIG.COLUMNS.status]),
+            tglMuat: DataProcessor.parseDate(row[CONFIG.COLUMNS.tglMuat])
           };
         },
         
@@ -1025,7 +1168,7 @@
         },
         
         calculateMasterStats: (data) => {
-          if (!data || data.length === 0) return { totalOrders: 0, totalQty: 0, avgQty: 0, periode: '-' };
+          if (!data || data.length === 0) return { totalOrders: 0, totalQty: 0, avgQty: 0, periode: '-', totalKomoditi: 0 };
           
           const uniqueOrders = new Map();
           data.forEach(o => {
@@ -1047,7 +1190,23 @@
             periode = `${DataProcessor.formatDate(first)} - ${DataProcessor.formatDate(last)}`;
           }
           
-          return { totalOrders, totalQty, avgQty, periode };
+          return { totalOrders, totalQty, avgQty, periode, totalKomoditi: 2 };
+        },
+        
+        calculateKomoditiSummary: (dataGula, dataMinyak) => {
+          const gulaOrders = new Set(dataGula.map(d => d.orderCode)).size;
+          const minyakOrders = new Set(dataMinyak.map(d => d.orderCode)).size;
+          
+          const gulaQty = dataGula.reduce((sum, d) => sum + (d.qty || 0), 0);
+          const minyakQty = dataMinyak.reduce((sum, d) => sum + (d.qty || 0), 0);
+          
+          const gulaProgress = dataGula.filter(d => d.statusCategory === 'PROGRESS').length;
+          const minyakProgress = dataMinyak.filter(d => d.statusCategory === 'PROGRESS').length;
+          
+          return {
+            gula: { orders: gulaOrders, qty: gulaQty, progress: gulaProgress },
+            minyak: { orders: minyakOrders, qty: minyakQty, progress: minyakProgress }
+          };
         },
         
         calculateRealisasiStats: (data) => {
@@ -1059,7 +1218,8 @@
             if (!orderMap.has(item.orderCode)) {
               orderMap.set(item.orderCode, {
                 statuses: new Set(),
-                totalQty: 0
+                totalQty: 0,
+                komoditi: item.komoditi
               });
             }
             
@@ -1108,7 +1268,6 @@
             }
           });
 
-          // Hitung persentase
           const total = stats.totalOrders;
           stats.progress.percentage = total ? (stats.progress.count / total) * 100 : 0;
           stats.onDelivery.percentage = total ? (stats.onDelivery.count / total) * 100 : 0;
@@ -1417,6 +1576,17 @@
           DOM.updateText('masterTotalQty', DataProcessor.formatNumber(stats.totalQty));
           DOM.updateText('masterAvgQty', DataProcessor.formatNumberDecimal(stats.avgQty, 1));
           DOM.updateText('masterPeriode', stats.periode);
+          DOM.updateText('masterTotalKomoditi', '2 (Gula & Minyak)');
+        },
+        
+        komoditiSummary: (summary) => {
+          DOM.updateText('gulaOrderCount', `${summary.gula.orders} order`);
+          DOM.updateText('gulaTotalQty', DataProcessor.formatNumber(summary.gula.qty));
+          DOM.updateText('gulaProgress', `${summary.gula.progress} order`);
+          
+          DOM.updateText('minyakOrderCount', `${summary.minyak.orders} order`);
+          DOM.updateText('minyakTotalQty', DataProcessor.formatNumber(summary.minyak.qty));
+          DOM.updateText('minyakProgress', `${summary.minyak.progress} order`);
         },
         
         renderProgressContainer: (progressStats) => {
@@ -1635,7 +1805,6 @@
         },
         
         charts: (data, stats) => {
-          // Hancurkan chart lama
           Object.values(State.charts).forEach(c => c && c.destroy());
           State.charts = {};
 
@@ -1668,7 +1837,6 @@
             });
           }
 
-          // Status Note
           const statusNote = DOM.get('statusNote');
           if (statusNote) {
             statusNote.innerHTML = `Total ${stats.totalOrders} order • Total QTY: ${DataProcessor.formatNumber(stats.totalQty)}`;
@@ -1741,12 +1909,16 @@
             
           tbody.innerHTML = '';
           if (sorted.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Tidak ada data</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">Tidak ada data</td></tr>';
             return;
           }
           
           sorted.forEach(item => {
             const row = tbody.insertRow();
+            
+            // Komoditi
+            const komoditiCell = row.insertCell();
+            komoditiCell.innerHTML = `<span class="badge ${item.komoditi === 'GULA' ? 'badge-gula' : 'badge-minyak'}">${item.komoditi}</span>`;
             
             // No Polisi
             const np = item.noPolisi || '-';
@@ -1784,8 +1956,11 @@
           const refreshSec = DOM.get('refreshSec')?.value;
           DOM.updateText('refreshStatus', refreshSec === '0' ? 'Off' : `${refreshSec||30}s`);
           
-          const statusArr = [State.dataStatus.realisasi ? '✅ Realisasi' : '❌ Realisasi', 
-                            State.dataStatus.master ? '✅ Master' : '❌ Master'];
+          const statusArr = [
+            State.dataStatus.gula ? '✅ Gula' : '❌ Gula',
+            State.dataStatus.minyak ? '✅ Minyak' : '❌ Minyak',
+            State.dataStatus.master ? '✅ Master' : '❌ Master'
+          ];
           DOM.updateText('dataStatus', statusArr.join(' • '));
           
           if (State.lastFetch) {
@@ -1829,22 +2004,38 @@
           try {
             LiveStatusManager.updateFromFetch(false);
             
-            const [realisasiRes, masterRes] = await Promise.allSettled([
-              SheetsAPI.fetchData(CONFIG.REALISASI_RANGE),
+            // Fetch semua sheet
+            const [gulaRes, minyakRes, masterRes] = await Promise.allSettled([
+              SheetsAPI.fetchData(CONFIG.SHEETS.GULA),
+              SheetsAPI.fetchData(CONFIG.SHEETS.MINYAK),
               SheetsAPI.fetchData(CONFIG.MASTER_RANGE)
             ]);
 
-            let realisasiData = [];
-            if (realisasiRes.status === 'fulfilled') {
-              const rows = realisasiRes.value;
+            // Proses data GULA
+            let gulaData = [];
+            if (gulaRes.status === 'fulfilled') {
+              const rows = gulaRes.value;
               for (let i = 1; i < rows.length; i++) {
-                const item = DataProcessor.processRealisasiRow(rows[i]);
-                if (item && item.orderCode) realisasiData.push(item);
+                const item = DataProcessor.processRealisasiRow(rows[i], 'GULA');
+                if (item && item.orderCode) gulaData.push(item);
               }
-              State.dataStatus.realisasi = realisasiData.length > 0;
-              console.log(`✅ Loaded ${realisasiData.length} realisasi records`);
+              State.dataStatus.gula = gulaData.length > 0;
+              console.log(`✅ Loaded ${gulaData.length} GULA records`);
             }
 
+            // Proses data MINYAK
+            let minyakData = [];
+            if (minyakRes.status === 'fulfilled') {
+              const rows = minyakRes.value;
+              for (let i = 1; i < rows.length; i++) {
+                const item = DataProcessor.processRealisasiRow(rows[i], 'MINYAK');
+                if (item && item.orderCode) minyakData.push(item);
+              }
+              State.dataStatus.minyak = minyakData.length > 0;
+              console.log(`✅ Loaded ${minyakData.length} MINYAK records`);
+            }
+
+            // Proses data MASTER
             let masterData = [];
             if (masterRes.status === 'fulfilled') {
               const rows = masterRes.value;
@@ -1856,24 +2047,65 @@
               console.log(`✅ Loaded ${masterData.length} master records`);
             }
 
-            State.realisasiData = realisasiData;
+            // Simpan ke state
+            State.realisasiData.GULA = gulaData;
+            State.realisasiData.MINYAK = minyakData;
+            State.realisasiData.ALL = [...gulaData, ...minyakData];
             State.masterData = masterData;
             State.lastFetch = new Date();
             
-            LiveStatusManager.updateFromFetch(realisasiData.length > 0 || masterData.length > 0);
+            // Set filtered data sesuai active komoditi
+            if (State.activeKomoditi === 'semua') {
+              State.filteredRealisasi = [...State.realisasiData.ALL];
+            } else if (State.activeKomoditi === 'GULA') {
+              State.filteredRealisasi = [...State.realisasiData.GULA];
+            } else {
+              State.filteredRealisasi = [...State.realisasiData.MINYAK];
+            }
             
-            return { realisasiData, masterData };
+            // Terapkan filter tanggal
+            const from = DOM.get('fromDate')?.value;
+            const to = DOM.get('toDate')?.value;
+            State.filteredRealisasi = DataProcessor.filterByDate(State.filteredRealisasi, from, to, 'tglOrder');
+            State.filteredMaster = DataProcessor.filterByDate(masterData, from, to, 'tglOrder');
+            
+            LiveStatusManager.updateFromFetch(gulaData.length > 0 || minyakData.length > 0);
+            
+            return { gulaData, minyakData, masterData };
             
           } catch (err) {
             console.error('❌ Fetch error:', err);
             LiveStatusManager.updateFromFetch(false);
             DOM.showMessage('error', 'Gagal mengambil data');
-            return { realisasiData: State.realisasiData || [], masterData: State.masterData || [] };
+            return { gulaData: [], minyakData: [], masterData: [] };
           } finally {
             DOM.showRefreshIndicator(false);
             State.isRefreshing = false;
           }
         }
+      };
+
+      // ========== APP UPDATE DISPLAY ==========
+      App.updateDisplay = () => {
+        const progressStats = DataProcessor.calculateProgressStats(State.filteredRealisasi);
+        const partialStats = DataProcessor.calculatePartialStats(State.filteredRealisasi);
+        const deliveredStats = DataProcessor.calculateDeliveredStats(State.filteredRealisasi);
+        const cancelStats = DataProcessor.calculateCancelStats(State.filteredRealisasi);
+        const realStats = DataProcessor.calculateRealisasiStats(State.filteredRealisasi);
+        const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
+        const komoditiSummary = DataProcessor.calculateKomoditiSummary(
+          State.realisasiData.GULA, 
+          State.realisasiData.MINYAK
+        );
+
+        Renderer.renderProgressContainer(progressStats);
+        Renderer.renderPartialContainer(partialStats);
+        Renderer.masterSummary(masterStats);
+        Renderer.komoditiSummary(komoditiSummary);
+        Renderer.kpi(realStats, deliveredStats, cancelStats);
+        Renderer.charts(State.filteredRealisasi, realStats);
+        Renderer.realTimeTable(State.filteredRealisasi);
+        Renderer.ringkasanData(realStats, masterStats);
       };
 
       // ========== GLOBAL DEBUG FUNCTIONS ==========
@@ -1922,8 +2154,8 @@
       };
       
       window.debugStatusCategories = () => {
-        if (!State.realisasiData.length) return console.log('Data belum ada');
-        const unique = [...new Set(State.realisasiData.map(d => d.status))];
+        if (!State.realisasiData.ALL.length) return console.log('Data belum ada');
+        const unique = [...new Set(State.realisasiData.ALL.map(d => d.status))];
         console.group('🔍 STATUS CATEGORIES');
         unique.forEach(s => {
           console.log(`"${s}" → ${DataProcessor.getStatusCategory(s)}`);
@@ -1939,29 +2171,8 @@
       const App = {
         refresh: async () => {
           if (State.isRefreshing) return;
-          const { realisasiData, masterData } = await DataFetcher.fetchAllData();
-          
-          const from = DOM.get('fromDate')?.value;
-          const to = DOM.get('toDate')?.value;
-          
-          State.filteredRealisasi = DataProcessor.filterByDate(realisasiData, from, to, 'tglOrder');
-          State.filteredMaster = DataProcessor.filterByDate(masterData, from, to, 'tglOrder');
-
-          const progressStats = DataProcessor.calculateProgressStats(State.filteredRealisasi);
-          const partialStats = DataProcessor.calculatePartialStats(State.filteredRealisasi);
-          const deliveredStats = DataProcessor.calculateDeliveredStats(State.filteredRealisasi);
-          const cancelStats = DataProcessor.calculateCancelStats(State.filteredRealisasi);
-          const realStats = DataProcessor.calculateRealisasiStats(State.filteredRealisasi);
-          const masterStats = DataProcessor.calculateMasterStats(State.filteredMaster);
-
-          Renderer.renderProgressContainer(progressStats);
-          Renderer.renderPartialContainer(partialStats);
-          Renderer.masterSummary(masterStats);
-          Renderer.kpi(realStats, deliveredStats, cancelStats);
-          Renderer.charts(State.filteredRealisasi, realStats);
-          Renderer.realTimeTable(State.filteredRealisasi);
-          Renderer.ringkasanData(realStats, masterStats);
-
+          await DataFetcher.fetchAllData();
+          App.updateDisplay();
           DOM.showMessage('success', `Update: ${State.filteredRealisasi.length} realisasi`);
         },
         
@@ -1978,8 +2189,26 @@
 
             DOM.get('btnRefresh').addEventListener('click', () => App.refresh());
             DOM.get('refreshSec').addEventListener('change', AutoRefresh.setup);
-            DOM.get('fromDate').addEventListener('change', () => App.refresh());
-            DOM.get('toDate').addEventListener('change', () => App.refresh());
+            DOM.get('fromDate').addEventListener('change', () => {
+              State.filteredRealisasi = DataProcessor.filterByDate(
+                State.activeKomoditi === 'semua' ? State.realisasiData.ALL :
+                State.activeKomoditi === 'GULA' ? State.realisasiData.GULA : State.realisasiData.MINYAK,
+                DOM.get('fromDate')?.value,
+                DOM.get('toDate')?.value,
+                'tglOrder'
+              );
+              App.updateDisplay();
+            });
+            DOM.get('toDate').addEventListener('change', () => {
+              State.filteredRealisasi = DataProcessor.filterByDate(
+                State.activeKomoditi === 'semua' ? State.realisasiData.ALL :
+                State.activeKomoditi === 'GULA' ? State.realisasiData.GULA : State.realisasiData.MINYAK,
+                DOM.get('fromDate')?.value,
+                DOM.get('toDate')?.value,
+                'tglOrder'
+              );
+              App.updateDisplay();
+            });
 
             TVMode.init();
             await App.refresh();
