@@ -428,6 +428,52 @@
       gap: 5px;
     }
 
+    /* ===== REAL TIME DELIVERY CONTAINERS ===== */
+    .realtime-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .realtime-card {
+      border: 1px solid var(--line);
+      background: rgba(12, 31, 53, 0.55);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .realtime-card .hd {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(15, 42, 71, 0.45);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .realtime-card .hd.gula { border-left: 4px solid #f39c12; }
+    .realtime-card .hd.minyak { border-left: 4px solid #e67e22; }
+
+    .realtime-card .bd {
+      padding: 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .realtime-card table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .realtime-card th {
+      position: sticky;
+      top: 0;
+      background: rgba(15, 42, 71, 0.95);
+      z-index: 1;
+    }
+
     /* ===== FOOTER ===== */
     .footer {
       margin-top: 40px;
@@ -518,7 +564,7 @@
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 1200px) {
-      .main, .bottom { grid-template-columns: 1fr; }
+      .main, .bottom, .realtime-grid { grid-template-columns: 1fr; }
       .master-stats { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 768px) {
@@ -559,7 +605,7 @@
     <button class="debug-btn" style="background:#2ecc71" onclick="debugDelivered()">✅ Delivered</button>
     <button class="debug-btn" style="background:#e74c3c" onclick="debugCancel()">⛔ Cancel</button>
     <button class="debug-btn" style="background:#3498db" onclick="debugStatusCategories()">🔍 Status</button>
-    <button class="debug-btn" style="background:#ffb000" onclick="debugKomoditi()">🔍 Cek Komoditi</button>
+    <button class="debug-btn" style="background:#9b59b6" onclick="debugKomoditi()">🔍 Cek Komoditi</button>
     <button class="debug-btn" style="background:#ffb000" onclick="testAllContainers()">🧪 Test</button>
   </div>
 
@@ -738,50 +784,54 @@
         </div>
       </div>
 
-      <!-- Real Time Delivery -->
-      <div class="card" id="containerRealTime">
-        <div class="hd">
-          <div class="t">🚚 Real Time Delivery</div>
-          <div class="pill">10 Data Terbaru</div>
-        </div>
-        <div class="bd" style="padding:0">
-          <div style="overflow-x:auto">
-            <table>
-              <thead>
-                <tr>
-                  <th>Komoditi</th>
-                  <th>No Polisi</th>
-                  <th>Tujuan</th>
-                  <th>Status</th>
-                  <th>QTY</th>
-                  <th>Tgl Muat</th>
-                </tr>
-              </thead>
-              <tbody id="rtBody"></tbody>
-            </table>
+      <!-- REAL TIME DELIVERY - GULA & MINYAK (2 Container) -->
+      <div style="display: contents;">
+        <!-- Real Time Delivery GULA -->
+        <div class="realtime-card" id="containerRealTimeGula">
+          <div class="hd gula">
+            <div class="t">🍚 Real Time Delivery - GULA</div>
+            <div class="pill">10 Data Terbaru</div>
+          </div>
+          <div class="bd">
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>No Polisi</th>
+                    <th>Tujuan</th>
+                    <th>Status</th>
+                    <th>QTY</th>
+                    <th>Tgl Muat</th>
+                  </tr>
+                </thead>
+                <tbody id="rtBodyGula"></tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Ringkasan Data -->
-      <div class="card" id="containerRingkasan">
-        <div class="hd">
-          <div class="t">📋 Ringkasan Data</div>
-          <div class="pill">Info Detail</div>
-        </div>
-        <div class="bd">
-          <div class="note">
-            <div>• Total Baris: <span id="totalRowsDetail">-</span></div>
-            <div>• Total Order: <span id="totalOrdersDetail">-</span></div>
-            <div>• Total Master: <span id="masterInfoDetail">-</span></div>
-            <div>• Total QTY: <span id="totalQtyDetail">-</span></div>
-            <div>• Rata-rata QTY: <span id="avgQtyDetail">-</span></div>
-            <div>• Auto Refresh: <span id="refreshStatus">30s</span></div>
-            <div>• Status Data: <span id="dataStatus">Menyiapkan...</span></div>
-            <div>• Last Update: <span id="lastUpdateTime">-</span></div>
+        <!-- Real Time Delivery MINYAK -->
+        <div class="realtime-card" id="containerRealTimeMinyak">
+          <div class="hd minyak">
+            <div class="t">🛢️ Real Time Delivery - MINYAK</div>
+            <div class="pill">10 Data Terbaru</div>
           </div>
-          <div id="messageContainer" style="margin-top:10px; color:var(--success);"></div>
-          <div id="errorContainer" style="display:none; margin-top:10px;"></div>
+          <div class="bd">
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>No Polisi</th>
+                    <th>Tujuan</th>
+                    <th>Status</th>
+                    <th>QTY</th>
+                    <th>Tgl Muat</th>
+                  </tr>
+                </thead>
+                <tbody id="rtBodyMinyak"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -792,7 +842,7 @@
         <img src="https://www.bgrlogistik.id/bgr/img/logo_bli.png" alt="BGR Logistik">
       </div>
       <div class="footer-info">
-        <span>📊 Integrasi 2 Sheet Realisasi (Gula & Minyak) + Master Order</span>
+       
       </div>
       <div class="copyright">copyright © 2026 By RH</div>
     </footer>
@@ -879,21 +929,15 @@
         },
         showMessage: (type, msg, duration = 2000) => {
           const container = DOM.get('messageContainer');
-          const errorContainer = DOM.get('errorContainer');
           if (!container) return;
 
           if (type === 'error') {
-            if (errorContainer) {
-              errorContainer.style.display = 'block';
-              errorContainer.style.padding = '10px';
-              errorContainer.style.background = 'rgba(231,76,60,0.2)';
-              errorContainer.style.borderRadius = 'var(--radius-sm)';
-              errorContainer.style.color = 'var(--danger)';
-              errorContainer.innerHTML = `❌ ${msg}`;
-              setTimeout(() => { errorContainer.style.display = 'none'; }, duration);
-            }
+            container.innerHTML = `❌ ${msg}`;
+            container.style.color = 'var(--danger)';
+            setTimeout(() => { container.innerHTML = ''; }, duration);
           } else {
             container.innerHTML = `✅ ${msg}`;
+            container.style.color = 'var(--success)';
             setTimeout(() => { container.innerHTML = ''; }, duration);
           }
         },
@@ -908,7 +952,7 @@
         }
       };
 
-      // ========== FILTER KOMODITI (DIPERBAIKI UNTUK MINYAKITA) ==========
+      // ========== FILTER KOMODITI ==========
       window.filterKomoditi = (komoditi) => {
         State.activeKomoditi = komoditi;
         
@@ -921,17 +965,15 @@
           State.filteredRealisasi = [...State.realisasiData.ALL];
         } else if (komoditi === 'GULA') {
           document.getElementById('btnGula').classList.add('active');
-          // Filter GULA: cari yang mengandung "GULA"
           State.filteredRealisasi = State.realisasiData.ALL.filter(item => 
-            item.komoditi === 'GULA' || item.komoditi?.toUpperCase().includes('GULA')
+            item.komoditi === 'GULA' || item.komoditi?.includes('GULA')
           );
         } else if (komoditi === 'MINYAK') {
           document.getElementById('btnMinyak').classList.add('active');
-          // Filter MINYAK: cari yang mengandung "MINYAK" (termasuk MINYAKITA)
           State.filteredRealisasi = State.realisasiData.ALL.filter(item => 
             item.komoditi === 'MINYAK' || 
             item.komoditi === 'MINYAKITA' || 
-            item.komoditi?.toUpperCase().includes('MINYAK')
+            item.komoditi?.includes('MINYAK')
           );
         }
         
@@ -1126,14 +1168,13 @@
           return 'UNKNOWN';
         },
         
-        // Proses data realisasi (Gula & Minyak) - DIPERBAIKI
+        // Proses data realisasi (Gula & Minyak)
         processRealisasiRow: (row, komoditiSheet) => {
           if (!Array.isArray(row) || row.length < 17) return null;
           
           const orderCode = row[CONFIG.REALISASI_COLUMNS.orderCode] || '';
           if (!orderCode || orderCode.toString().trim() === '') return null;
           
-          // Baca komoditi dari sheet (kolom E)
           const komoditiFromSheet = row[CONFIG.REALISASI_COLUMNS.komoditi] || '';
           const komoditiValue = komoditiFromSheet.toString().trim().toUpperCase();
           
@@ -1144,11 +1185,7 @@
             tglOrder: DataProcessor.parseDate(row[CONFIG.REALISASI_COLUMNS.tglOrder]),
             orderCode: orderCode.toString().trim(),
             pabrik: row[CONFIG.REALISASI_COLUMNS.pabrik] || 'Unknown',
-            // Simpan komoditi asli dari sheet
             komoditi: komoditiValue || komoditiSheet,
-            // Tambahkan grup komoditi untuk memudahkan filtering
-            komoditiGroup: komoditiValue.includes('GULA') ? 'GULA' : 
-                          (komoditiValue.includes('MINYAK') ? 'MINYAK' : komoditiSheet),
             penerima: row[CONFIG.REALISASI_COLUMNS.penerima] || 'Unknown',
             kota: row[CONFIG.REALISASI_COLUMNS.kota] || 'Unknown',
             qty: DataProcessor.parseNumber(row[CONFIG.REALISASI_COLUMNS.qty]),
@@ -1254,14 +1291,12 @@
           }
         },
         
-        // Hitung summary komoditi - DIPERBAIKI UNTUK MINYAKITA
+        // Hitung summary komoditi
         calculateKomoditiSummary: (dataGula, dataMinyak) => {
-          // Untuk GULA: filter yang mengandung GULA
           const gulaData = dataGula.filter(d => 
             d.komoditi === 'GULA' || d.komoditi?.includes('GULA')
           );
           
-          // Untuk MINYAK: filter yang mengandung MINYAK (termasuk MINYAKITA)
           const minyakData = dataMinyak.filter(d => 
             d.komoditi === 'MINYAK' || 
             d.komoditi === 'MINYAKITA' || 
@@ -1374,11 +1409,10 @@
           const progressStats = {
             count: 0,
             qty: 0,
-            orders: [],
             avgProcessingTime: 0
           };
 
-          orderMap.forEach((orderData, orderCode) => {
+          orderMap.forEach((orderData) => {
             const statuses = Array.from(orderData.statuses);
             const hasProgress = statuses.includes('PROGRESS');
             const hasDeliveredOrCancel = statuses.includes('DELIVERED') || statuses.includes('CANCEL');
@@ -1386,22 +1420,8 @@
             if (hasProgress && !hasDeliveredOrCancel) {
               progressStats.count++;
               progressStats.qty += orderData.totalQty;
-              progressStats.orders.push({
-                orderCode,
-                totalQty: orderData.totalQty,
-                firstSeen: orderData.firstSeen
-              });
             }
           });
-
-          const ordersWithAge = progressStats.orders.filter(o => o.firstSeen);
-          if (ordersWithAge.length > 0) {
-            const totalAge = ordersWithAge.reduce((sum, o) => {
-              const age = (new Date() - new Date(o.firstSeen)) / (1000 * 60 * 60 * 24);
-              return sum + age;
-            }, 0);
-            progressStats.avgProcessingTime = totalAge / ordersWithAge.length;
-          }
 
           return progressStats;
         },
@@ -1635,11 +1655,6 @@
             <div class="main-value">${DataProcessor.formatNumber(progressStats.count)}</div>
             <div class="qty-value">${DataProcessor.formatNumber(progressStats.qty)} Qty</div>
             <div class="percentage">${DataProcessor.formatNumberDecimal(percentage, 1)}% dari total</div>
-            <div class="progress-detail">
-              <div style="font-size: 11px; color: var(--text-secondary);">
-                Rata-rata: ${DataProcessor.formatNumberDecimal(progressStats.avgProcessingTime, 1)} hari
-              </div>
-            </div>
           `;
         },
         
@@ -1906,70 +1921,87 @@
           }
         },
         
-        realTimeTable: (data) => {
-          const tbody = DOM.get('rtBody');
-          if (!tbody) return;
-          
-          const sorted = [...data]
-            .sort((a,b) => {
-              const dateA = b.tglMuat || b.rencanaMuat || 0;
-              const dateB = a.tglMuat || a.rencanaMuat || 0;
-              return dateA - dateB;
-            })
-            .slice(0,10);
+        renderRealTimeTables: (dataGula, dataMinyak) => {
+          // Render tabel Gula
+          const tbodyGula = DOM.get('rtBodyGula');
+          if (tbodyGula) {
+            const sortedGula = [...dataGula]
+              .filter(item => item.komoditi === 'GULA' || item.komoditi?.includes('GULA'))
+              .sort((a,b) => {
+                const dateA = b.tglMuat || b.rencanaMuat || 0;
+                const dateB = a.tglMuat || a.rencanaMuat || 0;
+                return dateA - dateB;
+              })
+              .slice(0,10);
             
-          tbody.innerHTML = '';
-          if (sorted.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">Tidak ada data</td></tr>';
-            return;
+            tbodyGula.innerHTML = '';
+            if (sortedGula.length === 0) {
+              tbodyGula.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Tidak ada data Gula</td></tr>';
+            } else {
+              sortedGula.forEach(item => {
+                const row = tbodyGula.insertRow();
+                
+                const np = item.noPolisi || '-';
+                const npCell = row.insertCell();
+                npCell.textContent = np;
+                if (np !== '-' && np.length > 2) npCell.style.color = '#ffb000';
+                
+                row.insertCell().textContent = item.kota || '-';
+                
+                const stCell = row.insertCell(); 
+                stCell.textContent = item.status || '-';
+                const statusClass = item.statusCategory ? 
+                  `status-${item.statusCategory.toLowerCase().replace('_','')}` : '';
+                if (statusClass) stCell.className = statusClass;
+                
+                row.insertCell().textContent = DataProcessor.formatNumber(item.qty);
+                
+                const tgl = item.tglMuat ? DataProcessor.formatDate(item.tglMuat) : 
+                           (item.rencanaMuat ? DataProcessor.formatDate(item.rencanaMuat) : '-');
+                row.insertCell().textContent = tgl;
+              });
+            }
           }
-          
-          sorted.forEach(item => {
-            const row = tbody.insertRow();
+
+          // Render tabel Minyak
+          const tbodyMinyak = DOM.get('rtBodyMinyak');
+          if (tbodyMinyak) {
+            const sortedMinyak = [...dataMinyak]
+              .filter(item => item.komoditi === 'MINYAK' || item.komoditi === 'MINYAKITA' || item.komoditi?.includes('MINYAK'))
+              .sort((a,b) => {
+                const dateA = b.tglMuat || b.rencanaMuat || 0;
+                const dateB = a.tglMuat || a.rencanaMuat || 0;
+                return dateA - dateB;
+              })
+              .slice(0,10);
             
-            const komoditiCell = row.insertCell();
-            komoditiCell.innerHTML = `<span class="badge ${item.komoditi === 'GULA' || item.komoditi?.includes('GULA') ? 'badge-gula' : 'badge-minyak'}">${item.komoditi}</span>`;
-            
-            const np = item.noPolisi || '-';
-            const npCell = row.insertCell();
-            npCell.textContent = np;
-            if (np !== '-' && np.length > 2) npCell.style.color = '#ffb000';
-            
-            row.insertCell().textContent = item.kota || '-';
-            
-            const stCell = row.insertCell(); 
-            stCell.textContent = item.status || '-';
-            const statusClass = item.statusCategory ? 
-              `status-${item.statusCategory.toLowerCase().replace('_','')}` : '';
-            if (statusClass) stCell.className = statusClass;
-            
-            row.insertCell().textContent = DataProcessor.formatNumber(item.qty);
-            
-            const tgl = item.tglMuat ? DataProcessor.formatDate(item.tglMuat) : 
-                       (item.rencanaMuat ? DataProcessor.formatDate(item.rencanaMuat) : '-');
-            row.insertCell().textContent = tgl;
-          });
-        },
-        
-        ringkasanData: (realStats, masterStats) => {
-          DOM.updateText('totalRowsDetail', `${realStats.totalRows} baris`);
-          DOM.updateText('totalOrdersDetail', `${realStats.totalOrders} order`);
-          DOM.updateText('totalQtyDetail', DataProcessor.formatNumber(realStats.totalQty));
-          DOM.updateText('avgQtyDetail', DataProcessor.formatNumberDecimal(realStats.avgQtyPerOrder,1));
-          DOM.updateText('masterInfoDetail', `${DataProcessor.formatNumber(masterStats.totalOrders)} order (${DataProcessor.formatNumber(masterStats.totalQty)} QTY)`);
-          
-          const refreshSec = DOM.get('refreshSec')?.value;
-          DOM.updateText('refreshStatus', refreshSec === '0' ? 'Off' : `${refreshSec||30}s`);
-          
-          const statusArr = [
-            State.dataStatus.gula ? '✅ Gula' : '❌ Gula',
-            State.dataStatus.minyak ? '✅ Minyak' : '❌ Minyak',
-            State.dataStatus.master ? '✅ Master' : '❌ Master'
-          ];
-          DOM.updateText('dataStatus', statusArr.join(' • '));
-          
-          if (State.lastFetch) {
-            DOM.updateText('lastUpdateTime', `${DataProcessor.formatDate(State.lastFetch)} ${DataProcessor.formatTime(State.lastFetch)}`);
+            tbodyMinyak.innerHTML = '';
+            if (sortedMinyak.length === 0) {
+              tbodyMinyak.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Tidak ada data Minyak</td></tr>';
+            } else {
+              sortedMinyak.forEach(item => {
+                const row = tbodyMinyak.insertRow();
+                
+                const np = item.noPolisi || '-';
+                const npCell = row.insertCell();
+                npCell.textContent = np;
+                if (np !== '-' && np.length > 2) npCell.style.color = '#ffb000';
+                
+                row.insertCell().textContent = item.kota || '-';
+                
+                const stCell = row.insertCell(); 
+                stCell.textContent = item.status || '-';
+                const statusClass = item.statusCategory ? 
+                  `status-${item.statusCategory.toLowerCase().replace('_','')}` : '';
+                if (statusClass) stCell.className = statusClass;
+                
+                row.insertCell().textContent = DataProcessor.formatNumber(item.qty);
+                
+                const tgl = item.tglMuat ? DataProcessor.formatDate(item.tglMuat) : 
+                           (item.rencanaMuat ? DataProcessor.formatDate(item.rencanaMuat) : '-');
+                row.insertCell().textContent = tgl;
+              });
+            }
           }
         },
         
@@ -2109,8 +2141,7 @@
           Renderer.komoditiSummary(komoditiSummary);
           Renderer.kpi(realStats, deliveredStats, cancelStats);
           Renderer.charts(State.filteredRealisasi, realStats);
-          Renderer.realTimeTable(State.filteredRealisasi);
-          Renderer.ringkasanData(realStats, masterStats);
+          Renderer.renderRealTimeTables(State.realisasiData.GULA, State.realisasiData.MINYAK);
         },
         
         refresh: async () => {
