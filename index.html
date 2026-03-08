@@ -281,7 +281,7 @@
 
     .master-stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr); /* Diubah dari 4 ke 3 karena hapus total komoditi */
       gap: 16px;
       padding: 16px;
     }
@@ -666,10 +666,7 @@
           <div class="master-stat-label">Rata-rata QTY/Order</div>
           <div class="master-stat-value" id="masterAvgQty">0</div>
         </div>
-        <div class="master-stat-item">
-          <div class="master-stat-label">Total Komoditi</div>
-          <div class="master-stat-value" id="masterTotalKomoditi">2</div>
-        </div>
+        <!-- Total Komoditi dihapus -->
       </div>
     </div>
 
@@ -825,8 +822,8 @@
 
       // ========== KONFIGURASI ==========
       const CONFIG = {
-        API_KEY: 'AIzaSyCCcgmD9-Xck5OCdJ74l_vvIKJtFCORqGc', // API Key yang sudah valid
-        SHEET_ID: '1sSCdfPKQWBsgH6JUFzmUpIpuIi8T8FWbhzs0LDcKO2M', // Spreadsheet ID
+        API_KEY: 'AIzaSyCCcgmD9-Xck5OCdJ74l_vvIKJtFCORqGc',
+        SHEET_ID: '1sSCdfPKQWBsgH6JUFzmUpIpuIi8T8FWbhzs0LDcKO2M',
         
         // 2 Sheet Realisasi
         SHEETS: {
@@ -834,11 +831,22 @@
           MINYAK: 'PELAKSANAAN PEKERJAAN MINYAK!A:T'
         },
         
-        // Master Order
+        // Master Order - SUDAH DIPERBAIKI
         MASTER_RANGE: 'ORDER_ID_FOOD!A:H',
         
-        // Mapping kolom (sama untuk kedua sheet)
+        // Mapping kolom - SUDAH DIPERBAIKI sesuai permintaan
         COLUMNS: {
+          tglOrder: 1,     // Kolom B
+          orderCode: 2,    // Kolom C
+          pabrik: 3,       // Kolom D
+          komoditi: 4,     // Kolom E
+          penerima: 5,     // Kolom F
+          kota: 6,         // Kolom G
+          qty: 7           // Kolom H
+        },
+        
+        // Mapping kolom untuk realisasi (sheet Gula & Minyak) - TETAP
+        REALISASI_COLUMNS: {
           tglOrder: 1,     // Kolom B
           orderCode: 2,    // Kolom C
           pabrik: 3,       // Kolom D
@@ -1135,44 +1143,47 @@
           return 'UNKNOWN';
         },
         
+        // Proses realisasi (Gula & Minyak) - menggunakan REALISASI_COLUMNS
         processRealisasiRow: (row, komoditi) => {
           if (!Array.isArray(row) || row.length < 17) return null;
           
-          const orderCode = row[CONFIG.COLUMNS.orderCode] || '';
+          const orderCode = row[CONFIG.REALISASI_COLUMNS.orderCode] || '';
           if (!orderCode || orderCode.toString().trim() === '') return null;
           
-          let noPolisi = row[CONFIG.COLUMNS.noPolisi] || '-';
+          let noPolisi = row[CONFIG.REALISASI_COLUMNS.noPolisi] || '-';
           noPolisi = noPolisi.toString().trim().toUpperCase();
           
           return {
-            tglOrder: DataProcessor.parseDate(row[CONFIG.COLUMNS.tglOrder]),
+            tglOrder: DataProcessor.parseDate(row[CONFIG.REALISASI_COLUMNS.tglOrder]),
             orderCode: orderCode.toString().trim(),
-            pabrik: row[CONFIG.COLUMNS.pabrik] || 'Unknown',
+            pabrik: row[CONFIG.REALISASI_COLUMNS.pabrik] || 'Unknown',
             komoditi: komoditi,
-            penerima: row[CONFIG.COLUMNS.penerima] || 'Unknown',
-            kota: row[CONFIG.COLUMNS.kota] || 'Unknown',
-            qty: DataProcessor.parseNumber(row[CONFIG.COLUMNS.qty]),
+            penerima: row[CONFIG.REALISASI_COLUMNS.penerima] || 'Unknown',
+            kota: row[CONFIG.REALISASI_COLUMNS.kota] || 'Unknown',
+            qty: DataProcessor.parseNumber(row[CONFIG.REALISASI_COLUMNS.qty]),
             noPolisi: noPolisi,
-            rencanaMuat: DataProcessor.parseDate(row[CONFIG.COLUMNS.rencanaMuat]),
-            status: row[CONFIG.COLUMNS.status] || '',
-            statusCategory: DataProcessor.getStatusCategory(row[CONFIG.COLUMNS.status]),
-            tglMuat: DataProcessor.parseDate(row[CONFIG.COLUMNS.tglMuat])
+            rencanaMuat: DataProcessor.parseDate(row[CONFIG.REALISASI_COLUMNS.rencanaMuat]),
+            status: row[CONFIG.REALISASI_COLUMNS.status] || '',
+            statusCategory: DataProcessor.getStatusCategory(row[CONFIG.REALISASI_COLUMNS.status]),
+            tglMuat: DataProcessor.parseDate(row[CONFIG.REALISASI_COLUMNS.tglMuat])
           };
         },
         
+        // Proses master - menggunakan COLUMNS (yang sudah diperbaiki)
         processMasterRow: (row) => {
-          if (!Array.isArray(row) || row.length < 7) return null;
+          if (!Array.isArray(row) || row.length < 8) return null;
 
-          const orderCodeRaw = row[2];
+          const orderCodeRaw = row[CONFIG.COLUMNS.orderCode];
           if (!orderCodeRaw || orderCodeRaw.toString().trim() === '') return null;
 
           return {
-            tglOrder: DataProcessor.parseDate(row[1]),
+            tglOrder: DataProcessor.parseDate(row[CONFIG.COLUMNS.tglOrder]),
             orderCode: orderCodeRaw.toString().trim(),
-            pabrik: (row[3] || '').toString().trim() || 'Unknown',
-            penerima: (row[4] || '').toString().trim() || 'Unknown',
-            tujuan: (row[5] || '').toString().trim() || 'Unknown',
-            qtyOrder: DataProcessor.parseNumber(row[6])
+            pabrik: (row[CONFIG.COLUMNS.pabrik] || '').toString().trim() || 'Unknown',
+            komoditi: (row[CONFIG.COLUMNS.komoditi] || '').toString().trim() || 'Unknown',
+            penerima: (row[CONFIG.COLUMNS.penerima] || '').toString().trim() || 'Unknown',
+            tujuan: (row[CONFIG.COLUMNS.kota] || '').toString().trim() || 'Unknown',
+            qtyOrder: DataProcessor.parseNumber(row[CONFIG.COLUMNS.qty])
           };
         },
         
@@ -1196,7 +1207,7 @@
         },
         
         calculateMasterStats: (data) => {
-          if (!data || data.length === 0) return { totalOrders: 0, totalQty: 0, avgQty: 0, periode: '-', totalKomoditi: 0 };
+          if (!data || data.length === 0) return { totalOrders: 0, totalQty: 0, avgQty: 0, periode: '-' };
           
           const uniqueOrders = new Map();
           data.forEach(o => {
@@ -1218,7 +1229,7 @@
             periode = `${DataProcessor.formatDate(first)} - ${DataProcessor.formatDate(last)}`;
           }
           
-          return { totalOrders, totalQty, avgQty, periode, totalKomoditi: 2 };
+          return { totalOrders, totalQty, avgQty, periode };
         },
         
         calculateKomoditiSummary: (dataGula, dataMinyak) => {
@@ -1604,7 +1615,7 @@
           DOM.updateText('masterTotalQty', DataProcessor.formatNumber(stats.totalQty));
           DOM.updateText('masterAvgQty', DataProcessor.formatNumberDecimal(stats.avgQty, 1));
           DOM.updateText('masterPeriode', stats.periode);
-          DOM.updateText('masterTotalKomoditi', '2 (Gula & Minyak)');
+          // Total Komoditi dihapus
         },
         
         komoditiSummary: (summary) => {
@@ -2063,7 +2074,7 @@
               console.log(`✅ Loaded ${minyakData.length} MINYAK records`);
             }
 
-            // Proses data MASTER
+            // Proses data MASTER - menggunakan processMasterRow yang sudah diperbaiki
             let masterData = [];
             if (masterRes.status === 'fulfilled') {
               const rows = masterRes.value;
